@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RateMyClass — Find Your Course</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --ink: #1a1a1a;
+    --accent: #c0392b;
+    --muted: #888;
+    --border: #e0dbd2;
+    --shadow: 0 2px 20px rgba(0,0,0,0.08);
+    --success: #1e8449;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 3rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+
+  .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+  .nav-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .nav-btn:hover { background: var(--accent); }
+
+  .nav-link {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-link:hover { color: var(--accent); }
+
+  /* SEARCH VIEW */
+  #search-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-title span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 1rem;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 50px;
+    padding: 0.6rem 1rem;
+    width: 100%;
+    max-width: 560px;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.6s 0.2s ease both;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-bar:focus-within {
+    border-color: var(--ink);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  }
+
+  .search-icon { font-size: 1.1rem; margin-right: 0.6rem; color: var(--muted); }
+
+  .search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    background: transparent;
+    color: var(--ink);
+  }
+  .search-input::placeholder { color: #bbb; }
+
+  .filter-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    padding: 0.45rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+  }
+  .filter-btn:hover { background: var(--accent); }
+
+  /* RESULTS VIEW */
+  #results-view { display: none; padding: 2rem 3rem; }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .results-search-bar {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    flex: 1;
+    min-width: 200px;
+    transition: border-color 0.2s;
+  }
+  .results-search-bar:focus-within { border-color: var(--accent); }
+  .results-search-bar input {
+    border: none;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: transparent;
+    width: 100%;
+  }
+
+  .results-filter-btn {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 30px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .filter-dropdown {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    background: #fff;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .filter-panel {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+  .filter-panel.open { display: block; }
+  .filter-panel h4 {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .filter-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .filter-tag {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-tag:hover, .filter-tag.active {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+
+  .results-count {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .course-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.8rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .course-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .course-img {
+    width: 48px; height: 48px;
+    background: var(--bg);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .course-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .course-details {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+
+  .stars { color: #f39c12; font-size: 0.85rem; margin-right: 0.3rem; }
+  .rating-text { font-size: 0.8rem; color: var(--muted); }
+
+  /* Flash messages */
+  .flash-messages { margin-bottom: 1rem; }
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  .alert-success { background: #eafaf1; color: var(--success); border: 1px solid rgba(30,132,73,0.2); }
+  .alert-info { background: #eef4ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.2); }
+  .alert-danger { background: #fdf0ee; color: var(--accent); border: 1px solid rgba(192,57,43,0.2); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 700px) {
+    nav { padding: 1rem 1.5rem; }
+    #results-view { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="{{ url_for('courses.index') }}">Rate<span>My</span>Class</a>
+  <div class="nav-right">
+    {% if current_user.is_authenticated %}
+      <span class="nav-link">Hi, {{ current_user.first_name }}!</span>
+      <a href="{{ url_for('auth.logout') }}" class="nav-btn">Sign Out</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="nav-link">Sign In</a>
+      <a href="{{ url_for('auth.register') }}" class="nav-btn">Get Started</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div style="padding: 0 3rem;">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages" style="margin-top: 1rem;">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+</div>
+
+<!-- SEARCH VIEW -->
+<div id="search-view">
+  <h1 class="hero-title">Rate<span>My</span><br>Class</h1>
+  <p class="hero-sub">Find and rate university courses — from students, for students.</p>
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="main-search" type="text" placeholder="Search for a course..." />
+    <button class="filter-btn" id="main-filter-btn">Filter ▾</button>
+  </div>
+</div>
+
+<!-- RESULTS VIEW -->
+<div id="results-view">
+  <div class="results-header">
+    <div class="results-search-bar">
+      <input id="results-search" type="text" placeholder="Search for a course..." />
+      <button class="results-filter-btn" id="results-filter-btn">Filter ▾</button>
+    </div>
+    <select class="filter-dropdown">
+      <option>All Departments</option>
+      <option>Computer Science</option>
+      <option>Mathematics</option>
+      <option>Biology</option>
+      <option>History</option>
+    </select>
+  </div>
+
+  <div class="filter-panel" id="filter-panel">
+    <h4>Filter by</h4>
+    <div class="filter-tags">
+      <span class="filter-tag">⭐ Top Rated</span>
+      <span class="filter-tag">📚 Easy Workload</span>
+      <span class="filter-tag">🧠 Challenging</span>
+      <span class="filter-tag">👨‍🏫 Great Professor</span>
+      <span class="filter-tag">🕐 Online</span>
+      <span class="filter-tag">📝 No Exams</span>
+    </div>
+  </div>
+
+  <p class="results-count" id="results-count">Showing all courses</p>
+
+  <div id="course-list">
+    {% if courses %}
+      {% for course in courses %}
+        <div class="course-card">
+          <div class="course-img">📚</div>
+          <div class="course-info">
+            <div class="course-name">{{ course.course_title }}</div>
+            <div class="course-details">{{ course.course_number }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="course-card">
+        <div class="course-img">💻</div>
+        <div class="course-info">
+          <div class="course-name">Introduction to Computer Science</div>
+          <div class="course-details">CS101 · Spring 2025</div>
+          <div><span class="stars">★★★★★</span><span class="rating-text">4.8 (120 reviews)</span></div>
+        </div>
+      </div>
+      <div class="course-card">
+        <div class="course-img">📐</div>
+        <div class="course-info">
+          <div class="course-name">Calculus I</div>
+          <div class="course-details">MATH101 · Fall 2024</div>
+          <div><span class="stars">★★★★☆</span><span class="rating-text">4.2 (89 reviews)</span></div>
+        </div>
+      </div>
+      <div class="course-card">
+        <div class="course-img">🧬</div>
+        <div class="course-info">
+          <div class="course-name">Fundamentals of Biology</div>
+          <div class="course-details">BIO110 · Spring 2025</div>
+          <div><span class="stars">★★★★☆</span><span class="rating-text">4.0 (54 reviews)</span></div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  const searchView = document.getElementById('search-view');
+  const resultsView = document.getElementById('results-view');
+  const mainSearch = document.getElementById('main-search');
+  const resultsSearch = document.getElementById('results-search');
+  const filterPanel = document.getElementById('filter-panel');
+
+  function showResults(query) {
+    searchView.style.display = 'none';
+    resultsView.style.display = 'block';
+    resultsSearch.value = query;
+    document.getElementById('results-count').textContent = query
+      ? `Showing results for "${query}"`
+      : 'Showing all courses';
+  }
+
+  mainSearch.addEventListener('keydown', e => {
+    if (e.key === 'Enter') showResults(mainSearch.value);
+  });
+
+  document.getElementById('main-filter-btn').addEventListener('click', () => {
+    showResults(mainSearch.value);
+    filterPanel.classList.toggle('open');
+  });
+
+  document.getElementById('results-filter-btn').addEventListener('click', () => {
+    filterPanel.classList.toggle('open');
+  });
+
+  resultsSearch.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      document.getElementById('results-count').textContent = resultsSearch.value
+        ? `Showing results for "${resultsSearch.value}"`
+        : 'Showing all courses';
+    }
+  });
+</script>
+
+</body>
+</html>

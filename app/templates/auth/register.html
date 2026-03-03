@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RateMyClass — Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --ink: #1a1a1a;
+    --accent: #c0392b;
+    --muted: #888;
+    --card: #ffffff;
+    --border: #e0dbd2;
+    --shadow: 0 2px 20px rgba(0,0,0,0.08);
+    --success: #1e8449;
+    --success-bg: #eafaf1;
+    --error: #c0392b;
+    --error-bg: #fdf0ee;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 3rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+
+  .nav-link {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-link:hover { color: var(--accent); }
+
+  .page {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: calc(100vh - 62px);
+  }
+
+  .left-panel {
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .left-panel::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: rgba(192,57,43,0.15);
+    pointer-events: none;
+  }
+  .left-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: rgba(192,57,43,0.08);
+    pointer-events: none;
+  }
+
+  .left-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 1.2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .left-quote span { color: var(--accent); }
+
+  .left-sub {
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+    max-width: 340px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .right-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+  }
+
+  .form-card {
+    width: 100%;
+    max-width: 420px;
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  .form-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 0.4rem;
+  }
+
+  .form-subheading {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+  .form-subheading a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .form-subheading a:hover { text-decoration: underline; }
+
+  .field { margin-bottom: 1.3rem; }
+
+  .field-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 500;
+    margin-bottom: 0.45rem;
+    color: var(--ink);
+  }
+
+  .input-wrap input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.78rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    background: #fff;
+    color: var(--ink);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .input-wrap input:focus {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(26,26,26,0.06);
+  }
+
+  .name-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .submit-btn:hover { background: var(--accent); }
+  .submit-btn:active { transform: scale(0.99); }
+
+  .flash-messages { margin-bottom: 1.2rem; }
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  .alert-danger { background: var(--error-bg); color: var(--error); border: 1px solid rgba(192,57,43,0.2); }
+  .alert-success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(30,132,73,0.2); }
+  .alert-info { background: #eef4ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.2); }
+
+  .hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.35rem;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 700px) {
+    .page { grid-template-columns: 1fr; }
+    .left-panel { display: none; }
+    nav { padding: 1rem 1.5rem; }
+    .name-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="{{ url_for('courses.index') }}">Rate<span>My</span>Class</a>
+  <a class="nav-link" href="{{ url_for('auth.login') }}">Already have an account? <strong>Sign in</strong></a>
+</nav>
+
+<div class="page">
+
+  <div class="left-panel">
+    <div class="left-quote">Your voice <span>shapes</span> the next student's journey.</div>
+    <p class="left-sub">Join thousands of Southern CT State students sharing honest course reviews, uploading study materials, and helping each other succeed.</p>
+  </div>
+
+  <div class="right-panel">
+    <div class="form-card">
+
+      <h1 class="form-heading">Create account</h1>
+      <p class="form-subheading">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-messages">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('auth.register') }}">
+
+        <div class="name-row">
+          <div class="field">
+            <label class="field-label" for="first_name">First name</label>
+            <div class="input-wrap">
+              <input type="text" id="first_name" name="first_name" placeholder="John" required />
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="last_name">Last name</label>
+            <div class="input-wrap">
+              <input type="text" id="last_name" name="last_name" placeholder="Doe" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="email">University email</label>
+          <div class="input-wrap">
+            <input type="email" id="email" name="email" placeholder="you@southernct.edu" required />
+          </div>
+          <p class="hint">Must be a @southernct.edu email address</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="password" name="password" placeholder="Create a password" required />
+          </div>
+          <p class="hint">At least 8 characters recommended</p>
+        </div>
+
+        <button type="submit" class="submit-btn">Create Account</button>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
