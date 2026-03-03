@@ -327,13 +327,6 @@ CREATE TABLE IF NOT EXISTS flag (
         ON DELETE SET NULL
         ON UPDATE CASCADE,
 
-    -- reviewed_at and reviewed_by_admin_id must be consistent
-    CONSTRAINT chk_flag_review_consistency
-        CHECK (
-            (status = 'pending'  AND reviewed_by_admin_id IS NULL AND reviewed_at IS NULL) OR
-            (status != 'pending' AND reviewed_by_admin_id IS NOT NULL AND reviewed_at IS NOT NULL)
-        ),
-
     -- Authenticated user: max 1 flag per material (US011 SRS constraint)
     CONSTRAINT uq_flag_user_material
         UNIQUE (reporter_user_id, material_id),
