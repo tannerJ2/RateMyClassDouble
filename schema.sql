@@ -334,13 +334,6 @@ CREATE TABLE IF NOT EXISTS flag (
             (status != 'pending' AND reviewed_by_admin_id IS NOT NULL AND reviewed_at IS NOT NULL)
         ),
 
-    -- Exactly one of reporter_user_id or reporter_ip_hash must be provided (XOR)
-    CONSTRAINT chk_flag_reporter_xor
-        CHECK (
-            (reporter_user_id IS NOT NULL AND reporter_ip_hash IS NULL) OR
-            (reporter_user_id IS NULL     AND reporter_ip_hash IS NOT NULL)
-        ),
-
     -- Authenticated user: max 1 flag per material (US011 SRS constraint)
     CONSTRAINT uq_flag_user_material
         UNIQUE (reporter_user_id, material_id),
