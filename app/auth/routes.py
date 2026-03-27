@@ -10,6 +10,8 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app.extensions import db, bcrypt
 from app.models import User, PasswordResetToken
 from datetime import datetime, timedelta, timezone
+from flask_mail import Message
+from app.extensions import mail
 import secrets
 
 auth = Blueprint('auth', __name__)
@@ -127,7 +129,18 @@ def forgot_password():
 
             # TODO: Send email via SendGrid with reset link
             reset_link = url_for('auth.reset_password', token=token, _external=True)
-            print(f"[DEV] Password reset link: {reset_link}")
+
+            msg = Message(
+                subject='RateMyClass — Password Reset',
+                recipients=[user.email],
+                html=f'''
+                    <p>Hi {user.first_name},</p>
+                    <p>Click the link below to reset your password. This link expires in 30 minutes.</p>
+                    <p><a href="{reset_link}">{reset_link}</a></p>
+                    <p>If you did not request this, ignore this email.</p>
+                    '''
+            )
+            mail.send(msg)
 
         flash('If that email exists you will receive a reset link shortly.', 'info')
         return redirect(url_for('auth.login'))

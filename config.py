@@ -14,3 +14,10 @@ class Config:
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB file upload limit for now
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = False  # Set to True in production for now
+
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = 'ratemyclasspswreset@gmail.com'
+    MAIL_PASSWORD = 'vdbk wrqp zyyf rjcz'
+    MAIL_DEFAULT_SENDER = 'RateMyClassPswReset@gmail.com'
