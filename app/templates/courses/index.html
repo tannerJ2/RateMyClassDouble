@@ -439,7 +439,8 @@
   <div id="course-list">
     {% if courses %}
       {% for course in courses %}
-        <div class="course-card">
+        <a href="{{ url_for('courses.course_detail', course_id=course.Course.course_id) }}" style="text-decoration:none; color:inherit;">
+          <div class="course-card">
             <div class="course-img">📚</div>
             <div class="course-info">
               <div class="course-name">{{ course.Course.course_title }}</div>
@@ -447,6 +448,7 @@
               <div><span class="stars">★★★★★</span><span class="rating-text">0.0 (0 reviews)</span></div>
             </div>
           </div>
+        </a>
       {% endfor %}
     {% else %}
       <div class="course-card">
@@ -504,14 +506,16 @@
     courseList.innerHTML = courses.length === 0
   ? '<p style="color:var(--muted)">No courses found.</p>'
   : courses.map(c => `
-      <div class="course-card">
-        <div class="course-img">📚</div>
-        <div class="course-info">
-          <div class="course-name">${c.title}</div>
-          <div class="course-details">${c.dept_code} ${c.number}</div>
-          <div><span class="stars">★★★★★</span><span class="rating-text">0.0 (0 reviews)</span></div>
+      <a href="/course/${c.id}" style="text-decoration:none; color:inherit;">
+        <div class="course-card">
+          <div class="course-img">📚</div>
+          <div class="course-info">
+            <div class="course-name">${c.title}</div>
+            <div class="course-details">${c.dept_code} ${c.number}</div>
+            <div><span class="stars">★★★★★</span><span class="rating-text">0.0 (0 reviews)</span></div>
+          </div>
         </div>
-      </div>
+      </a>
     `).join('');
   }
 
