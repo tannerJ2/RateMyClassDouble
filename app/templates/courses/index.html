@@ -73,9 +73,8 @@
   }
   .nav-link:hover { color: var(--accent); }
 
-  /* SEARCH VIEW */
-  #search-view {
-    transform: translateY(-100px);
+  /* HERO */
+  .hero {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -83,10 +82,8 @@
     justify-content: center;
     padding: 4rem 2rem;
     text-align: center;
+    transform: translateY(-60px);
   }
-  /*
-  
-  */
 
   .hero-title {
     font-family: 'Playfair Display', serif;
@@ -117,24 +114,23 @@
     box-shadow: var(--shadow);
     animation: fadeUp 0.6s 0.2s ease both;
     transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    text-decoration: none;
   }
-  .search-bar:focus-within {
+  .search-bar:hover {
     border-color: var(--ink);
     box-shadow: 0 4px 24px rgba(0,0,0,0.12);
   }
 
   .search-icon { font-size: 1.1rem; margin-right: 0.6rem; color: var(--muted); }
 
-  .search-input {
+  .search-placeholder {
     flex: 1;
-    border: none;
-    outline: none;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.95rem;
-    background: transparent;
-    color: var(--ink);
+    color: #bbb;
+    text-align: left;
   }
-  .search-input::placeholder { color: #bbb; }
 
   .filter-btn {
     background: var(--ink);
@@ -149,200 +145,6 @@
   }
   .filter-btn:hover { background: var(--accent); }
 
-  /* RESULTS VIEW */
-  #results-view { display: none; padding: 2rem 3rem; }
-
-  .results-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-  }
-
-  .results-search-bar {
-    display: flex;
-    align-items: center;
-    background: #fff;
-    border: 1.5px solid var(--border);
-    border-radius: 50px;
-    padding: 0.5rem 1rem;
-    flex: 1;
-    min-width: 200px;
-    transition: border-color 0.2s;
-  }
-  .results-search-bar:focus-within { border-color: var(--accent); }
-  .results-search-bar input {
-    border: none;
-    outline: none;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem;
-    background: transparent;
-    width: 100%;
-  }
-
-  .results-filter-btn {
-    background: #fff;
-    border: 1.5px solid var(--border);
-    border-radius: 30px;
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-  }
-<!--
-  .filter-dropdown {
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    padding: 0.5rem 0.8rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    background: #fff;
-    color: var(--ink);
-    outline: none;
-  }
--->
-
-.custom-select {
-  position: relative;
-  min-width: 180px;
-}
-
-.custom-select-trigger {
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem 0.8rem;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.85rem;
-  background: #fff;
-  color: var(--ink);
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.custom-select-trigger:hover {
-  border-color: var(--ink);
-}
-
-.custom-options {
-  display: none;
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: #fff;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 999;
-  box-shadow: var(--shadow);
-}
-
-.custom-options.open {
-  display: block;
-}
-
-.custom-option {
-  padding: 0.45rem 0.8rem;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.85rem;
-  cursor: pointer;
-  color: var(--ink);
-}
-
-.custom-option:hover {
-  background: var(--bg);
-}
-
-.custom-option.selected {
-  font-weight: 600;
-  color: var(--accent);
-}
-  .filter-panel {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 1.5rem;
-    display: none;
-  }
-  .filter-panel.open { display: block; }
-  .filter-panel h4 {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-bottom: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .filter-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .filter-tag {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 0.35rem 0.8rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .filter-tag:hover, .filter-tag.active {
-    background: var(--ink);
-    color: #fff;
-    border-color: var(--ink);
-  }
-
-  .results-count {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
-
-  .course-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.8rem;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .course-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
-  }
-
-  .course-img {
-    width: 48px; height: 48px;
-    background: var(--bg);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    flex-shrink: 0;
-  }
-
-.course-name {
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 0.3rem;
-  }
-
-.course-details {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-top: 0.1rem;
-    margin-bottom: 0.1rem;
-  }
-
-  .stars { color: #f39c12; font-size: 0.85rem; margin-right: 0.3rem; }
-  .rating-text { font-size: 0.8rem; color: var(--muted); }
-
   /* Flash messages */
   .flash-messages { margin-bottom: 1rem; }
   .alert {
@@ -352,17 +154,16 @@
     margin-bottom: 0.5rem;
   }
   .alert-success { background: #eafaf1; color: var(--success); border: 1px solid rgba(30,132,73,0.2); }
-  .alert-info { background: #eef4ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.2); }
-  .alert-danger { background: #fdf0ee; color: var(--accent); border: 1px solid rgba(192,57,43,0.2); }
+  .alert-info    { background: #eef4ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.2); }
+  .alert-danger  { background: #fdf0ee; color: var(--accent); border: 1px solid rgba(192,57,43,0.2); }
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   @media (max-width: 700px) {
     nav { padding: 1rem 1.5rem; }
-    #results-view { padding: 1.5rem; }
   }
 </style>
 </head>
@@ -393,176 +194,15 @@
   {% endwith %}
 </div>
 
-<!-- SEARCH VIEW -->
-<div id="search-view">
+<div class="hero">
   <h1 class="hero-title">Rate<span>My</span><br>Class</h1>
   <p class="hero-sub">Find and rate university courses — from students, for students.</p>
-  <div class="search-bar">
+  <a class="search-bar" href="{{ url_for('courses.search_page') }}">
     <span class="search-icon">🔍</span>
-    <input class="search-input" id="main-search" type="text" placeholder="Search for a course..." />
-    <button class="filter-btn" id="main-filter-btn">Filter ▾</button>
-  </div>
+    <span class="search-placeholder">Search for a course...</span>
+<!--    <button class="filter-btn">Filter ▾</button> -->
+  </a>
 </div>
-
-<!-- RESULTS VIEW -->
-<div id="results-view">
-  <div class="results-header">
-    <div class="results-search-bar">
-      <input id="results-search" type="text" placeholder="Search for a course..." />
-      <button class="results-filter-btn" id="results-filter-btn">Filter ▾</button>
-    </div>
-    <div class="custom-select" id="dept-select">
-      <div class="custom-select-trigger">All Departments ▾</div>
-      <div class="custom-options">
-        <div class="custom-option selected" data-value="">All Departments</div>
-        {% for dept in departments %}
-          <div class="custom-option" data-value="{{ dept.dept_code }}">{{ dept.dept_name }}</div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-
-  <div class="filter-panel" id="filter-panel">
-    <h4>Filter by</h4>
-    <div class="filter-tags">
-      <span class="filter-tag">⭐ Top Rated</span>
-      <span class="filter-tag">📚 Easy Workload</span>
-      <span class="filter-tag">🧠 Challenging</span>
-      <span class="filter-tag">👨‍🏫 Great Professor</span>
-      <span class="filter-tag">🕐 Online</span>
-      <span class="filter-tag">📝 No Exams</span>
-    </div>
-  </div>
-
-  <p class="results-count" id="results-count">Showing all courses</p>
-
-  <div id="course-list">
-    {% if courses %}
-      {% for course in courses %}
-        <a href="{{ url_for('courses.course_detail', course_id=course.Course.course_id) }}" style="text-decoration:none; color:inherit;">
-          <div class="course-card">
-            <div class="course-img">📚</div>
-            <div class="course-info">
-              <div class="course-name">{{ course.Course.course_title }}</div>
-              <div class="course-details">{{ course.dept_code }} {{ course.Course.course_number }}</div>
-              <div><span class="stars">★★★★★</span><span class="rating-text">0.0 (0 reviews)</span></div>
-            </div>
-          </div>
-        </a>
-      {% endfor %}
-    {% else %}
-      <div class="course-card">
-        <div class="course-img">💻</div>
-        <div class="course-info">
-          <div class="course-name">Introduction to Computer Science</div>
-          <div class="course-details">CS101 · Spring 2025</div>
-          <div><span class="stars">★★★★★</span><span class="rating-text">4.8 (120 reviews)</span></div>
-        </div>
-      </div>
-      <div class="course-card">
-        <div class="course-img">📐</div>
-        <div class="course-info">
-          <div class="course-name">Calculus I</div>
-          <div class="course-details">MATH101 · Fall 2024</div>
-          <div><span class="stars">★★★★☆</span><span class="rating-text">4.2 (89 reviews)</span></div>
-        </div>
-      </div>
-      <div class="course-card">
-        <div class="course-img">🧬</div>
-        <div class="course-info">
-          <div class="course-name">Fundamentals of Biology</div>
-          <div class="course-details">BIO110 · Spring 2025</div>
-          <div><span class="stars">★★★★☆</span><span class="rating-text">4.0 (54 reviews)</span></div>
-        </div>
-      </div>
-    {% endif %}
-  </div>
-</div>
-
-<script>
-  const searchView = document.getElementById('search-view');
-  const resultsView = document.getElementById('results-view');
-  const mainSearch = document.getElementById('main-search');
-  const resultsSearch = document.getElementById('results-search');
-  const filterPanel = document.getElementById('filter-panel');
-  const courseList = document.getElementById('course-list');
-  const resultsCount = document.getElementById('results-count');
-
-  async function doSearch(query, dept = '') {
-    searchView.style.display = 'none';
-    resultsView.style.display = 'block';
-
-    const params = new URLSearchParams();
-    if (query) params.append('q', query);
-    if (dept) params.append('dept', dept);
-
-    const res = await fetch(`/search?${params.toString()}`);
-    const courses = await res.json();
-
-    resultsCount.textContent = query
-      ? `Showing results for "${query}"`
-      : 'Showing all courses';
-
-    courseList.innerHTML = courses.length === 0
-  ? '<p style="color:var(--muted)">No courses found.</p>'
-  : courses.map(c => `
-      <a href="/course/${c.id}" style="text-decoration:none; color:inherit;">
-        <div class="course-card">
-          <div class="course-img">📚</div>
-          <div class="course-info">
-            <div class="course-name">${c.title}</div>
-            <div class="course-details">${c.dept_code} ${c.number}</div>
-            <div><span class="stars">★★★★★</span><span class="rating-text">0.0 (0 reviews)</span></div>
-          </div>
-        </div>
-      </a>
-    `).join('');
-  }
-
-  mainSearch.addEventListener('keydown', e => {
-    if (e.key === 'Enter') doSearch(mainSearch.value);
-  });
-
-  document.getElementById('main-filter-btn').addEventListener('click', () => {
-    doSearch(mainSearch.value);
-    filterPanel.classList.toggle('open');
-  });
-
-  document.getElementById('results-filter-btn').addEventListener('click', () => {
-    filterPanel.classList.toggle('open');
-  });
-
-  resultsSearch.addEventListener('keydown', e => {
-    if (e.key === 'Enter') doSearch(resultsSearch.value);
-  });
-
-  const deptSelect = document.getElementById('dept-select');
-  const deptTrigger = deptSelect.querySelector('.custom-select-trigger');
-  const deptOptions = deptSelect.querySelector('.custom-options');
-
-  deptTrigger.addEventListener('click', () => {
-    deptOptions.classList.toggle('open');
-  });
-
-  deptOptions.addEventListener('click', e => {
-    const opt = e.target.closest('.custom-option');
-    if (!opt) return;
-    const value = opt.dataset.value;
-    const label = opt.textContent;
-    deptTrigger.textContent = label + ' ▾';
-    deptOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
-    opt.classList.add('selected');
-    deptOptions.classList.remove('open');
-    const query = resultsSearch.value || mainSearch.value;
-    doSearch(query, value);
-  });
-
-  document.addEventListener('click', e => {
-    if (!deptSelect.contains(e.target)) {
-      deptOptions.classList.remove('open');
-    }
-  });
-</script>
 
 </body>
 </html>

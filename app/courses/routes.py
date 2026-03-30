@@ -29,11 +29,14 @@ def index():
 
 @courses.route('/search')
 def search():
-    """JSON endpoint for live search."""
     q    = request.args.get('q', '').strip()
     dept = request.args.get('dept', '').strip()
 
     query = Course.query.join(Department, Course.dept_id == Department.dept_id)
+
+    # Department dropdown filter — applied first, hard filter by dept_code
+    if dept:
+        query = query.filter(Department.dept_code == dept)
 
     if q:
         like = f'%{q}%'
@@ -44,21 +47,30 @@ def search():
                 Department.dept_code.ilike(like),
             )
         )
-        # Exact dept_code match floats to top
+        # Ordering priority:
+        # 1. Exact dept_code match (e.g. typing "MAT" → all MAT courses first)
+        # 2. Course number starts with query
+        # 3. Course title starts with query
+        # 4. Everything else (contains the word somewhere)
         query = query.order_by(
             db.case(
                 (Department.dept_code.ilike(q), 0),
                 else_=1
             ),
+            db.case(
+                (Course.course_number.ilike(f'{q}%'), 0),
+                else_=1
+            ),
+            db.case(
+                (Course.course_title.ilike(f'{q}%'), 0),
+                else_=1
+            ),
             Course.course_number
         )
     else:
-        query = query.order_by(Course.course_number)
+        query = query.order_by(Department.dept_code, Course.course_number)
 
-    if dept:
-        query = query.filter(Department.dept_code == dept)
-
-    results = query.add_columns(Department.dept_code, Department.dept_name).limit(100).all()
+    results = query.add_columns(Department.dept_code, Department.dept_name).limit(1500).all()
 
     return jsonify([
         {
@@ -120,3 +132,15 @@ def course_detail(course_id):
         material_count  = material_count,
         avg_difficulty  = avg_difficulty,
     )
+
+@courses.route('/courses')
+def search_page():
+    all_courses = (
+        Course.query
+        .join(Department, Course.dept_id == Department.dept_id)
+        .add_columns(Department.dept_code, Department.dept_name)
+        .order_by(Department.dept_code, Course.course_number)
+        .all()
+    )
+    departments = Department.query.order_by(Department.dept_name).all()
+    return render_template('courses/search.html', courses=all_courses, departments=departments)
