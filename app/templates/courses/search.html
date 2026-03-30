@@ -27,17 +27,20 @@
     flex-direction: column;
   }
 
+  /* NAV */
   nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.2rem 3rem;
+    padding: 1.2rem 3rem 1.2rem 1.2rem;
     border-bottom: 1px solid var(--border);
     background: var(--bg);
     position: sticky;
     top: 0;
     z-index: 100;
   }
+
+  .nav-left { display: flex; align-items: center; gap: 1rem; }
 
   .logo {
     font-family: 'Playfair Display', serif;
@@ -72,6 +75,195 @@
     transition: color 0.2s;
   }
   .nav-link:hover { color: var(--accent); }
+
+  /* NAV TRIGGER */
+  #nav-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+  }
+
+  .trigger-line {
+    height: 2.5px;
+    background: var(--ink);
+    border-radius: 4px;
+    display: block;
+  }
+  .trigger-line:nth-child(1) { width: 24px; }
+  .trigger-line:nth-child(2) { width: 16px; }
+  .trigger-line:nth-child(3) { width: 24px; }
+
+  /* OVERLAY */
+  #menu-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.25);
+    z-index: 200;
+  }
+  #menu-overlay.active { display: block; }
+
+  /* SIDE MENU */
+  #side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 100vh;
+    background: #fff;
+    border-right: 1px solid var(--border);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 6px 0 32px rgba(0,0,0,0.1);
+  }
+  #side-menu.open { transform: translateX(0); }
+
+  .menu-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.3rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    min-height: 68px;
+  }
+
+  .menu-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .menu-logo span { color: var(--accent); }
+
+  #menu-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+  }
+
+  .close-line {
+    height: 2.5px;
+    background: var(--ink);
+    border-radius: 4px;
+    display: block;
+  }
+  .close-line:nth-child(1) { width: 24px; }
+  .close-line:nth-child(2) { width: 16px; }
+  .close-line:nth-child(3) { width: 24px; }
+
+  .menu-user {
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .menu-user-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
+  .menu-user-email { font-size: 0.78rem; color: var(--muted); }
+
+  .menu-nav {
+    flex: 1;
+    padding: 0.8rem 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.85rem 1.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    width: 100%;
+  }
+  .menu-item:hover { background: var(--bg); color: var(--accent); }
+
+  .menu-item-icon { display: flex; align-items: center; color: var(--muted); flex-shrink: 0; }
+  .menu-item:hover .menu-item-icon { color: var(--accent); }
+
+  .menu-item-soon { opacity: 0.45; pointer-events: none; }
+
+  .soon-tag {
+    margin-left: auto;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.15rem 0.5rem;
+    color: var(--muted);
+  }
+
+  .menu-bottom {
+    border-top: 1px solid var(--border);
+    padding: 0.8rem 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu-item-logout { color: var(--accent); }
+  .menu-item-logout .menu-item-icon { color: var(--accent); }
+  .menu-item-logout:hover { background: #fdf0ee; }
+
+  .menu-guest {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    gap: 1rem;
+  }
+  .menu-guest p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+  .menu-signin-btn {
+    display: block;
+    width: 100%;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 8px;
+    padding: 0.75rem;
+    text-align: center;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+  .menu-signin-btn:hover { background: var(--accent); }
+
+  .menu-register-link {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .menu-register-link:hover { color: var(--accent); }
 
   /* SEARCH PAGE */
   .search-page { padding: 2rem 3rem; }
@@ -115,10 +307,7 @@
     font-family: 'DM Sans', sans-serif;
   }
 
-  .custom-select {
-    position: relative;
-    min-width: 180px;
-  }
+  .custom-select { position: relative; min-width: 180px; }
 
   .custom-select-trigger {
     border: 1.5px solid var(--border);
@@ -199,6 +388,63 @@
     margin-bottom: 1rem;
   }
 
+  .back-btn {
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 1rem;
+    display: none;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--accent); }
+  .back-btn.visible { display: block; }
+
+  #dept-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .dept-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    text-align: center;
+  }
+  .dept-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--accent);
+  }
+
+  .dept-code {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+    line-height: 1;
+  }
+
+  .dept-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .dept-count { font-size: 0.75rem; color: var(--muted); }
+
+  #course-list { display: none; }
+
   .course-card {
     display: flex;
     align-items: center;
@@ -216,34 +462,11 @@
     box-shadow: var(--shadow);
   }
 
-  .course-img {
-    width: 48px; height: 48px;
-    background: var(--bg);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    flex-shrink: 0;
-  }
-
-  .course-name {
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 0.1rem;
-  }
-
-  .course-details {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-top: 0.1rem;
-    margin-bottom: 0.1rem;
-  }
-
+  .course-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.1rem; }
+  .course-details { font-size: 0.8rem; color: var(--muted); margin-top: 0.1rem; margin-bottom: 0.1rem; }
   .stars { color: #f39c12; font-size: 0.85rem; margin-right: 0.3rem; }
   .rating-text { font-size: 0.8rem; color: var(--muted); }
 
-  /* Flash messages */
   .flash-messages { margin-bottom: 1rem; }
   .alert {
     padding: 0.75rem 1rem;
@@ -255,16 +478,92 @@
   .alert-info    { background: #eef4ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.2); }
   .alert-danger  { background: #fdf0ee; color: var(--accent); border: 1px solid rgba(192,57,43,0.2); }
 
+  @media (max-width: 900px) {
+    #dept-grid { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width: 700px) {
     nav { padding: 1rem 1.5rem; }
     .search-page { padding: 1.5rem; }
+    #dept-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
+<!-- OVERLAY -->
+<div id="menu-overlay"></div>
+
+<!-- SIDE MENU -->
+<div id="side-menu">
+  <div class="menu-top">
+    <a class="menu-logo" href="{{ url_for('courses.index') }}">Rate<span>My</span>Class</a>
+    <button id="menu-close">
+      <span class="close-line"></span>
+      <span class="close-line"></span>
+      <span class="close-line"></span>
+    </button>
+  </div>
+
+  {% if current_user.is_authenticated %}
+    <div class="menu-user">
+      <div class="menu-user-name">{{ current_user.first_name }} {{ current_user.last_name }}</div>
+      <div class="menu-user-email">{{ current_user.email }}</div>
+    </div>
+
+    <div class="menu-nav">
+      <a href="#" class="menu-item">
+        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        Reviews
+      </a>
+      <a href="#" class="menu-item">
+        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+        Liked
+      </a>
+      <a href="#" class="menu-item">
+        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
+        Uploads
+      </a>
+      <a href="#" class="menu-item menu-item-soon">
+        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+        Schedule Builder
+        <span class="soon-tag">Soon</span>
+      </a>
+    </div>
+
+    <div class="menu-bottom">
+      <a href="#" class="menu-item">
+        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        Profile
+      </a>
+      <a href="#" class="menu-item">
+        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+        Settings
+      </a>
+      <a href="{{ url_for('auth.logout') }}" class="menu-item menu-item-logout">
+        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+        Sign Out
+      </a>
+    </div>
+
+  {% else %}
+    <div class="menu-guest">
+      <p>Sign in to access your reviews, liked courses, uploads and more.</p>
+      <a href="{{ url_for('auth.login') }}" class="menu-signin-btn">Sign In</a>
+      <a href="{{ url_for('auth.register') }}" class="menu-register-link">Don't have an account? Get Started</a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- NAV -->
 <nav>
-  <a class="logo" href="{{ url_for('courses.index') }}">Rate<span>My</span>Class</a>
+  <div class="nav-left">
+    <button id="nav-trigger">
+      <span class="trigger-line"></span>
+      <span class="trigger-line"></span>
+      <span class="trigger-line"></span>
+    </button>
+    <a class="logo" href="{{ url_for('courses.index') }}">Rate<span>My</span>Class</a>
+  </div>
   <div class="nav-right">
     {% if current_user.is_authenticated %}
       <span class="nav-link">Hi, {{ current_user.first_name }}!</span>
@@ -293,10 +592,10 @@
   <div class="results-header">
     <div class="results-search-bar">
       <input id="results-search" type="text" placeholder="Search for a course..." autofocus />
-      <button class="results-filter-btn" id="results-filter-btn">Filter ▾</button>
+      <button class="results-filter-btn" id="results-filter-btn">Filter</button>
     </div>
     <div class="custom-select" id="dept-select">
-      <div class="custom-select-trigger">All Departments ▾</div>
+      <div class="custom-select-trigger">All Departments</div>
       <div class="custom-options">
         <div class="custom-option selected" data-value="">All Departments</div>
         {% for dept in departments %}
@@ -309,39 +608,57 @@
   <div class="filter-panel" id="filter-panel">
     <h4>Filter by</h4>
     <div class="filter-tags">
-      <span class="filter-tag">⭐ Top Rated</span>
-      <span class="filter-tag">📚 Easy Workload</span>
-      <span class="filter-tag">🧠 Challenging</span>
-      <span class="filter-tag">👨‍🏫 Great Professor</span>
-      <span class="filter-tag">🕐 Online</span>
-      <span class="filter-tag">📝 No Exams</span>
+      <span class="filter-tag">Top Rated</span>
+      <span class="filter-tag">Easy Workload</span>
+      <span class="filter-tag">Challenging</span>
+      <span class="filter-tag">Online</span>
     </div>
   </div>
 
-  <p class="results-count" id="results-count">Showing all courses</p>
+  <button class="back-btn" id="back-btn">← Back to Departments</button>
+  <p class="results-count" id="results-count">Browse by Department</p>
 
-  <div id="course-list">
-    {% for course in courses %}
-      <a href="{{ url_for('courses.course_detail', course_id=course.Course.course_id) }}" style="text-decoration:none; color:inherit;">
-        <div class="course-card">
-          <div class="course-img">📚</div>
-          <div class="course-info">
-            <div class="course-name">{{ course.Course.course_title }}</div>
-            <div class="course-details">{{ course.dept_code }} {{ course.Course.course_number }}</div>
-            <div><span class="stars">★★★★★</span><span class="rating-text">0.0 (0 reviews)</span></div>
-          </div>
-        </div>
-      </a>
+  <div id="dept-grid">
+    {% for dept in departments %}
+      <div class="dept-card" data-code="{{ dept.dept_code }}" data-name="{{ dept.dept_name }}">
+        <div class="dept-code">{{ dept.dept_code }}</div>
+        <div class="dept-name">{{ dept.dept_name }}</div>
+        <div class="dept-count">{{ dept_counts.get(dept.dept_code, 0) }} courses</div>
+      </div>
     {% endfor %}
   </div>
+
+  <div id="course-list"></div>
 
 </div>
 
 <script>
+  // Side menu
+  const navTrigger  = document.getElementById('nav-trigger');
+  const menuClose   = document.getElementById('menu-close');
+  const sideMenu    = document.getElementById('side-menu');
+  const menuOverlay = document.getElementById('menu-overlay');
+
+  function openMenu() {
+    sideMenu.classList.add('open');
+    menuOverlay.classList.add('active');
+  }
+  function closeMenu() {
+    sideMenu.classList.remove('open');
+    menuOverlay.classList.remove('active');
+  }
+
+  navTrigger.addEventListener('click', openMenu);
+  menuClose.addEventListener('click', closeMenu);
+  menuOverlay.addEventListener('click', closeMenu);
+
+  // Search
   const resultsSearch = document.getElementById('results-search');
   const filterPanel   = document.getElementById('filter-panel');
   const courseList    = document.getElementById('course-list');
+  const deptGrid      = document.getElementById('dept-grid');
   const resultsCount  = document.getElementById('results-count');
+  const backBtn       = document.getElementById('back-btn');
   const deptSelect    = document.getElementById('dept-select');
   const deptTrigger   = deptSelect.querySelector('.custom-select-trigger');
   const deptOptions   = deptSelect.querySelector('.custom-options');
@@ -350,7 +667,25 @@
     return deptOptions.querySelector('.custom-option.selected')?.dataset.value || '';
   }
 
+  function showDeptGrid() {
+    deptGrid.style.display = 'grid';
+    courseList.style.display = 'none';
+    backBtn.classList.remove('visible');
+    resultsCount.textContent = 'Browse by Department';
+    deptTrigger.textContent = 'All Departments';
+    deptOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+    deptOptions.querySelector('.custom-option').classList.add('selected');
+  }
+
+  function showCourseList() {
+    deptGrid.style.display = 'none';
+    courseList.style.display = 'block';
+    backBtn.classList.add('visible');
+  }
+
   async function doSearch(query, dept = '') {
+    showCourseList();
+
     const params = new URLSearchParams();
     if (query) params.append('q', query);
     if (dept)  params.append('dept', dept);
@@ -358,16 +693,20 @@
     const res     = await fetch(`/search?${params.toString()}`);
     const courses = await res.json();
 
-    resultsCount.textContent = query
-      ? `Showing results for "${query}"`
-      : 'Showing all courses';
+    if (dept && !query) {
+      const deptName = deptOptions.querySelector(`.custom-option[data-value="${dept}"]`)?.textContent || dept;
+      resultsCount.textContent = `${deptName} — ${courses.length} courses`;
+    } else if (query) {
+      resultsCount.textContent = `Showing results for "${query}"`;
+    } else {
+      resultsCount.textContent = 'Showing all courses';
+    }
 
     courseList.innerHTML = courses.length === 0
       ? '<p style="color:var(--muted)">No courses found.</p>'
       : courses.map(c => `
           <a href="/course/${c.id}" style="text-decoration:none; color:inherit;">
             <div class="course-card">
-              <div class="course-img">📚</div>
               <div class="course-info">
                 <div class="course-name">${c.title}</div>
                 <div class="course-details">${c.dept_code} ${c.number}</div>
@@ -378,19 +717,37 @@
         `).join('');
   }
 
-  // Text search
+  deptGrid.addEventListener('click', e => {
+    const card = e.target.closest('.dept-card');
+    if (!card) return;
+    const code = card.dataset.code;
+    const name = card.dataset.name;
+    deptTrigger.textContent = name;
+    deptOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+    const matchingOpt = deptOptions.querySelector(`.custom-option[data-value="${code}"]`);
+    if (matchingOpt) matchingOpt.classList.add('selected');
+    doSearch('', code);
+  });
+
+  backBtn.addEventListener('click', () => {
+    resultsSearch.value = '';
+    showDeptGrid();
+  });
+
   resultsSearch.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
-      doSearch(resultsSearch.value, getSelectedDept());
+      if (resultsSearch.value.trim() === '') {
+        showDeptGrid();
+      } else {
+        doSearch(resultsSearch.value, getSelectedDept());
+      }
     }
   });
 
-  // Filter button
   document.getElementById('results-filter-btn').addEventListener('click', () => {
     filterPanel.classList.toggle('open');
   });
 
-  // Department dropdown
   deptTrigger.addEventListener('click', () => {
     deptOptions.classList.toggle('open');
   });
@@ -400,14 +757,17 @@
     if (!opt) return;
     const value = opt.dataset.value;
     const label = opt.textContent;
-    deptTrigger.textContent = label + ' ▾';
+    deptTrigger.textContent = label;
     deptOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
     opt.classList.add('selected');
     deptOptions.classList.remove('open');
-
-    console.log('dept value:', value, 'query:', resultsSearch.value);
+    if (!value) {
+      resultsSearch.value = '';
+      showDeptGrid();
+      return;
+    }
     doSearch(resultsSearch.value, value);
-});
+  });
 
   document.addEventListener('click', e => {
     if (!deptSelect.contains(e.target)) {

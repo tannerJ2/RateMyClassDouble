@@ -135,12 +135,18 @@ def course_detail(course_id):
 
 @courses.route('/courses')
 def search_page():
-    all_courses = (
-        Course.query
-        .join(Department, Course.dept_id == Department.dept_id)
-        .add_columns(Department.dept_code, Department.dept_name)
-        .order_by(Department.dept_code, Course.course_number)
+    departments = Department.query.order_by(Department.dept_name).all()
+
+    # Count courses per department
+    dept_counts = dict(
+        db.session.query(Department.dept_code, func.count(Course.course_id))
+        .join(Course, Course.dept_id == Department.dept_id)
+        .group_by(Department.dept_code)
         .all()
     )
-    departments = Department.query.order_by(Department.dept_name).all()
-    return render_template('courses/search.html', courses=all_courses, departments=departments)
+
+    return render_template(
+        'courses/search.html',
+        departments = departments,
+        dept_counts = dept_counts,
+    )
