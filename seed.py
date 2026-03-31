@@ -1,6 +1,6 @@
 # =============================================================================
 # RateMyClass — Database Seed Script
-# Source: courses_Fall_2026 CSV (real SCSU Fall 2026 catalogue)
+# Source: courses_Fall_2026.csv (real SCSU Fall 2026 catalogue)
 #
 # Usage:
 #   python3 seed.py
@@ -15,18 +15,11 @@
 #   7. Seeds a test Admin account
 #   8. Seeds a test User account + a sample review
 #
-# PROFESSOR NOTE:
-#   schema.sql does not currently have a Professor table.
-#   This script creates two extra tables automatically:
-#     - professor         (professor_id, full_name)
-#     - course_professor  (course_id FK, professor_id FK)  [many-to-many]
-#   To make these permanent, add them to schema.sql and models.py.
-#
 # PROFESSOR RULES (per spec):
 #   - Each professor listed only once per course, even if they teach
 #     multiple sections of the same course.
 #   - If a course has any real professor, TBA Staff is excluded entirely.
-#   - If ALL sections are TBA Staff, the course is listed with no professors.
+#   - If ALL sections are TBA Staff, the course is listed with TBA Staff once.
 #   - Instructor pronouns and HTML entities are cleaned automatically.
 # =============================================================================
 
@@ -35,37 +28,17 @@ import html
 import os
 import re
 
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, UniqueConstraint
 from flask_bcrypt import generate_password_hash
 
 from app import create_app
 from app.extensions import db
-from app.models import Course, Department, FlagReason, Review, Semester, User
+from app.models import Course, Department, FlagReason, Professor, Review, Semester, User
 
 app = create_app()
 
-# =============================================================================
-# EXTRA TABLES  (professor + course_professor join)
-# =============================================================================
-
-professor_table = Table(
-    'professor', db.metadata,
-    Column('professor_id', Integer, primary_key=True, autoincrement=True),
-    Column('full_name',    String(255), nullable=False, unique=True),
-    extend_existing=True,
-)
-
-course_professor_table = Table(
-    'course_professor', db.metadata,
-    Column('course_id',    Integer, ForeignKey('course.course_id',         ondelete='CASCADE'), nullable=False),
-    Column('professor_id', Integer, ForeignKey('professor.professor_id',   ondelete='CASCADE'), nullable=False),
-    UniqueConstraint('course_id', 'professor_id', name='uq_course_professor'),
-    extend_existing=True,
-)
-
 
 # =============================================================================
-# DEPARTMENT CODE → FULL NAME  (all 78 subjects in the Fall 2026 catalogue)
+# DEPARTMENT CODE → FULL NAME
 # =============================================================================
 
 DEPARTMENT_NAMES = {
@@ -152,66 +125,40 @@ DEPARTMENT_NAMES = {
 
 
 # =============================================================================
-# HELPER — clean a single raw instructor string into a list of professor names
+# HELPER — parse raw instructor string into clean professor name list
 # =============================================================================
 
 def parse_instructors(raw: str) -> list[str]:
-    """
-    Takes a raw Instructor cell value and returns a clean list of
-    professor name strings, with TBA Staff removed if any real name exists.
-
-    Handles:
-      - Semicolon-separated multiple instructors
-      - HTML entities  (&#39; → ', &amp; → &)
-      - Pronoun declarations  (she/her/hers), (he/him/his), (they/them/their)
-      - Misc parentheticals   (Please ask), (Prefer not to answer), nicknames
-      - TBA Staff logic       excluded when real professor exists
-    """
     if not raw or not raw.strip():
         return []
 
-    # Decode HTML entities
     raw = html.unescape(raw)
-
-    # Split on semicolons to get individual names
     parts = [p.strip() for p in raw.split(';')]
 
     cleaned = []
     for part in parts:
         if not part:
             continue
-
-        # Remove anything inside parentheses (pronouns, nicknames, notes)
         name = re.sub(r'\s*\(.*?\)', '', part).strip()
-
-        # Normalise whitespace
         name = re.sub(r'\s+', ' ', name).strip()
-
         if name:
             cleaned.append(name)
 
-    # Apply TBA Staff rule:
-    # If there is at least one real name alongside TBA Staff, drop TBA Staff.
     real_names = [n for n in cleaned if n.upper() != 'TBA STAFF']
     if real_names:
-        return real_names      # real professor exists — drop TBA Staff
+        return real_names
     elif cleaned:
-        return ['TBA Staff']   # all TBA — keep one TBA Staff entry
+        return ['TBA Staff']
     return []
 
 
 # =============================================================================
-# CSV PARSING — build course → professors mapping
+# CSV PARSING
 # =============================================================================
 
 def load_csv(filepath: str):
-    """
-    Reads the CSV and returns:
-      courses_meta  : dict  (subject, number) → (title, credits)
-      course_profs  : dict  (subject, number) → set of professor name strings
-    """
-    courses_meta  = {}   # (subject, number) → (title, credits)
-    course_profs  = {}   # (subject, number) → set of name strings
+    courses_meta = {}
+    course_profs = {}
 
     with open(filepath, newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
@@ -222,24 +169,21 @@ def load_csv(filepath: str):
             credits = row['Credits'].strip()
             key     = (subject, number)
 
-            # First time we see this course — store metadata
             if key not in courses_meta:
-                courses_meta[key]  = (title, credits)
-                course_profs[key]  = set()
+                courses_meta[key] = (title, credits)
+                course_profs[key] = set()
 
-            # Parse and accumulate professors for this course
             names = parse_instructors(row['Instructor'])
             for name in names:
                 course_profs[key].add(name)
 
-    # Post-process: if a course has any real professor, remove TBA Staff.
-    # Only keep TBA Staff if it is the only entry (all sections were TBA).
+    # Post-process TBA Staff rule
     for key in course_profs:
         real = {n for n in course_profs[key] if n.upper() != 'TBA STAFF'}
         if real:
-            course_profs[key] = real          # drop TBA Staff
+            course_profs[key] = real
         elif not course_profs[key]:
-            course_profs[key] = {'TBA Staff'} # all sections had no instructor at all
+            course_profs[key] = {'TBA Staff'}
 
     return courses_meta, course_profs
 
@@ -253,14 +197,13 @@ def seed():
 
     if not os.path.exists(csv_path):
         print(f"\n[ERROR] CSV file not found at:\n  {csv_path}")
-        print("Place courses_Fall_2026__View_Only_.csv in the same folder as seed.py and retry.\n")
+        print("Place courses_Fall_2026.csv in the same folder as seed.py and retry.\n")
         return
 
     print("=" * 60)
     print("RateMyClass — Database Seeder")
     print("=" * 60)
 
-    # ── Parse CSV first (fail-fast before touching DB) ───────────────────────
     print("\n[0/8] Parsing CSV...")
     courses_meta, course_profs = load_csv(csv_path)
     print(f"      {len(courses_meta)} unique courses found across "
@@ -268,13 +211,13 @@ def seed():
 
     with app.app_context():
 
-        # ── 1. Drop and recreate all tables ──────────────────────────────────
+        # 1. Drop and recreate all tables
         print("\n[1/8] Recreating tables...")
         db.drop_all()
         db.create_all()
         print("      Done.")
 
-        # ── 2. Semesters ─────────────────────────────────────────────────────
+        # 2. Semesters
         print("[2/8] Seeding semesters...")
         semesters = {}
         for year in range(2022, 2027):
@@ -285,16 +228,16 @@ def seed():
         db.session.flush()
         print(f"      {len(semesters)} semesters created.")
 
-        # ── 3. Departments ───────────────────────────────────────────────────
+        # 3. Departments
         print("[3/8] Seeding departments...")
         dept_objects = {}
         subjects_in_csv = sorted(set(s for s, _ in courses_meta))
-        missing_depts   = []
+        missing_depts = []
 
         for code in subjects_in_csv:
             name = DEPARTMENT_NAMES.get(code)
             if not name:
-                name = code   # fallback: use code as name
+                name = code
                 missing_depts.append(code)
             d = Department(dept_code=code, dept_name=name)
             db.session.add(d)
@@ -305,7 +248,7 @@ def seed():
         if missing_depts:
             print(f"      WARNING: No display name found for: {missing_depts}")
 
-        # ── 4. Flag Reasons ──────────────────────────────────────────────────
+        # 4. Flag Reasons
         print("[4/8] Seeding flag reasons...")
         flag_reasons = ['Spam', 'Inappropriate Content', 'Plagiarism', 'Cheating']
         for reason in flag_reasons:
@@ -313,22 +256,22 @@ def seed():
         db.session.flush()
         print(f"      {len(flag_reasons)} flag reasons created.")
 
-        # ── 5. Professors ────────────────────────────────────────────────────
+        # 5. Professors — now using the proper Professor model
         print("[5/8] Seeding professors...")
         all_prof_names = set()
         for names in course_profs.values():
             all_prof_names.update(names)
 
-        prof_id_map = {}
+        prof_objects = {}
         for name in sorted(all_prof_names):
-            result = db.session.execute(
-                professor_table.insert().values(full_name=name)
-            )
-            prof_id_map[name] = result.inserted_primary_key[0]
-        db.session.flush()
-        print(f"      {len(prof_id_map)} professors created.")
+            p = Professor(full_name=name)
+            db.session.add(p)
+            prof_objects[name] = p
 
-        # ── 6. Courses + professor links ──────────────────────────────────────
+        db.session.flush()
+        print(f"      {len(prof_objects)} professors created.")
+
+        # 6. Courses + professor links — now using ORM relationships
         print("[6/8] Seeding courses...")
         course_objects = {}
         link_count = 0
@@ -349,21 +292,18 @@ def seed():
             db.session.flush()
             course_objects[(subject, number)] = c
 
+            # Link professors via ORM relationship instead of raw SQL
             for prof_name in sorted(course_profs.get((subject, number), [])):
-                pid = prof_id_map.get(prof_name)
-                if pid:
-                    db.session.execute(
-                        course_professor_table.insert().values(
-                            course_id    = c.course_id,
-                            professor_id = pid,
-                        )
-                    )
+                prof = prof_objects.get(prof_name)
+                if prof:
+                    c.professors.append(prof)
                     link_count += 1
 
+        db.session.flush()
         print(f"      {len(course_objects)} courses created.")
         print(f"      {link_count} course–professor links created.")
 
-        # ── 7. Test accounts ─────────────────────────────────────────────────
+        # 7. Test accounts
         print("[7/8] Seeding test accounts...")
         admin = User(
             first_name    = 'Admin',
@@ -388,7 +328,7 @@ def seed():
         print("      admin@southernct.edu  / Admin1234!")
         print("      student@southernct.edu / Student1234!")
 
-        # ── 8. Sample review ─────────────────────────────────────────────────
+        # 8. Sample review
         print("[8/8] Seeding sample review...")
         csc_152   = course_objects.get(('CSC', '152'))
         fall_2025 = semesters.get(('Fall', 2025))
@@ -410,18 +350,16 @@ def seed():
             ))
             print("      Sample review added to CSC 152 — Fall 2025.")
         else:
-            print("      WARNING: CSC 152 or Fall 2025 semester not found — skipping sample review.")
+            print("      WARNING: CSC 152 or Fall 2025 not found — skipping sample review.")
 
-        # ── Commit everything ─────────────────────────────────────────────────
         db.session.commit()
 
-        # ── Summary ───────────────────────────────────────────────────────────
         print("\n" + "=" * 60)
         print("Seed complete!")
         print("=" * 60)
         print(f"  Departments     : {len(dept_objects)}")
         print(f"  Courses         : {len(course_objects)}")
-        print(f"  Professors      : {len(prof_id_map)}")
+        print(f"  Professors      : {len(prof_objects)}")
         print(f"  Prof links      : {link_count}")
         print(f"  Semesters       : {len(semesters)}")
         print(f"  Flag Reasons    : {len(flag_reasons)}")

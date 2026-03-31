@@ -7,14 +7,28 @@ the schema in your SRS
 '''
 
 
-from datetime import datetime, timezone # for timestamp fields
-from flask_login import UserMixin # for user authentication features later in the code
-from app.extensions import db # imports the database from app.extensions
+from datetime import datetime, timezone
+from flask_login import UserMixin
 from app.extensions import db, login_manager
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+# ─────────────────────────────────────────────
+# CourseProfessor (join table)
+# ─────────────────────────────────────────────
+# Many-to-many: a course can have many professors,
+# a professor can teach many courses.
+course_professor = db.Table(
+    'course_professor',
+    db.Column('course_id',    db.Integer, db.ForeignKey('course.course_id',       ondelete='CASCADE'), nullable=False),
+    db.Column('professor_id', db.Integer, db.ForeignKey('professor.professor_id', ondelete='CASCADE'), nullable=False),
+    db.UniqueConstraint('course_id', 'professor_id', name='uq_course_professor')
+)
+
 
 # ─────────────────────────────────────────────
 # User
@@ -59,7 +73,7 @@ class User(UserMixin, db.Model):
 class Department(db.Model):
     """
     Represents academic departments used to categorize courses.
-    Example: dept_code='CS', dept_name='Computer Science'
+    Example: dept_code='CSC', dept_name='Computer Science'
     """
     __tablename__ = "department"
 
@@ -75,12 +89,33 @@ class Department(db.Model):
 
 
 # ─────────────────────────────────────────────
+# Professor
+# ─────────────────────────────────────────────
+class Professor(db.Model):
+    """
+    Stores professor names sourced from the SCSU course catalogue.
+    Linked to courses via the course_professor join table.
+    'TBA Staff' is stored as a professor when all sections are unassigned.
+    """
+    __tablename__ = "professor"
+
+    professor_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    full_name    = db.Column(db.String(255), nullable=False, unique=True)
+
+    # Relationships
+    courses = db.relationship("Course", secondary=course_professor, back_populates="professors", lazy="dynamic")
+
+    def __repr__(self):
+        return f"<Professor {self.full_name}>"
+
+
+# ─────────────────────────────────────────────
 # Course
 # ─────────────────────────────────────────────
 class Course(db.Model):
     """
     Stores course-level metadata. Linked to a department.
-    Example: course_number='CS101', course_title='Intro to CS'
+    Example: course_number='152', course_title='Programming Fundamentals'
     """
     __tablename__ = "course"
 
@@ -93,6 +128,7 @@ class Course(db.Model):
 
     # Relationships
     department = db.relationship("Department", back_populates="courses")
+    professors = db.relationship("Professor",  secondary=course_professor, back_populates="courses", lazy="dynamic")
     reviews    = db.relationship("Review",     back_populates="course",  lazy="dynamic")
     materials  = db.relationship("Material",   back_populates="course",  lazy="dynamic")
 
@@ -106,7 +142,7 @@ class Course(db.Model):
 class Semester(db.Model):
     """
     Represents an academic term and year.
-    Used to give context to reviews and materials (e.g., 'Fall 2024').
+    Used to give context to reviews and materials (e.g., 'Fall 2025').
     """
     __tablename__ = "semester"
 
@@ -129,7 +165,8 @@ class Review(db.Model):
     """
     Stores structured course reviews submitted by verified users.
     Includes overall rating, workload, difficulty, and written feedback.
-    Min review_text: 30 characters (enforced at form/route level).
+    Min review_text: 30 characters (enforced at route level).
+    One review per user per course per semester.
     """
     __tablename__ = "review"
 
@@ -193,8 +230,8 @@ class Material(db.Model):
 class FlagReason(db.Model):
     """
     Lookup table for standardized moderation categories.
-    Examples: 'spam', 'inappropriate', 'plagiarism', 'cheating'
-    Seeded at app startup — admins don't create these manually.
+    Examples: 'Spam', 'Inappropriate Content', 'Plagiarism', 'Cheating'
+    Seeded once at setup — admins don't create these manually.
     """
     __tablename__ = "flag_reason"
 
@@ -222,9 +259,7 @@ class Flag(db.Model):
     __tablename__ = "flag"
 
     __table_args__ = (
-        # Authenticated user: max 1 flag per material
         db.UniqueConstraint('reporter_user_id', 'material_id', name='uq_flag_user_material'),
-        # Visitor: max 1 flag per material per IP
         db.UniqueConstraint('reporter_ip_hash', 'material_id', name='uq_flag_ip_material'),
     )
 
@@ -232,7 +267,7 @@ class Flag(db.Model):
     material_id          = db.Column(db.Integer, db.ForeignKey("material.material_id"), nullable=False, index=True)
     reporter_user_id     = db.Column(db.Integer, db.ForeignKey("users.user_id"),        nullable=True)
     reporter_ip_hash     = db.Column(db.String(64), nullable=True)
-    reason_id            = db.Column(db.Integer, db.ForeignKey("flag_reason.reason_id"),nullable=False, index=True)
+    reason_id            = db.Column(db.Integer, db.ForeignKey("flag_reason.reason_id"), nullable=False, index=True)
     details              = db.Column(db.Text, nullable=True)
     status               = db.Column(db.Enum("pending", "reviewed", "dismissed"), default="pending", nullable=False, index=True)
     reviewed_by_admin_id = db.Column(db.Integer, db.ForeignKey("users.user_id"),        nullable=True)
@@ -240,7 +275,7 @@ class Flag(db.Model):
     created_at           = db.Column(db.DateTime, default=datetime.now(timezone.utc), nullable=False)
 
     # Relationships
-    material          = db.relationship("Material", back_populates="flags")
+    material          = db.relationship("Material",   back_populates="flags")
     reporter          = db.relationship("User", foreign_keys=[reporter_user_id],     back_populates="flags_reported")
     reviewed_by_admin = db.relationship("User", foreign_keys=[reviewed_by_admin_id], back_populates="flags_reviewed")
     reason            = db.relationship("FlagReason", back_populates="flags")
