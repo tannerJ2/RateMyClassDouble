@@ -702,10 +702,16 @@
       resultsCount.textContent = 'Showing all courses';
     }
 
+    // Build the return URL so the back button restores search state
+    const returnParams = new URLSearchParams();
+    if (query) returnParams.set('q', query);
+    if (dept)  returnParams.set('dept', dept);
+    const returnUrl = '/courses?' + returnParams.toString();
+
     courseList.innerHTML = courses.length === 0
       ? '<p style="color:var(--muted)">No courses found.</p>'
       : courses.map(c => `
-          <a href="/course/${c.id}" style="text-decoration:none; color:inherit;">
+          <a href="/course/${c.id}?back=${encodeURIComponent(returnUrl)}" style="text-decoration:none; color:inherit;">
             <div class="course-card">
               <div class="course-info">
                 <div class="course-name">${c.title}</div>
@@ -774,6 +780,29 @@
       deptOptions.classList.remove('open');
     }
   });
+  // ── Restore search state from URL params (e.g. coming back from course detail)
+  (function restoreState() {
+    const params     = new URLSearchParams(window.location.search);
+    const savedQuery = params.get('q')    || '';
+    const savedDept  = params.get('dept') || '';
+
+    if (!savedQuery && !savedDept) return;
+
+    if (savedQuery) {
+      resultsSearch.value = savedQuery;
+    }
+
+    if (savedDept) {
+      const matchingOpt = deptOptions.querySelector(`.custom-option[data-value="${savedDept}"]`);
+      if (matchingOpt) {
+        deptOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+        matchingOpt.classList.add('selected');
+        deptTrigger.textContent = matchingOpt.textContent;
+      }
+    }
+
+    doSearch(savedQuery, savedDept);
+  })();
 </script>
 
 </body>

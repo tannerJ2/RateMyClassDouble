@@ -220,7 +220,7 @@ def seed():
         # 2. Semesters
         print("[2/8] Seeding semesters...")
         semesters = {}
-        for year in range(2022, 2027):
+        for year in range(2026, 2027):
             for term in ['Spring', 'Summer', 'Fall', 'Winter']:
                 s = Semester(term=term, year=year)
                 db.session.add(s)
@@ -336,6 +336,7 @@ def seed():
             db.session.add(Review(
                 course_id        = csc_152.course_id,
                 user_id          = student.user_id,
+                review_type      = 'opinion',
                 semester_id      = fall_2025.semester_id,
                 rating_overall   = 4,
                 workload_level   = 3,

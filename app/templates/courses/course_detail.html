@@ -7,17 +7,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f7f4ef;
-    --ink: #1a1a1a;
-    --accent: #c0392b;
-    --muted: #888;
-    --border: #e0dbd2;
-    --shadow: 0 2px 20px rgba(0,0,0,0.08);
+    --bg:      #f7f4ef;
+    --ink:     #1a1a1a;
+    --accent:  #c0392b;
+    --muted:   #888;
+    --border:  #e0dbd2;
+    --shadow:  0 2px 20px rgba(0,0,0,0.08);
     --success: #1e8449;
-    --card: #ffffff;
+    --card:    #ffffff;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
   body {
     font-family: 'DM Sans', sans-serif;
@@ -26,7 +30,7 @@
     min-height: 100vh;
   }
 
-  /* NAV */
+  /* ── NAV ───────────────────────────────────── */
   nav {
     display: flex;
     justify-content: space-between;
@@ -39,7 +43,17 @@
     z-index: 100;
   }
 
-  .nav-left { display: flex; align-items: center; gap: 1rem; }
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
 
   .logo {
     font-family: 'Playfair Display', serif;
@@ -48,9 +62,10 @@
     color: var(--ink);
     text-decoration: none;
   }
-  .logo span { color: var(--accent); }
 
-  .nav-right { display: flex; align-items: center; gap: 1rem; }
+  .logo span {
+    color: var(--accent);
+  }
 
   .nav-btn {
     background: var(--ink);
@@ -65,7 +80,10 @@
     text-decoration: none;
     transition: background 0.2s;
   }
-  .nav-btn:hover { background: var(--accent); }
+
+  .nav-btn:hover {
+    background: var(--accent);
+  }
 
   .nav-link {
     font-size: 0.85rem;
@@ -73,9 +91,12 @@
     text-decoration: none;
     transition: color 0.2s;
   }
-  .nav-link:hover { color: var(--accent); }
 
-  /* NAV TRIGGER */
+  .nav-link:hover {
+    color: var(--accent);
+  }
+
+  /* ── NAV TRIGGER ───────────────────────────── */
   #nav-trigger {
     background: none;
     border: none;
@@ -96,11 +117,12 @@
     border-radius: 4px;
     display: block;
   }
+
   .trigger-line:nth-child(1) { width: 24px; }
   .trigger-line:nth-child(2) { width: 16px; }
   .trigger-line:nth-child(3) { width: 24px; }
 
-  /* OVERLAY */
+  /* ── OVERLAY ───────────────────────────────── */
   #menu-overlay {
     display: none;
     position: fixed;
@@ -108,9 +130,12 @@
     background: rgba(0,0,0,0.25);
     z-index: 200;
   }
-  #menu-overlay.active { display: block; }
 
-  /* SIDE MENU */
+  #menu-overlay.active {
+    display: block;
+  }
+
+  /* ── SIDE MENU ─────────────────────────────── */
   #side-menu {
     position: fixed;
     top: 0;
@@ -126,7 +151,10 @@
     transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     box-shadow: 6px 0 32px rgba(0,0,0,0.1);
   }
-  #side-menu.open { transform: translateX(0); }
+
+  #side-menu.open {
+    transform: translateX(0);
+  }
 
   .menu-top {
     display: flex;
@@ -144,7 +172,10 @@
     color: var(--ink);
     text-decoration: none;
   }
-  .menu-logo span { color: var(--accent); }
+
+  .menu-logo span {
+    color: var(--accent);
+  }
 
   #menu-close {
     background: none;
@@ -166,6 +197,7 @@
     border-radius: 4px;
     display: block;
   }
+
   .close-line:nth-child(1) { width: 24px; }
   .close-line:nth-child(2) { width: 16px; }
   .close-line:nth-child(3) { width: 24px; }
@@ -174,8 +206,17 @@
     padding: 1.2rem 1.5rem;
     border-bottom: 1px solid var(--border);
   }
-  .menu-user-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
-  .menu-user-email { font-size: 0.78rem; color: var(--muted); }
+
+  .menu-user-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .menu-user-email {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
 
   .menu-nav {
     flex: 1;
@@ -190,19 +231,34 @@
     align-items: center;
     gap: 0.8rem;
     padding: 0.85rem 1.5rem;
+    width: 100%;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.9rem;
     color: var(--ink);
     text-decoration: none;
     transition: background 0.15s, color 0.15s;
-    width: 100%;
   }
-  .menu-item:hover { background: var(--bg); color: var(--accent); }
 
-  .menu-item-icon { display: flex; align-items: center; color: var(--muted); flex-shrink: 0; }
-  .menu-item:hover .menu-item-icon { color: var(--accent); }
+  .menu-item:hover {
+    background: var(--bg);
+    color: var(--accent);
+  }
 
-  .menu-item-soon { opacity: 0.45; pointer-events: none; }
+  .menu-item-icon {
+    display: flex;
+    align-items: center;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .menu-item:hover .menu-item-icon {
+    color: var(--accent);
+  }
+
+  .menu-item-soon {
+    opacity: 0.45;
+    pointer-events: none;
+  }
 
   .soon-tag {
     margin-left: auto;
@@ -224,9 +280,17 @@
     flex-direction: column;
   }
 
-  .menu-item-logout { color: var(--accent); }
-  .menu-item-logout .menu-item-icon { color: var(--accent); }
-  .menu-item-logout:hover { background: #fdf0ee; }
+  .menu-item-logout {
+    color: var(--accent);
+  }
+
+  .menu-item-logout .menu-item-icon {
+    color: var(--accent);
+  }
+
+  .menu-item-logout:hover {
+    background: #fdf0ee;
+  }
 
   .menu-guest {
     flex: 1;
@@ -238,7 +302,12 @@
     text-align: center;
     gap: 1rem;
   }
-  .menu-guest p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+  .menu-guest p {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
 
   .menu-signin-btn {
     display: block;
@@ -254,7 +323,10 @@
     font-weight: 500;
     transition: background 0.2s;
   }
-  .menu-signin-btn:hover { background: var(--accent); }
+
+  .menu-signin-btn:hover {
+    background: var(--accent);
+  }
 
   .menu-register-link {
     font-size: 0.8rem;
@@ -262,9 +334,12 @@
     text-decoration: none;
     transition: color 0.2s;
   }
-  .menu-register-link:hover { color: var(--accent); }
 
-  /* BACK LINK */
+  .menu-register-link:hover {
+    color: var(--accent);
+  }
+
+  /* ── PAGE ──────────────────────────────────── */
   .back-link {
     display: inline-flex;
     align-items: center;
@@ -275,9 +350,11 @@
     padding: 1.2rem 3rem 0;
     transition: color 0.2s;
   }
-  .back-link:hover { color: var(--accent); }
 
-  /* PAGE LAYOUT */
+  .back-link:hover {
+    color: var(--accent);
+  }
+
   .page {
     max-width: 1200px;
     margin: 0 auto;
@@ -288,7 +365,10 @@
     align-items: start;
   }
 
-  .course-header { margin-bottom: 2rem; }
+  /* ── COURSE HEADER ─────────────────────────── */
+  .course-header {
+    margin-bottom: 2rem;
+  }
 
   .course-meta {
     font-size: 0.78rem;
@@ -327,9 +407,18 @@
     text-align: center;
   }
 
-  .stars { color: #f39c12; font-size: 1.1rem; letter-spacing: 2px; }
-  .rating-label { font-size: 0.88rem; color: var(--muted); }
+  .stars {
+    color: #f39c12;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+  }
 
+  .rating-label {
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  /* ── SUMMARY CARD ──────────────────────────── */
   .summary-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -339,16 +428,24 @@
   }
 
   .summary-card h2 {
-    font-family: 'DM Sans', sans-serif;
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 1rem;
   }
 
-  .summary-card p { font-size: 0.92rem; line-height: 1.8; color: #444; margin-bottom: 1rem; }
-  .summary-card p:last-child { margin-bottom: 0; }
-  .no-description { font-size: 0.9rem; color: var(--muted); font-style: italic; }
+  .summary-card p {
+    font-size: 0.92rem;
+    line-height: 1.8;
+    color: #444;
+  }
 
+  .no-description {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── SECTION CARD ──────────────────────────── */
   .section-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -357,14 +454,22 @@
     margin-bottom: 1.5rem;
   }
 
-  .section-card h2 {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1.2rem;
+  .section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 1.2rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .section-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
   }
 
   .submit-btn {
@@ -380,41 +485,179 @@
     text-decoration: none;
     transition: background 0.2s;
   }
-  .submit-btn:hover { background: var(--accent); }
 
-  .empty-state {
-    text-align: center;
-    padding: 2.5rem 1rem;
+  .submit-btn:hover {
+    background: var(--accent);
+  }
+
+  .view-all-btn {
+    background: none;
+    border: 1.5px solid var(--border);
     color: var(--muted);
-    font-size: 0.88rem;
+    border-radius: 8px;
+    padding: 0.45rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
   }
 
-  .review-card {
-    border-top: 1px solid var(--border);
-    padding: 1.2rem 0;
+  .view-all-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
   }
-  .review-card:first-child { border-top: none; }
 
-  .review-header {
+  /* ── CAROUSEL ──────────────────────────────── */
+  .carousel {
+    position: relative;
+  }
+
+  .carousel-track {
+    overflow: hidden;
+  }
+
+  .carousel-slide {
+    display: none;
+  }
+
+  .carousel-slide.active {
+    display: block;
+  }
+
+  .carousel-nav {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    justify-content: space-between;
+    margin-top: 1rem;
   }
 
-  .review-stars { color: #f39c12; font-size: 0.85rem; }
-  .review-semester { font-size: 0.78rem; color: var(--muted); }
-  .review-text { font-size: 0.88rem; line-height: 1.7; color: #444; }
-
-  .review-meta {
+  .carousel-arrows {
     display: flex;
-    gap: 1.2rem;
-    margin-top: 0.6rem;
+    gap: 0.5rem;
+  }
+
+  .carousel-arrow {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+
+  .carousel-arrow:hover {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: #fff;
+  }
+
+  .carousel-counter {
     font-size: 0.78rem;
     color: var(--muted);
   }
 
-  .sidebar { display: flex; flex-direction: column; gap: 1.2rem; }
+  /* ── OPINION PREVIEW (in carousel) ────────── */
+  .opinion-top {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .opinion-stars {
+    color: #f39c12;
+    font-size: 0.9rem;
+  }
+
+  .opinion-semester {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .opinion-edited {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .opinion-text {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 0.8rem;
+  }
+
+  .opinion-ratings {
+    display: flex;
+    gap: 1.2rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .opinion-author {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ── DESCRIPTION PREVIEW (in carousel) ────── */
+  .desc-text {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 0.8rem;
+  }
+
+  .desc-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ── EMPTY STATE ───────────────────────────── */
+  .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .empty-state a {
+    color: var(--accent);
+  }
+
+  /* ── MATERIALS ─────────────────────────────── */
+  .materials-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .materials-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .materials-title {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  /* ── SIDEBAR ───────────────────────────────── */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
 
   .sidebar-card {
     background: var(--card);
@@ -433,22 +676,39 @@
     margin-bottom: 0.8rem;
     border-bottom: 1px solid var(--border);
   }
-  .professor-item:first-child { padding-top: 0rem; }
 
-  .professor-list { display: flex; flex-direction: column; gap: 0.3rem; }
+  .professor-list {
+    display: flex;
+    flex-direction: column;
+  }
 
   .professor-item {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
     padding: 0.6rem 0;
     border-bottom: 1px solid var(--border);
   }
-  .professor-item:last-child { border-bottom: none; padding-bottom: 0; }
 
-  .professor-name { font-size: 0.88rem; font-weight: 500; color: var(--ink); line-height: 1;}
+  .professor-item:first-child {
+    padding-top: 0;
+  }
 
-  .stats-list { display: flex; flex-direction: column; gap: 0.8rem; }
+  .professor-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .professor-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
 
   .stat-row {
     display: flex;
@@ -457,25 +717,64 @@
     font-size: 0.88rem;
   }
 
-  .stat-label { color: var(--muted); }
-  .stat-value { font-weight: 600; color: var(--ink); }
-  .difficulty-stars { color: #f39c12; font-size: 0.9rem; }
+  .stat-label {
+    color: var(--muted);
+  }
 
-  .flash-messages { padding: 1rem 3rem 0; }
+  .stat-value {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .difficulty-stars {
+    color: #f39c12;
+    font-size: 0.9rem;
+  }
+
+  /* ── FLASH MESSAGES ────────────────────────── */
+  .flash-messages {
+    padding: 1rem 3rem 0;
+  }
+
   .alert {
     padding: 0.75rem 1rem;
     border-radius: 8px;
     font-size: 0.85rem;
     margin-bottom: 0.5rem;
   }
-  .alert-success { background: #eafaf1; color: var(--success); border: 1px solid rgba(30,132,73,0.2); }
-  .alert-danger  { background: #fdf0ee; color: var(--accent); border: 1px solid rgba(192,57,43,0.2); }
-  .alert-info    { background: #eef4ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.2); }
 
+  .alert-success {
+    background: #eafaf1;
+    color: var(--success);
+    border: 1px solid rgba(30,132,73,0.2);
+  }
+
+  .alert-info {
+    background: #eef4ff;
+    color: #2563eb;
+    border: 1px solid rgba(37,99,235,0.2);
+  }
+
+  .alert-danger {
+    background: #fdf0ee;
+    color: var(--accent);
+    border: 1px solid rgba(192,57,43,0.2);
+  }
+
+  /* ── RESPONSIVE ────────────────────────────── */
   @media (max-width: 900px) {
-    .page { grid-template-columns: 1fr; padding: 1.5rem; }
-    nav { padding: 1rem 1.5rem; }
-    .back-link { padding: 1rem 1.5rem 0; }
+    .page {
+      grid-template-columns: 1fr;
+      padding: 1.5rem;
+    }
+
+    nav {
+      padding: 1rem 1.5rem;
+    }
+
+    .back-link {
+      padding: 1rem 1.5rem 0;
+    }
   }
 </style>
 </head>
@@ -500,42 +799,17 @@
       <div class="menu-user-name">{{ current_user.first_name }} {{ current_user.last_name }}</div>
       <div class="menu-user-email">{{ current_user.email }}</div>
     </div>
-
     <div class="menu-nav">
-      <a href="#" class="menu-item">
-        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-        Reviews
-      </a>
-      <a href="#" class="menu-item">
-        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
-        Liked
-      </a>
-      <a href="#" class="menu-item">
-        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
-        Uploads
-      </a>
-      <a href="#" class="menu-item menu-item-soon">
-        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-        Schedule Builder
-        <span class="soon-tag">Soon</span>
-      </a>
+      <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Reviews</a>
+      <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>Liked</a>
+      <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>Uploads</a>
+      <a href="#" class="menu-item menu-item-soon"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Schedule Builder<span class="soon-tag">Soon</span></a>
     </div>
-
     <div class="menu-bottom">
-      <a href="#" class="menu-item">
-        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-        Profile
-      </a>
-      <a href="#" class="menu-item">
-        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-        Settings
-      </a>
-      <a href="{{ url_for('auth.logout') }}" class="menu-item menu-item-logout">
-        <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
-        Sign Out
-      </a>
+      <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Profile</a>
+      <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Settings</a>
+      <a href="{{ url_for('auth.logout') }}" class="menu-item menu-item-logout"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>Sign Out</a>
     </div>
-
   {% else %}
     <div class="menu-guest">
       <p>Sign in to access your reviews, liked courses, uploads and more.</p>
@@ -587,70 +861,153 @@
       <div class="course-meta">{{ course.department.dept_code }} · {{ course.department.dept_name }}</div>
       <h1 class="course-title">{{ course.course_title }}</h1>
       <div class="rating-row">
-        <div class="rating-badge">0.0</div>
-        <span class="stars">★★★★★</span>
-        <span class="rating-label">Based on 0 student reviews</span>
+        {% if avg_rating %}
+          <div class="rating-badge">{{ "%.1f"|format(avg_rating) }}</div>
+          <span class="stars">
+            {% for i in range(avg_rating|round|int) %}★{% endfor %}{% for i in range(5 - avg_rating|round|int) %}☆{% endfor %}
+          </span>
+          <span class="rating-label"> From {{ opinion_count }} user{{ 's' if opinion_count != 1 }}</span>
+        {% else %}
+          <div class="rating-badge" style="background:var(--muted);">—</div>
+          <span class="rating-label">No ratings yet</span>
+        {% endif %}
       </div>
     </div>
 
+    <!-- COURSE SUMMARY -->
     <div class="summary-card">
       <h2>Course Summary</h2>
       {% if course.course_description %}
         <p>{{ course.course_description }}</p>
       {% else %}
-        <p class="no-description">No course description has been added yet. Students who have taken this course can submit a review to help future students understand what to expect.</p>
+        <p class="no-description">No course description has been added yet. Students who have taken this course can submit a description to help future students understand what to expect.</p>
       {% endif %}
     </div>
 
+    <!-- OPINIONS -->
     <div class="section-card">
-      <h2>
-        Student Reviews
-        {% if current_user.is_authenticated %}
-          <a href="#" class="submit-btn">+ Submit Review</a>
-        {% else %}
-          <a href="{{ url_for('auth.login') }}" class="submit-btn">Sign in to Review</a>
-        {% endif %}
-      </h2>
+      <div class="section-header">
+        <span class="section-title">Opinions</span>
+        <div class="section-actions">
+          <a href="{{ url_for('courses.all_opinions', course_id=course.course_id) }}" class="view-all-btn">View All ({{ opinion_count }})</a>
+          {% if current_user.is_authenticated %}
+            {% if user_opinion %}
+              <a href="{{ url_for('courses.edit_opinion', course_id=course.course_id) }}" class="submit-btn">Edit Opinion</a>
+            {% else %}
+              <a href="{{ url_for('courses.submit_opinion', course_id=course.course_id) }}" class="submit-btn">+ Opinion</a>
+            {% endif %}
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="submit-btn">Sign in to Review</a>
+          {% endif %}
+        </div>
+      </div>
 
-      {% if reviews %}
-        {% for review in reviews %}
-          <div class="review-card">
-            <div class="review-header">
-              <span class="review-stars">
-                {% for i in range(review.rating_overall) %}★{% endfor %}
-                {% for i in range(5 - review.rating_overall) %}☆{% endfor %}
-              </span>
-              <span class="review-semester">{{ review.semester.term }} {{ review.semester.year }}</span>
-            </div>
-            <p class="review-text">{{ review.review_text }}</p>
-            <div class="review-meta">
-              <span>Workload: {{ review.workload_level }}/5</span>
-              <span>Difficulty: {{ review.difficulty_level }}/5</span>
-              {% if review.assessment_style %}
-                <span>{{ review.assessment_style }}</span>
-              {% endif %}
-            </div>
+      {% if opinions %}
+        <div class="carousel" id="opinions-carousel">
+          <div class="carousel-track">
+            {% for review in opinions %}
+              <div class="carousel-slide {% if loop.first %}active{% endif %}">
+                <div class="opinion-top">
+                  <span class="opinion-stars">
+                    {% for i in range(review.rating_overall) %}★{% endfor %}{% for i in range(5 - review.rating_overall) %}☆{% endfor %}
+                  </span>
+                  <span class="opinion-semester">{{ review.semester.term }} {{ review.semester.year }}</span>
+                  {% if review.is_edited %}<span class="opinion-edited">edited</span>{% endif %}
+                </div>
+                <p class="opinion-text">{{ review.review_text }}</p>
+                <div class="opinion-ratings">
+                  <span>Workload: {{ review.workload_level }}/5</span>
+                  <span>Difficulty: {{ review.difficulty_level }}/5</span>
+                </div>
+                <span class="opinion-author">{{ review.user.first_name }} {{ review.user.last_name[0] }}.</span>
+              </div>
+            {% endfor %}
           </div>
-        {% endfor %}
+          {% if opinions|length > 1 %}
+            <div class="carousel-nav">
+              <span class="carousel-counter" id="opinions-counter">1 / {{ opinions|length }}</span>
+              <div class="carousel-arrows">
+                <button class="carousel-arrow" onclick="carouselPrev('opinions-carousel', 'opinions-counter')">←</button>
+                <button class="carousel-arrow" onclick="carouselNext('opinions-carousel', 'opinions-counter')">→</button>
+              </div>
+            </div>
+          {% endif %}
+        </div>
       {% else %}
         <div class="empty-state">
-          No reviews yet — be the first to share your experience!
+          No opinions yet.
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('courses.submit_opinion', course_id=course.course_id) }}">Be the first to share yours!</a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}">Sign in</a> to share your opinion.
+          {% endif %}
         </div>
       {% endif %}
     </div>
 
+    <!-- DESCRIPTIONS -->
     <div class="section-card">
-      <h2>
-        Course Materials
+      <div class="section-header">
+        <span class="section-title">Course Descriptions</span>
+        <div class="section-actions">
+          <a href="{{ url_for('courses.all_descriptions', course_id=course.course_id) }}" class="view-all-btn">View All ({{ description_count }})</a>
+          {% if current_user.is_authenticated %}
+            {% if user_description %}
+              <a href="{{ url_for('courses.edit_description', course_id=course.course_id) }}" class="submit-btn">Edit Description</a>
+            {% else %}
+              <a href="{{ url_for('courses.submit_description', course_id=course.course_id) }}" class="submit-btn">+ Description</a>
+            {% endif %}
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="submit-btn">Sign in to Describe</a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if descriptions %}
+        <div class="carousel" id="descriptions-carousel">
+          <div class="carousel-track">
+            {% for review in descriptions %}
+              <div class="carousel-slide {% if loop.first %}active{% endif %}">
+                <p class="desc-text">{{ review.review_text }}</p>
+                <span class="desc-meta">
+                  {{ review.user.first_name }} {{ review.user.last_name[0] }}. · {{ review.created_at.strftime('%b %d, %Y') }}{% if review.is_edited %} · <em>edited</em>{% endif %}
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+          {% if descriptions|length > 1 %}
+            <div class="carousel-nav">
+              <span class="carousel-counter" id="descriptions-counter">1 / {{ descriptions|length }}</span>
+              <div class="carousel-arrows">
+                <button class="carousel-arrow" onclick="carouselPrev('descriptions-carousel', 'descriptions-counter')">←</button>
+                <button class="carousel-arrow" onclick="carouselNext('descriptions-carousel', 'descriptions-counter')">→</button>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          No descriptions yet.
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('courses.submit_description', course_id=course.course_id) }}">Be the first to describe this course!</a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}">Sign in</a> to add a description.
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- MATERIALS -->
+    <div class="materials-section">
+      <div class="materials-header">
+        <span class="materials-title">Course Materials</span>
         {% if current_user.is_authenticated %}
           <a href="#" class="submit-btn">+ Upload Material</a>
         {% else %}
           <a href="{{ url_for('auth.login') }}" class="submit-btn">Sign in to Upload</a>
         {% endif %}
-      </h2>
-      <div class="empty-state">
-        No materials uploaded yet.
       </div>
+      <div class="empty-state">No materials uploaded yet.</div>
     </div>
 
   </div>
@@ -677,15 +1034,15 @@
       <h3>Course Stats</h3>
       <div class="stats-list">
         <div class="stat-row">
-          <span class="stat-label">Total Reviews</span>
-          <span class="stat-value">{{ review_count }}</span>
+          <span class="stat-label">Opinions</span>
+          <span class="stat-value">{{ opinion_count }}</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">Total Ratings</span>
-          <span class="stat-value">{{ review_count }}</span>
+          <span class="stat-label">Descriptions</span>
+          <span class="stat-value">{{ description_count }}</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">Materials Uploaded</span>
+          <span class="stat-label">Materials</span>
           <span class="stat-value">{{ material_count }}</span>
         </div>
         <div class="stat-row">
@@ -693,8 +1050,7 @@
           <span class="stat-value">
             {% if avg_difficulty %}
               <span class="difficulty-stars">
-                {% for i in range(avg_difficulty|round|int) %}★{% endfor %}
-                {% for i in range(5 - avg_difficulty|round|int) %}☆{% endfor %}
+                {% for i in range(avg_difficulty|round|int) %}★{% endfor %}{% for i in range(5 - avg_difficulty|round|int) %}☆{% endfor %}
               </span>
             {% else %}
               <span style="color:var(--muted)">No data yet</span>
@@ -708,23 +1064,58 @@
 </div>
 
 <script>
+  // ── Side menu ──────────────────────────────────────────────────────────────
   const navTrigger  = document.getElementById('nav-trigger');
   const menuClose   = document.getElementById('menu-close');
   const sideMenu    = document.getElementById('side-menu');
   const menuOverlay = document.getElementById('menu-overlay');
 
-  function openMenu() {
-    sideMenu.classList.add('open');
-    menuOverlay.classList.add('active');
-  }
-  function closeMenu() {
-    sideMenu.classList.remove('open');
-    menuOverlay.classList.remove('active');
-  }
+  function openMenu()  { sideMenu.classList.add('open');    menuOverlay.classList.add('active'); }
+  function closeMenu() { sideMenu.classList.remove('open'); menuOverlay.classList.remove('active'); }
 
   navTrigger.addEventListener('click', openMenu);
   menuClose.addEventListener('click', closeMenu);
   menuOverlay.addEventListener('click', closeMenu);
+
+  // ── Carousel ───────────────────────────────────────────────────────────────
+  function carouselMove(carouselId, counterId, direction) {
+    const carousel = document.getElementById(carouselId);
+    const slides   = carousel.querySelectorAll('.carousel-slide');
+    const counter  = document.getElementById(counterId);
+    let current    = Array.from(slides).findIndex(s => s.classList.contains('active'));
+
+    slides[current].classList.remove('active');
+    current = (current + direction + slides.length) % slides.length;
+    slides[current].classList.add('active');
+
+    if (counter) counter.textContent = `${current + 1} / ${slides.length}`;
+  }
+
+  function carouselPrev(id, cid) { carouselMove(id, cid, -1); }
+  function carouselNext(id, cid) { carouselMove(id, cid,  1); }
+
+
+  // ── Back button — restore search state ────────────────────────────────────
+  const backLink  = document.getElementById('back-link');
+  const backParam = new URLSearchParams(window.location.search).get('back');
+
+  if (backParam) {
+    try {
+      const backUrl    = new URL(backParam, window.location.origin);
+      const deptParam  = backUrl.searchParams.get('dept');
+      const queryParam = backUrl.searchParams.get('q');
+
+      backLink.href = backParam;
+
+      if (deptParam && !queryParam) {
+        backLink.textContent = `← Back to ${deptParam}`;
+      } else if (queryParam) {
+        backLink.textContent = `← Back to results for "${queryParam}"`;
+      }
+    } catch (e) {
+      // malformed back param — leave default
+    }
+  }
 </script>
 
 </body>
