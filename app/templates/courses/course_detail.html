@@ -928,13 +928,55 @@
       </div>
     </div>
 
-    <!-- COURSE SUMMARY -->
-    <div class="summary-card">
-      <h2>Course Summary</h2>
-      {% if course.course_description %}
-        <p>{{ course.course_description }}</p>
+    <!-- DESCRIPTIONS -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title">Course Descriptions</span>
+        <div class="section-actions">
+          <a href="{{ url_for('courses.all_descriptions', course_id=course.course_id) }}" class="view-all-btn">View All ({{ description_count }})</a>
+          {% if current_user.is_authenticated %}
+            {% if user_description %}
+              <a href="{{ url_for('courses.edit_description', course_id=course.course_id) }}" class="submit-btn">Edit Description</a>
+            {% else %}
+              <a href="{{ url_for('courses.submit_description', course_id=course.course_id) }}" class="submit-btn">+ Description</a>
+            {% endif %}
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="submit-btn">Sign in to Describe</a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if descriptions %}
+        <div class="carousel" id="descriptions-carousel">
+          <div class="carousel-track">
+            {% for review in descriptions %}
+              <div class="carousel-slide {% if loop.first %}active{% endif %}">
+                <p class="desc-text">{{ review.review_text }}</p>
+                <span class="desc-meta">
+                  {{ review.user.first_name }} {{ review.user.last_name[0] }}. · {{ review.created_at.strftime('%b %d, %Y') }}{% if review.is_edited %} · <em>edited</em>{% endif %}
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+          {% if descriptions|length > 1 %}
+            <div class="carousel-nav">
+              <span class="carousel-counter" id="descriptions-counter">1 / {{ descriptions|length }}</span>
+              <div class="carousel-arrows">
+                <button class="carousel-arrow" onclick="carouselPrev('descriptions-carousel', 'descriptions-counter')">←</button>
+                <button class="carousel-arrow" onclick="carouselNext('descriptions-carousel', 'descriptions-counter')">→</button>
+              </div>
+            </div>
+          {% endif %}
+        </div>
       {% else %}
-        <p class="no-description">No course description has been added yet. Students who have taken this course can submit a description to help future students understand what to expect.</p>
+        <div class="empty-state">
+          No descriptions yet.
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('courses.submit_description', course_id=course.course_id) }}">Be the first to describe this course!</a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}">Sign in</a> to add a description.
+          {% endif %}
+        </div>
       {% endif %}
     </div>
 
@@ -999,69 +1041,30 @@
       {% endif %}
     </div>
 
-    <!-- DESCRIPTIONS -->
-    <div class="section-card">
-      <div class="section-header">
-        <span class="section-title">Course Descriptions</span>
-        <div class="section-actions">
-          <a href="{{ url_for('courses.all_descriptions', course_id=course.course_id) }}" class="view-all-btn">View All ({{ description_count }})</a>
-          {% if current_user.is_authenticated %}
-            {% if user_description %}
-              <a href="{{ url_for('courses.edit_description', course_id=course.course_id) }}" class="submit-btn">Edit Description</a>
-            {% else %}
-              <a href="{{ url_for('courses.submit_description', course_id=course.course_id) }}" class="submit-btn">+ Description</a>
-            {% endif %}
-          {% else %}
-            <a href="{{ url_for('auth.login') }}" class="submit-btn">Sign in to Describe</a>
-          {% endif %}
-        </div>
-      </div>
-
-      {% if descriptions %}
-        <div class="carousel" id="descriptions-carousel">
-          <div class="carousel-track">
-            {% for review in descriptions %}
-              <div class="carousel-slide {% if loop.first %}active{% endif %}">
-                <p class="desc-text">{{ review.review_text }}</p>
-                <span class="desc-meta">
-                  {{ review.user.first_name }} {{ review.user.last_name[0] }}. · {{ review.created_at.strftime('%b %d, %Y') }}{% if review.is_edited %} · <em>edited</em>{% endif %}
-                </span>
-              </div>
-            {% endfor %}
-          </div>
-          {% if descriptions|length > 1 %}
-            <div class="carousel-nav">
-              <span class="carousel-counter" id="descriptions-counter">1 / {{ descriptions|length }}</span>
-              <div class="carousel-arrows">
-                <button class="carousel-arrow" onclick="carouselPrev('descriptions-carousel', 'descriptions-counter')">←</button>
-                <button class="carousel-arrow" onclick="carouselNext('descriptions-carousel', 'descriptions-counter')">→</button>
-              </div>
-            </div>
-          {% endif %}
-        </div>
-      {% else %}
-        <div class="empty-state">
-          No descriptions yet.
-          {% if current_user.is_authenticated %}
-            <a href="{{ url_for('courses.submit_description', course_id=course.course_id) }}">Be the first to describe this course!</a>
-          {% else %}
-            <a href="{{ url_for('auth.login') }}">Sign in</a> to add a description.
-          {% endif %}
-        </div>
-      {% endif %}
-    </div>
 
     <!-- MATERIALS -->
-    <div class="materials-section">
-      <div class="materials-header">
-        <span class="materials-title">Course Materials</span>
-          <a href="{{ url_for('courses.all_materials', course_id=course.course_id) }}" class="nav-link" style="font-size:0.82rem;">View All ({{ material_count }})</a>
-        {% if current_user.is_authenticated %}
-          <a href="{{ url_for('courses.upload_material', course_id=course.course_id) }}" class="submit-btn">+ Upload Material</a>
-        {% else %}
-          <a href="{{ url_for('auth.login') }}" class="submit-btn">Sign in to Upload</a>
-        {% endif %}
-      </div>
+    <div class="section-card">
+        <div class="section-header">
+            <span class="section-title">Course Materials</span>
+
+            <div class="section-actions">
+            <a href="{{ url_for('courses.all_materials', course_id=course.course_id) }}"
+                class="view-all-btn">
+                View All ({{ material_count }})
+            </a>
+
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('courses.upload_material', course_id=course.course_id) }}"
+                class="submit-btn">
+                + Upload Material
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="submit-btn">
+                Sign in to Upload
+                </a>
+            {% endif %}
+            </div>
+        </div>
 
       {% if active_materials %}
         <div class="material-list">
