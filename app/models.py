@@ -326,3 +326,5 @@ class PasswordResetToken(db.Model):
 
     def __repr__(self):
         return f'<PasswordResetToken user={self.user_id} expires={self.expires_at}>'
+
+

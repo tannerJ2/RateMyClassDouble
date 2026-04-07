@@ -652,6 +652,60 @@
     font-weight: 600;
   }
 
+  .material-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .material-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    transition: border-color 0.2s;
+  }
+
+  .material-card:hover { border-color: var(--ink); }
+
+  .material-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 0.1rem; }
+
+  .material-info { flex: 1; min-width: 0; }
+
+  .material-title { font-size: 0.92rem; font-weight: 600; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .material-desc { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.35rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .material-meta { display: flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; color: var(--muted); flex-wrap: wrap; }
+
+  .material-type-badge { padding: 0.15rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3px; }
+  .type-notes       { background: #eef4ff; color: #2563eb; }
+  .type-study_guide { background: #eafaf1; color: #1e8449; }
+  .type-exam        { background: #fdf0ee; color: var(--accent); }
+  .type-other       { background: #f5f5f5; color: #555; }
+
+  .material-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    padding: 0.45rem 0.85rem;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .material-download-btn:hover { background: var(--accent); }
+
   /* ── SIDEBAR ───────────────────────────────── */
   .sidebar {
     display: flex;
@@ -800,9 +854,9 @@
       <div class="menu-user-email">{{ current_user.email }}</div>
     </div>
     <div class="menu-nav">
-      <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Reviews</a>
+      <a href="{{ url_for('courses.my_reviews') }}" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Reviews</a>
       <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>Liked</a>
-      <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>Uploads</a>
+      <a href="{{ url_for('courses.my_uploads') }}" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>Uploads</a>
       <a href="#" class="menu-item menu-item-soon"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Schedule Builder<span class="soon-tag">Soon</span></a>
     </div>
     <div class="menu-bottom">
@@ -1001,13 +1055,45 @@
     <div class="materials-section">
       <div class="materials-header">
         <span class="materials-title">Course Materials</span>
+          <a href="{{ url_for('courses.all_materials', course_id=course.course_id) }}" class="nav-link" style="font-size:0.82rem;">View All ({{ material_count }})</a>
         {% if current_user.is_authenticated %}
-          <a href="#" class="submit-btn">+ Upload Material</a>
+          <a href="{{ url_for('courses.upload_material', course_id=course.course_id) }}" class="submit-btn">+ Upload Material</a>
         {% else %}
           <a href="{{ url_for('auth.login') }}" class="submit-btn">Sign in to Upload</a>
         {% endif %}
       </div>
-      <div class="empty-state">No materials uploaded yet.</div>
+
+      {% if active_materials %}
+        <div class="material-list">
+          {% for mat in active_materials %}
+            <div class="material-card">
+              <div class="material-icon">📄</div>
+              <div class="material-info">
+                <div class="material-title">{{ mat.title }}</div>
+                {% if mat.description %}
+                  <div class="material-desc">{{ mat.description }}</div>
+                {% endif %}
+                <div class="material-meta">
+                  <span class="material-type-badge type-{{ mat.material_type }}">
+                    {% if mat.material_type == 'notes' %}Notes
+                    {% elif mat.material_type == 'study_guide' %}Study Guide
+                    {% elif mat.material_type == 'exam' %}Past Exam
+                    {% else %}Other{% endif %}
+                  </span>
+                  <span>{{ mat.semester.term }} {{ mat.semester.year }}</span>
+                  <span>by {{ mat.user.first_name }} {{ mat.user.last_name[0] }}.</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:0.5rem; align-items:center; flex-shrink:0;">
+                <a href="{{ url_for('courses.download_material', material_id=mat.material_id) }}" style="font-size:0.78rem; color:var(--muted); text-decoration:none;">↓ Download</a>
+                <a href="{{ url_for('courses.view_material', material_id=mat.material_id) }}" class="material-download-btn">View PDF</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">No materials uploaded yet.</div>
+      {% endif %}
     </div>
 
   </div>

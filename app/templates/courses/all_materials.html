@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>All Opinions — {{ course.course_title }}</title>
+<title>All Materials — {{ course.course_title }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -430,66 +430,60 @@
     background: var(--accent);
   }
 
-  /* ── OPINION CARD ──────────────────────────── */
-  .opinion-card {
+  /* ── MATERIAL CARD ─────────────────────────── */
+  .material-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 1.5rem 1.8rem;
     margin-bottom: 1.2rem;
-    scroll-margin-top: 100px;
   }
 
-  .opinion-card.mine {
+  .material-card.mine {
     border-color: var(--accent);
   }
 
-  .opinion-top {
+  .material-top {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
-    margin-bottom: 0.8rem;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
   }
 
-  .opinion-stars {
-    color: #f39c12;
+  .type-badge {
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+
+  .type-notes       { background: #eef4ff; color: #2563eb; }
+  .type-study_guide { background: #eafaf1; color: #1e8449; }
+  .type-exam        { background: #fdf0ee; color: var(--accent); }
+  .type-other       { background: #f5f5f5; color: #555; }
+
+  .material-title {
     font-size: 1rem;
-    letter-spacing: 1px;
+    font-weight: 600;
   }
 
-  .opinion-semester {
+  .material-semester {
     font-size: 0.8rem;
     color: var(--muted);
+    margin-left: auto;
   }
 
-  .opinion-edited {
-    font-size: 0.72rem;
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  .opinion-text {
+  .material-description {
     font-size: 0.92rem;
     line-height: 1.75;
     color: #333;
     margin-bottom: 1rem;
   }
 
-  .opinion-ratings {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 0.6rem;
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-
-  .opinion-assessment {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
-
-  .opinion-footer {
+  .material-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -497,96 +491,38 @@
     padding-top: 0.8rem;
   }
 
-  .opinion-author {
+  .material-author {
     font-size: 0.8rem;
     color: var(--muted);
   }
 
-  /* ── LIKE BUTTONS ──────────────────────────── */
-  .like-buttons {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-  }
-
-  .like-btn {
-    display: flex;
+  .download-btn {
+    display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: 20px;
-    padding: 0.3rem 0.7rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--ink);
-  }
-
-  .like-btn:hover {
-    border-color: var(--ink);
-  }
-
-  .like-btn.active-rh {
-    background: #fef9e7;
-    border-color: #f39c12;
-    color: #a57c00;
-  }
-
-  .like-btn.active-h {
-    background: #eafaf1;
-    border-color: #27ae60;
-    color: #1e8449;
-  }
-
-  .like-btn.active-nh {
-    background: #fdf0ee;
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  /* ── VISITOR TOOLTIP ───────────────────────── */
-  .like-tooltip-wrapper {
-    position: relative;
-    display: inline-flex;
-  }
-
-  .like-tooltip {
-    display: none;
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #fff;
-    border: 1px solid var(--border);
+    background: var(--ink);
+    color: #fff;
+    border: none;
     border-radius: 8px;
-    padding: 0.5rem 0.8rem;
-    font-size: 0.78rem;
-    color: var(--ink);
-    white-space: nowrap;
-    box-shadow: var(--shadow);
-    z-index: 10;
+    padding: 0.45rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
   }
 
-  .like-tooltip a {
-    color: var(--accent);
+  .download-btn:hover {
+    background: var(--accent);
   }
-
-  .like-tooltip-wrapper:hover .like-tooltip {
-    display: block;
-  }
-
-  .edit-link {
+  .back-btn {
     font-size: 0.78rem;
     color: var(--muted);
     text-decoration: none;
     transition: color 0.2s;
   }
 
-  .edit-link:hover {
-    color: var(--accent);
-  }
+  .back-btn:hover { color: var(--accent); }
 
   /* ── EMPTY STATE ───────────────────────────── */
   .empty-state {
@@ -713,79 +649,47 @@
   {% endwith %}
 
   <div class="page-header">
-    <div class="course-label">{{ course.department.dept_code }} · All Opinions</div>
+    <div class="course-label">{{ course.department.dept_code }} · All Materials</div>
     <h1 class="page-title">{{ course.course_title }}</h1>
     <div class="header-row">
       <div class="sort-bar">
-        <a href="?sort=liked"  class="sort-btn {% if sort == 'liked'  %}active{% endif %}">Most Helpful</a>
         <a href="?sort=recent" class="sort-btn {% if sort == 'recent' %}active{% endif %}">Most Recent</a>
+        <a href="?sort=type"   class="sort-btn {% if sort == 'type'   %}active{% endif %}">By Type</a>
         {% if current_user.is_authenticated %}
           <a href="?sort=yours" class="sort-btn {% if sort == 'yours' %}active{% endif %}">Yours</a>
         {% endif %}
       </div>
       {% if current_user.is_authenticated %}
-        <a href="{{ url_for('courses.submit_opinion', course_id=course.course_id) }}" class="submit-link">+ Submit Opinion</a>
+        <a href="{{ url_for('courses.upload_material', course_id=course.course_id) }}" class="submit-link">+ Upload Material</a>
       {% endif %}
     </div>
   </div>
 
-  {% if opinions %}
-    {% for review in opinions %}
-      <div class="opinion-card {% if current_user.is_authenticated and review.user_id == current_user.user_id %}mine{% endif %}"
-           id="review-{{ review.review_id }}">
+  {% if materials %}
+    {% for mat in materials %}
+      <div class="material-card {% if current_user.is_authenticated and mat.user_id == current_user.user_id %}mine{% endif %}">
 
-        <div class="opinion-top">
-          <span class="opinion-stars">
-            {% for i in range(review.rating_overall) %}★{% endfor %}{% for i in range(5 - review.rating_overall) %}☆{% endfor %}
+        <div class="material-top">
+          <span class="type-badge type-{{ mat.material_type }}">
+            {% if mat.material_type == 'notes' %}Notes
+            {% elif mat.material_type == 'study_guide' %}Study Guide
+            {% elif mat.material_type == 'exam' %}Past Exam
+            {% else %}Other{% endif %}
           </span>
-          <span class="opinion-semester">{{ review.semester.term }} {{ review.semester.year }}</span>
-          {% if review.is_edited %}<span class="opinion-edited">edited</span>{% endif %}
+          <span class="material-title">{{ mat.title }}</span>
+          <span class="material-semester">{{ mat.semester.term }} {{ mat.semester.year }}</span>
         </div>
 
-        <p class="opinion-text">{{ review.review_text }}</p>
-
-        <div class="opinion-ratings">
-          <span>Workload: {{ review.workload_level }}/5</span>
-          <span>Difficulty: {{ review.difficulty_level }}/5</span>
-        </div>
-        {% if review.assessment_style %}
-          <div class="opinion-assessment">{{ review.assessment_style }}</div>
+        {% if mat.description %}
+          <p class="material-description">{{ mat.description }}</p>
         {% endif %}
 
-        <div class="opinion-footer">
-          <span class="opinion-author">{{ review.user.first_name }} {{ review.user.last_name[0] }}.</span>
-
-          <div class="like-buttons">
-            {% set counts    = review.like_counts() %}
-            {% set user_like = user_likes.get(review.review_id) %}
-
-            {% if current_user.is_authenticated %}
-              <button class="like-btn {% if user_like == 'really_helpful' %}active-rh{% endif %}"
-                      data-review="{{ review.review_id }}" data-type="really_helpful">
-                ⭐ Really Helpful <span class="lc-rh">{{ counts.really_helpful }}</span>
-              </button>
-              <button class="like-btn {% if user_like == 'helpful' %}active-h{% endif %}"
-                      data-review="{{ review.review_id }}" data-type="helpful">
-                👍 Helpful <span class="lc-h">{{ counts.helpful }}</span>
-              </button>
-              <button class="like-btn {% if user_like == 'not_helpful' %}active-nh{% endif %}"
-                      data-review="{{ review.review_id }}" data-type="not_helpful">
-                👎 Not Helpful <span class="lc-nh">{{ counts.not_helpful }}</span>
-              </button>
-              {% if review.user_id == current_user.user_id %}
-                <a href="{{ url_for('courses.edit_opinion', course_id=course.course_id) }}" class="edit-link">Edit</a>
-              {% endif %}
-            {% else %}
-              {% for label, type, icon in [('Really Helpful','really_helpful','⭐'),('Helpful','helpful','👍'),('Not Helpful','not_helpful','👎')] %}
-                <div class="like-tooltip-wrapper">
-                  <button class="like-btn" disabled>{{ icon }} {{ label }} {{ counts[type] }}</button>
-                  <div class="like-tooltip">
-                    <a href="{{ url_for('auth.register') }}">Create an account</a> to like reviews
-                  </div>
-                </div>
-              {% endfor %}
-            {% endif %}
-          </div>
+        <div class="material-footer">
+            <span class="material-author">{{ mat.user.first_name }} {{ mat.user.last_name[0] }}.</span>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+                <a href="{{ url_for('courses.download_material', material_id=mat.material_id) }}" class="back-btn">↓ Download</a>
+                <a href="{{ url_for('courses.view_material', material_id=mat.material_id) }}" class="download-btn">View PDF</a>
+            </div>
         </div>
 
       </div>
@@ -793,14 +697,14 @@
 
   {% else %}
     <div class="empty-state">
-      <div class="empty-icon">⭐</div>
+      <div class="empty-icon">📄</div>
       {% if current_user.is_authenticated %}
-        <p>No opinions yet for this course.</p>
-        <p style="font-size:0.82rem;">Have you taken it? We'd love to hear your opinion!</p>
+        <p>No materials uploaded yet for this course.</p>
+        <p style="font-size:0.82rem;">Have notes or a study guide? Help your fellow students!</p>
         <br>
-        <a href="{{ url_for('courses.submit_opinion', course_id=course.course_id) }}" class="submit-link">Submit an Opinion</a>
+        <a href="{{ url_for('courses.upload_material', course_id=course.course_id) }}" class="submit-link">Upload a Material</a>
       {% else %}
-        <p>No opinions yet. <a href="{{ url_for('auth.login') }}" style="color:var(--accent);">Sign in</a> to be the first!</p>
+        <p>No materials yet. <a href="{{ url_for('auth.login') }}" style="color:var(--accent);">Sign in</a> to be the first!</p>
       {% endif %}
     </div>
   {% endif %}
@@ -820,38 +724,6 @@
   navTrigger.addEventListener('click', openMenu);
   menuClose.addEventListener('click', closeMenu);
   menuOverlay.addEventListener('click', closeMenu);
-
-  // ── Like buttons ───────────────────────────────────────────────────────────
-  const CLASS_MAP = {
-    really_helpful: 'active-rh',
-    helpful:        'active-h',
-    not_helpful:    'active-nh',
-  };
-
-  document.querySelectorAll('.like-btn[data-review]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const card = btn.closest('.opinion-card');
-
-      const res  = await fetch(`/review/${btn.dataset.review}/like`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ like_type: btn.dataset.type }),
-      });
-      const data = await res.json();
-
-      card.querySelector('.lc-rh').textContent = data.counts.really_helpful;
-      card.querySelector('.lc-h').textContent  = data.counts.helpful;
-      card.querySelector('.lc-nh').textContent = data.counts.not_helpful;
-
-      card.querySelectorAll('.like-btn[data-review]').forEach(b => {
-        b.classList.remove('active-rh', 'active-h', 'active-nh');
-      });
-
-      if (data.action !== 'removed') {
-        btn.classList.add(CLASS_MAP[btn.dataset.type]);
-      }
-    });
-  });
 </script>
 
 </body>
