@@ -462,12 +462,49 @@
     box-shadow: var(--shadow);
   }
 
-  .course-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.1rem; }
-  .course-details { font-size: 0.8rem; color: var(--muted); margin-top: 0.1rem; margin-bottom: 0.1rem; }
-  .stars { color: #f39c12; font-size: 0.85rem; margin-right: 0.3rem; }
-  .rating-text { font-size: 0.8rem; color: var(--muted); }
+  .course-name { 
+    font-weight: 600; 
+    font-size: 0.95rem; 
+    margin-bottom: 0.1rem; 
+}
 
-  .flash-messages { margin-bottom: 1rem; }
+  .course-details { 
+    font-size: 0.8rem;
+    color: var(--muted); 
+    margin-top: 0.1rem; 
+    margin-bottom: 0.1rem; 
+}
+
+  .stars {
+    display: inline-block;
+    position: relative;
+    font-size: 0.85rem;
+    margin-right: 0.3rem;
+    letter-spacing: 1px;
+  }
+
+  .stars-empty { 
+    color: #ddd; 
+
+}
+  .stars-filled {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: #f39c12;
+  }
+
+  .rating-text { 
+    font-size: 0.8rem; 
+    color: var(--muted); 
+}
+
+  .flash-messages { 
+    margin-bottom: 1rem; 
+}
+
   .alert {
     padding: 0.75rem 1rem;
     border-radius: 8px;
@@ -710,18 +747,25 @@
 
     courseList.innerHTML = courses.length === 0
       ? '<p style="color:var(--muted)">No courses found.</p>'
-      : courses.map(c => `
-          <a href="/course/${c.id}?back=${encodeURIComponent(returnUrl)}" style="text-decoration:none; color:inherit;">
-            <div class="course-card">
-              <div class="course-info">
-                <div class="course-name">${c.title}</div>
-                <div class="course-details">${c.dept_code} ${c.number}</div>
-                <div><span class="stars">★★★★★</span><span class="rating-text">0.0 (0 reviews)</span></div>
-              </div>
-            </div>
-          </a>
-        `).join('');
-  }
+      : courses.map(c => {
+          const avg    = parseFloat(c.avg_rating) || 0;
+          const count  = c.rating_count || 0;
+          const pct  = count > 0 ? (avg / 5 * 100).toFixed(1) + '%' : '0%';
+          const ratingText = count > 0
+            ? avg.toFixed(1) + ' (' + count + ' rating' + (count !== 1 ? 's' : '') + ')'
+            : 'No ratings yet';
+          const starsHtml = '<span class="stars">'
+            + '<span class="stars-empty">★★★★★</span>'
+            + '<span class="stars-filled" style="width:' + pct + '">★★★★★</span>'
+            + '</span>';
+          return '<a href="/course/' + c.id + '?back=' + encodeURIComponent(returnUrl) + '" style="text-decoration:none; color:inherit;">'
+            + '<div class="course-card"><div class="course-info">'
+            + '<div class="course-name">' + c.title + '</div>'
+            + '<div class="course-details">' + c.dept_code + ' ' + c.number + '</div>'
+            + '<div>' + starsHtml + '<span class="rating-text"> ' + ratingText + '</span></div>'
+            + '</div></div></a>';
+        }).join('');
+    }
 
   deptGrid.addEventListener('click', e => {
     const card = e.target.closest('.dept-card');
@@ -742,10 +786,12 @@
 
   resultsSearch.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
-      if (resultsSearch.value.trim() === '') {
+      const query = resultsSearch.value.trim();
+      const dept  = getSelectedDept();
+      if (!query && !dept) {
         showDeptGrid();
       } else {
-        doSearch(resultsSearch.value, getSelectedDept());
+        doSearch(query, dept);
       }
     }
   });
@@ -768,8 +814,11 @@
     opt.classList.add('selected');
     deptOptions.classList.remove('open');
     if (!value) {
-      resultsSearch.value = '';
-      showDeptGrid();
+      if (resultsSearch.value.trim()) {
+        doSearch(resultsSearch.value.trim(), '');
+      } else {
+        showDeptGrid();
+      }
       return;
     }
     doSearch(resultsSearch.value, value);

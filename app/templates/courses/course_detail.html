@@ -408,9 +408,22 @@
   }
 
   .stars {
-    color: #f39c12;
+    display: inline-block;
+    position: relative;
     font-size: 1.1rem;
     letter-spacing: 2px;
+  }
+  .stars-empty { 
+    color: #ddd; 
+}
+
+  .stars-filled {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: #f39c12;
   }
 
   .rating-label {
@@ -781,8 +794,10 @@
   }
 
   .difficulty-stars {
-    color: #f39c12;
+    display: inline-block;
+    position: relative;
     font-size: 0.9rem;
+    letter-spacing: 1px;
   }
 
   /* ── FLASH MESSAGES ────────────────────────── */
@@ -918,7 +933,8 @@
         {% if avg_rating %}
           <div class="rating-badge">{{ "%.1f"|format(avg_rating) }}</div>
           <span class="stars">
-            {% for i in range(avg_rating|round|int) %}★{% endfor %}{% for i in range(5 - avg_rating|round|int) %}☆{% endfor %}
+            <span class="stars-empty">★★★★★</span>
+            <span class="stars-filled" style="width:{{ (avg_rating / 5 * 100)|round(1) }}%">★★★★★</span>
           </span>
           <span class="rating-label"> From {{ opinion_count }} user{{ 's' if opinion_count != 1 }}</span>
         {% else %}
@@ -1048,10 +1064,10 @@
             <span class="section-title">Course Materials</span>
 
             <div class="section-actions">
-            <a href="{{ url_for('courses.all_materials', course_id=course.course_id) }}"
-                class="view-all-btn">
-                View All ({{ material_count }})
-            </a>
+                <a href="{{ url_for('courses.all_materials', course_id=course.course_id) }}"
+                    class="view-all-btn">
+                    View All ({{ material_count }})
+                </a>
 
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('courses.upload_material', course_id=course.course_id) }}"
@@ -1138,11 +1154,47 @@
           <span class="stat-label">Avg Difficulty</span>
           <span class="stat-value">
             {% if avg_difficulty %}
-              <span class="difficulty-stars">
-                {% for i in range(avg_difficulty|round|int) %}★{% endfor %}{% for i in range(5 - avg_difficulty|round|int) %}☆{% endfor %}
-              </span>
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+                
+                <span style="font-size:0.8rem; color:var(--muted);">
+                ({{ "%.1f"|format(avg_difficulty) }})
+                </span>
+
+                <span class="difficulty-stars">
+                <span class="stars-empty">★★★★★</span>
+                <span class="stars-filled"
+                        style="width: {{ ((avg_difficulty / 5) * 100)|round(1) }}%;">
+                    ★★★★★
+                </span>
+                </span>
+
+            </div>
             {% else %}
-              <span style="color:var(--muted)">No data yet</span>
+            <span style="color:var(--muted)">No data yet</span>
+            {% endif %}
+          </span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Avg Workload</span>
+          <span class="stat-value">
+            {% if avg_workload %}
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+                
+                <span style="font-size:0.8rem; color:var(--muted);">
+                ({{ "%.1f"|format(avg_workload) }})
+                </span>
+
+                <span class="difficulty-stars">
+                <span class="stars-empty">★★★★★</span>
+                <span class="stars-filled"
+                        style="width: {{ ((avg_workload / 5) * 100)|round(1) }}%;">
+                    ★★★★★
+                </span>
+                </span>
+
+            </div>
+            {% else %}
+            <span style="color:var(--muted)">No data yet</span>
             {% endif %}
           </span>
         </div>

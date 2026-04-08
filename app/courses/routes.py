@@ -61,6 +61,14 @@ def search():
             'number':    c.Course.course_number,
             'dept_code': c.dept_code,
             'dept_name': c.dept_name,
+            'avg_rating': round(
+                db.session.query(func.avg(Review.rating_overall))
+                .filter_by(course_id=c.Course.course_id, review_type='opinion')
+                .scalar() or 0, 1
+            ),
+            'rating_count': Review.query.filter_by(
+                course_id=c.Course.course_id, review_type='opinion'
+            ).count(),
         }
         for c in results
     ])
@@ -111,6 +119,11 @@ def course_detail(course_id):
         .filter_by(course_id=course_id, review_type='opinion')
         .scalar()
     )
+    avg_workload = (
+        db.session.query(func.avg(Review.workload_level))
+        .filter_by(course_id=course_id, review_type='opinion')
+        .scalar()
+    )
     avg_rating = (
         db.session.query(func.avg(Review.rating_overall))
         .filter_by(course_id=course_id, review_type='opinion')
@@ -147,6 +160,7 @@ def course_detail(course_id):
         material_count    = material_count,
         active_materials  = active_materials,
         avg_difficulty    = avg_difficulty,
+        avg_workload      = avg_workload,
         avg_rating        = avg_rating,
         user_opinion      = user_opinion,
         user_description  = user_description,
@@ -345,8 +359,17 @@ def submit_opinion(course_id):
         if errors:
             for e in errors:
                 flash(e, 'danger')
-            return render_template('courses/submit_opinion.html', course=course, semesters=semesters)
-
+            return render_template('courses/submit_opinion.html',
+                course            = course,
+                semesters         = semesters,
+                prev_semester_id  = semester_id,
+                prev_rating       = rating_overall,
+                prev_workload     = workload_level,
+                prev_difficulty   = difficulty_level,
+                prev_assessment   = assessment_style or '',
+                prev_text         = review_text,
+            )
+        
         db.session.add(Review(
             course_id        = course_id,
             user_id          = current_user.user_id,
@@ -386,10 +409,10 @@ def submit_description(course_id):
 
         if len(review_text) < 30:
             flash('Your description must be at least 30 characters.', 'danger')
-            return render_template('courses/submit_description.html', course=course)
+            return render_template('courses/submit_description.html', course=course, prev_text=review_text)
         if len(review_text) > 5000:
             flash('Your description cannot exceed 5000 characters.', 'danger')
-            return render_template('courses/submit_description.html', course=course)
+            return render_template('courses/submit_description.html', course=course, prev_text=review_text)
 
         db.session.add(Review(
             course_id   = course_id,
@@ -616,7 +639,12 @@ def upload_material(course_id):
                 flash(e, 'danger')
             return render_template(
                 'courses/upload_material.html',
-                course=course, semesters=semesters
+                course           = course,
+                semesters        = semesters,
+                prev_title       = title,
+                prev_description = description or '',
+                prev_type        = material_type,
+                prev_semester_id = semester_id,
             )
 
         # ── Save file securely ────────────────────────────────────────────────
@@ -723,3 +751,51 @@ def my_uploads():
         .all()
     )
     return render_template('courses/my_uploads.html', materials=materials)
+
+@courses.route('/my/saved')
+@login_required
+def my_saved():
+    saved_courses = SavedCourse.query.filter_by(
+        user_id=current_user.user_id
+    ).order_by(SavedCourse.created_at.desc()).all()
+
+    saved_materials = SavedMaterial.query.filter_by(
+        user_id=current_user.user_id
+    ).order_by(SavedMaterial.created_at.desc()).all()
+
+    return render_template('courses/my_saved.html',
+        saved_courses   = saved_courses,
+        saved_materials = saved_materials,
+    )
+
+
+@courses.route('/course/<int:course_id>/save', methods=['POST'])
+@login_required
+def save_course(course_id):
+    Course.query.get_or_404(course_id)
+    existing = SavedCourse.query.filter_by(
+        user_id=current_user.user_id, course_id=course_id
+    ).first()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        return jsonify({'action': 'unsaved'})
+    db.session.add(SavedCourse(user_id=current_user.user_id, course_id=course_id))
+    db.session.commit()
+    return jsonify({'action': 'saved'})
+
+
+@courses.route('/material/<int:material_id>/save', methods=['POST'])
+@login_required
+def save_material(material_id):
+    Material.query.get_or_404(material_id)
+    existing = SavedMaterial.query.filter_by(
+        user_id=current_user.user_id, material_id=material_id
+    ).first()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        return jsonify({'action': 'unsaved'})
+    db.session.add(SavedMaterial(user_id=current_user.user_id, material_id=material_id))
+    db.session.commit()
+    return jsonify({'action': 'saved'})
