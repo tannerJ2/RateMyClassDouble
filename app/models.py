@@ -41,6 +41,11 @@ class User(UserMixin, db.Model):
     created_at    = db.Column(db.DateTime,     default=datetime.now(timezone.utc), nullable=False)
     last_login_at = db.Column(db.DateTime,     nullable=True)
 
+    bio    = db.Column(db.Text,        nullable=True)
+    school = db.Column(db.String(255), nullable=True)
+    major  = db.Column(db.String(100), nullable=True)
+    minor  = db.Column(db.String(100), nullable=True)
+
     reviews        = db.relationship('Review',             back_populates='user',                                    lazy='dynamic')
     review_likes   = db.relationship('ReviewLike',         back_populates='user',                                    lazy='dynamic')
     materials      = db.relationship('Material',           back_populates='user',                                    lazy='dynamic')

@@ -171,3 +171,97 @@ def reset_password(token):
         return redirect(url_for('auth.login'))
 
     return render_template('auth/reset_password.html', token=token)
+
+
+# ─────────────────────────────────────────────
+# Profile
+# ─────────────────────────────────────────────
+@auth.route('/profile')
+@login_required
+def profile():
+    from app.models import Review, ReviewLike, Material
+    from sqlalchemy import func
+
+    total_likes = (
+        db.session.query(func.count(ReviewLike.like_id))
+        .join(Review, ReviewLike.review_id == Review.review_id)
+        .filter(
+            Review.user_id == current_user.user_id,
+            ReviewLike.like_type.in_(['really_helpful', 'helpful'])
+        )
+        .scalar() or 0
+    )
+    review_count   = Review.query.filter_by(user_id=current_user.user_id).count()
+    material_count = Material.query.filter_by(
+        user_id=current_user.user_id, is_removed=False
+    ).count()
+
+    return render_template('auth/profile.html',
+        total_likes    = total_likes,
+        review_count   = review_count,
+        material_count = material_count,
+    )
+
+
+# ─────────────────────────────────────────────
+# Edit Profile
+# ─────────────────────────────────────────────
+@auth.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    if request.method == 'POST':
+        current_user.bio    = request.form.get('bio',    '').strip() or None
+        current_user.school = request.form.get('school', '').strip() or None
+        current_user.major  = request.form.get('major',  '').strip() or None
+        current_user.minor  = request.form.get('minor',  '').strip() or None
+        db.session.commit()
+        flash('Profile updated.', 'success')
+        return redirect(url_for('auth.profile'))
+
+    return render_template('auth/edit_profile.html')
+
+
+# ─────────────────────────────────────────────
+# Settings
+# ─────────────────────────────────────────────
+@auth.route('/settings')
+@login_required
+def settings():
+    return render_template('auth/settings.html')
+
+
+@auth.route('/settings/change-email', methods=['POST'])
+@login_required
+def change_email():
+    new_email = request.form.get('email', '').strip().lower()
+
+    if not new_email.endswith('@southernct.edu'):
+        flash('Email must end in @southernct.edu.', 'danger')
+        return redirect(url_for('auth.settings'))
+
+    existing = User.query.filter_by(email=new_email).first()
+    if existing and existing.user_id != current_user.user_id:
+        flash('That email is already associated with another account.', 'danger')
+        return redirect(url_for('auth.settings'))
+
+    current_user.email = new_email
+    db.session.commit()
+    flash('Email updated successfully.', 'success')
+    return redirect(url_for('auth.settings'))
+
+
+@auth.route('/settings/change-name', methods=['POST'])
+@login_required
+def change_name():
+    first_name = request.form.get('first_name', '').strip()
+    last_name  = request.form.get('last_name',  '').strip()
+
+    if not first_name or not last_name:
+        flash('Name cannot be empty.', 'danger')
+        return redirect(url_for('auth.settings'))
+
+    current_user.first_name = first_name
+    current_user.last_name  = last_name
+    db.session.commit()
+    flash('Name updated successfully.', 'success')
+    return redirect(url_for('auth.settings'))

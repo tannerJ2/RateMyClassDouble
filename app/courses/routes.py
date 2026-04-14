@@ -37,16 +37,21 @@ def search():
 
     if q:
         like = f'%{q}%'
+        concat_code_number = func.concat(
+            Department.dept_code, ' ', Course.course_number
+        )
         query = query.filter(
             db.or_(
                 Course.course_title.ilike(like),
                 Course.course_number.ilike(like),
                 Department.dept_code.ilike(like),
+                concat_code_number.ilike(like),   # ← handles "CSC 400"
             )
         ).order_by(
-            db.case((Department.dept_code.ilike(q), 0),      else_=1),
-            db.case((Course.course_number.ilike(f'{q}%'), 0), else_=1),
-            db.case((Course.course_title.ilike(f'{q}%'), 0),  else_=1),
+            db.case((Department.dept_code.ilike(q), 0),              else_=1),
+            db.case((concat_code_number.ilike(f'{q}%'), 0),          else_=1),  # ← boost exact prefix matches
+            db.case((Course.course_number.ilike(f'{q}%'), 0),        else_=1),
+            db.case((Course.course_title.ilike(f'{q}%'), 0),         else_=1),
             Course.course_number
         )
     else:

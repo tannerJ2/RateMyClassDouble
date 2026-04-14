@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Uploads — RateMyClass</title>
+<title>Edit Profile — RateMyClass</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -26,7 +26,6 @@
     min-height: 100vh;
   }
 
-  /* ── NAV ───────────────────────────────────── */
   nav {
     display: flex;
     justify-content: space-between;
@@ -47,18 +46,15 @@
   .nav-link { font-size: 0.85rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
   .nav-link:hover { color: var(--accent); }
 
-  /* ── NAV TRIGGER ───────────────────────────── */
   #nav-trigger { background: none; border: none; cursor: pointer; padding: 0.4rem; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; justify-content: center; width: 36px; height: 36px; }
   .trigger-line { height: 2.5px; background: var(--ink); border-radius: 4px; display: block; }
   .trigger-line:nth-child(1) { width: 24px; }
   .trigger-line:nth-child(2) { width: 16px; }
   .trigger-line:nth-child(3) { width: 24px; }
 
-  /* ── OVERLAY ───────────────────────────────── */
   #menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 200; }
   #menu-overlay.active { display: block; }
 
-  /* ── SIDE MENU ─────────────────────────────── */
   #side-menu { position: fixed; top: 0; left: 0; width: 300px; height: 100vh; background: #fff; border-right: 1px solid var(--border); z-index: 300; display: flex; flex-direction: column; transform: translateX(-100%); transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 6px 0 32px rgba(0,0,0,0.1); }
   #side-menu.open { transform: translateX(0); }
   .menu-top { display: flex; align-items: center; justify-content: space-between; padding: 1.3rem 1.5rem; border-bottom: 1px solid var(--border); min-height: 68px; }
@@ -86,114 +82,118 @@
   .menu-item-logout:hover { background: #fdf0ee; }
 
   /* ── PAGE ──────────────────────────────────── */
-  .page { max-width: 800px; margin: 0 auto; padding: 2rem 3rem 4rem; }
+  .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--muted); text-decoration: none; padding: 1.2rem 3rem 0; transition: color 0.2s; }
+  .back-link:hover { color: var(--accent); }
 
-  .page-header { margin-bottom: 2rem; }
+  .page { max-width: 700px; margin: 0 auto; padding: 2rem 3rem 4rem; }
+
   .page-label { font-size: 0.78rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
-  .page-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; margin-bottom: 0.4rem; }
-  .page-sub { font-size: 0.85rem; color: var(--muted); }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; margin-bottom: 2rem; }
 
-  /* ── MATERIAL CARD ─────────────────────────── */
-  .material-card {
+  /* ── FORM ──────────────────────────────────── */
+  .form-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 1.5rem 1.8rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-section-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
     margin-bottom: 1.2rem;
   }
 
-  .material-top {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.6rem;
-    flex-wrap: wrap;
-  }
+  .form-group { margin-bottom: 1.4rem; }
+  .form-group:last-child { margin-bottom: 0; }
 
-  .type-badge {
-    padding: 0.2rem 0.65rem;
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    flex-shrink: 0;
-  }
-  .type-notes       { background: #eef4ff; color: #2563eb; }
-  .type-study_guide { background: #eafaf1; color: #1e8449; }
-  .type-exam        { background: #fdf0ee; color: var(--accent); }
-  .type-other       { background: #f5f5f5; color: #555; }
-
-  .material-title { font-size: 0.95rem; font-weight: 700; }
-
-  .material-course {
-    font-size: 0.78rem;
-    color: var(--muted);
-    margin-bottom: 0.5rem;
-  }
-
-  .material-description {
+  .form-group label {
+    display: block;
     font-size: 0.88rem;
-    line-height: 1.65;
-    color: #333;
-    margin-bottom: 1rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    font-weight: 500;
+    margin-bottom: 0.45rem;
   }
 
-  .material-footer {
-    display: flex;
-    gap: 0.6rem;
-    align-items: center;
-    border-top: 1px solid var(--border);
-    padding-top: 0.9rem;
-    flex-wrap: wrap;
-  }
-
-  .material-date {
+  .form-group .field-note {
     font-size: 0.75rem;
     color: var(--muted);
-    margin-left: auto;
+    margin-bottom: 0.45rem;
+    display: block;
   }
 
-  .action-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.45rem 0.9rem;
-    border-radius: 8px;
+  .form-group input[type="text"],
+  .form-group textarea {
+    width: 100%;
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background 0.2s;
-    white-space: nowrap;
+    font-size: 0.9rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    background: var(--bg);
+    color: var(--ink);
+    transition: border-color 0.2s;
+    outline: none;
   }
 
-  .action-btn-primary { background: var(--ink); color: #fff; }
-  .action-btn-primary:hover { background: var(--accent); }
-  .action-btn-secondary { background: var(--bg); color: var(--ink); border: 1.5px solid var(--border); }
-  .action-btn-secondary:hover { border-color: var(--ink); }
+  .form-group input[type="text"]:focus,
+  .form-group textarea:focus { border-color: var(--accent); }
 
-  /* ── EMPTY STATE ───────────────────────────── */
-  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
-  .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-  .empty-state p { font-size: 0.9rem; margin-bottom: 0.5rem; }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.65;
+  }
+
+  .char-count { font-size: 0.75rem; color: var(--muted); text-align: right; margin-top: 0.3rem; }
+
+  .form-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .submit-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.85rem 2.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .submit-btn:hover { background: var(--accent); }
+
+  .cancel-link {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .cancel-link:hover { color: var(--accent); }
 
   /* ── FLASH ─────────────────────────────────── */
   .flash-messages { margin-bottom: 1rem; }
   .alert { padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.5rem; }
   .alert-success { background: #eafaf1; color: var(--success); border: 1px solid rgba(30,132,73,0.2); }
   .alert-danger  { background: #fdf0ee; color: var(--accent);  border: 1px solid rgba(192,57,43,0.2); }
-  .alert-info    { background: #eef4ff; color: #2563eb;        border: 1px solid rgba(37,99,235,0.2); }
+
+  @media (max-width: 600px) {
+    .page { padding: 1.5rem 1.2rem 4rem; }
+    .back-link { padding: 1rem 1.2rem 0; }
+  }
 </style>
 </head>
 <body>
 
-<!-- OVERLAY -->
 <div id="menu-overlay"></div>
 
-<!-- SIDE MENU -->
 <div id="side-menu">
   <div class="menu-top">
     <a class="menu-logo" href="{{ url_for('courses.index') }}">Rate<span>My</span>Class</a>
@@ -209,18 +209,17 @@
   </div>
   <div class="menu-nav">
     <a href="{{ url_for('courses.my_reviews') }}" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Reviews</a>
-    <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>Liked</a>
-    <a href="{{ url_for('courses.my_uploads') }}" class="menu-item active"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>Uploads</a>
+    <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>Saved</a>
+    <a href="{{ url_for('courses.my_uploads') }}" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>Uploads</a>
     <a href="#" class="menu-item menu-item-soon"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Schedule Builder<span class="soon-tag">Soon</span></a>
   </div>
   <div class="menu-bottom">
-      <a href="{{ url_for('auth.profile') }}" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Profile</a>
-      <a href="{{ url_for('auth.settings') }}" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Settings</a>
-      <a href="{{ url_for('auth.logout') }}" class="menu-item menu-item-logout"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>Sign Out</a>
-    </div>
+    <a href="{{ url_for('auth.profile') }}" class="menu-item active"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Profile</a>
+    <a href="{{ url_for('auth.settings') }}" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Settings</a>
+    <a href="{{ url_for('auth.logout') }}" class="menu-item menu-item-logout"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>Sign Out</a>
+  </div>
 </div>
 
-<!-- NAV -->
 <nav>
   <div class="nav-left">
     <button id="nav-trigger">
@@ -236,6 +235,8 @@
   </div>
 </nav>
 
+<a class="back-link" href="{{ url_for('auth.profile') }}">← Back to Profile</a>
+
 <div class="page">
 
   {% with messages = get_flashed_messages(with_categories=true) %}
@@ -248,56 +249,53 @@
     {% endif %}
   {% endwith %}
 
-  <div class="page-header">
-    <div class="page-label">My Account</div>
-    <h1 class="page-title">My Uploads</h1>
-    <p class="page-sub">{{ materials|length }} material{{ 's' if materials|length != 1 }} uploaded</p>
-  </div>
+  <div class="page-label">My Account</div>
+  <h1 class="page-title">Edit Profile</h1>
 
-  {% if materials %}
-    {% for mat in materials %}
-      <div class="material-card">
-        <div class="material-top">
-          <span class="type-badge type-{{ mat.material_type }}">
-            {% if mat.material_type == 'notes' %}Notes
-            {% elif mat.material_type == 'study_guide' %}Study Guide
-            {% elif mat.material_type == 'exam' %}Past Exam
-            {% else %}Other{% endif %}
-          </span>
-          <span class="material-title">{{ mat.title }}</span>
-        </div>
+  <form method="POST">
 
-        <div class="material-course">
-          {{ mat.course.department.dept_code }} · {{ mat.course.course_number }} — {{ mat.course.course_title }} · {{ mat.semester.term }} {{ mat.semester.year }}
-        </div>
-
-        {% if mat.description %}
-          <p class="material-description">{{ mat.description }}</p>
-        {% endif %}
-
-        <div class="material-footer">
-          <a href="{{ url_for('courses.course_detail', course_id=mat.course_id) }}"
-             class="action-btn action-btn-secondary">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            Go to Course
-          </a>
-          <a href="{{ url_for('courses.view_material', material_id=mat.material_id) }}"
-             class="action-btn action-btn-primary">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            View Upload
-          </a>
-          <span class="material-date">Uploaded {{ mat.created_at.strftime('%b %d, %Y') }}</span>
-        </div>
+    <div class="form-card">
+      <div class="form-section-title">About You</div>
+      <div class="form-group">
+        <label for="bio">Bio <span style="color:var(--muted); font-weight:400;">(optional)</span></label>
+        <textarea name="bio" id="bio" maxlength="500"
+                  placeholder="Tell other students a little about yourself…">{{ current_user.bio or '' }}</textarea>
+        <div class="char-count"><span id="bio-count">{{ (current_user.bio or '')|length }}</span> / 500</div>
       </div>
-    {% endfor %}
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-icon">📄</div>
-      <p>You haven't uploaded any materials yet.</p>
-      <p style="font-size:0.82rem;">Help your fellow students by sharing your notes or study guides.</p>
     </div>
-  {% endif %}
 
+    <div class="form-card">
+      <div class="form-section-title">Academic Information</div>
+
+      <div class="form-group">
+        <label for="school">School</label>
+        <input type="text" name="school" id="school" maxlength="255"
+               placeholder="e.g. Southern Connecticut State University"
+               value="{{ current_user.school or '' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="major">Major</label>
+        <input type="text" name="major" id="major" maxlength="100"
+               placeholder="e.g. Computer Science"
+               value="{{ current_user.major or '' }}">
+      </div>
+
+      <div class="form-group">
+        <label for="minor">Minor <span style="color:var(--muted); font-weight:400;">(optional)</span></label>
+        <span class="field-note">Leave blank if you do not have a minor — it will not appear on your profile.</span>
+        <input type="text" name="minor" id="minor" maxlength="100"
+               placeholder="e.g. Mathematics"
+               value="{{ current_user.minor or '' }}">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="submit-btn">Save Changes</button>
+      <a href="{{ url_for('auth.profile') }}" class="cancel-link">Cancel</a>
+    </div>
+
+  </form>
 </div>
 
 <script>
@@ -310,6 +308,10 @@
   navTrigger.addEventListener('click', openMenu);
   menuClose.addEventListener('click', closeMenu);
   menuOverlay.addEventListener('click', closeMenu);
+
+  const bioInput = document.getElementById('bio');
+  const bioCount = document.getElementById('bio-count');
+  bioInput.addEventListener('input', () => { bioCount.textContent = bioInput.value.length; });
 </script>
 
 </body>
