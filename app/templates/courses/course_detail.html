@@ -845,6 +845,127 @@
       padding: 1rem 1.5rem 0;
     }
   }
+
+  
+  /* ── SAVE BUTTON ───────────────────────────── */
+  .save-wrapper {
+    position: relative;
+  }
+
+  .save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    white-space: nowrap;
+  }
+
+  .save-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  .save-btn.saved {
+    border-color: var(--ink);
+    color: var(--ink);
+    background: var(--bg);
+  }
+
+  .save-icon-outline { display: block; }
+  .save-icon-filled  { display: none;  }
+
+  .save-btn.saved .save-icon-outline { display: none;  }
+  .save-btn.saved .save-icon-filled  { display: block; }
+
+  .save-dropdown {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem;
+    width: 240px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    display: none;
+    flex-direction: column;
+    gap: 0.6rem;
+    z-index: 50;
+  }
+
+  .save-dropdown.open {
+    display: flex;
+  }
+
+  .save-dropdown-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .save-note-input {
+    resize: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.6rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    height: 64px;
+    outline: none;
+    color: var(--ink);
+    background: var(--bg);
+    transition: border-color 0.2s;
+  }
+
+  .save-note-input:focus {
+    border-color: var(--ink);
+  }
+
+  .save-confirm-btn {
+    align-self: flex-end;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .save-confirm-btn:hover {
+    background: var(--accent);
+  }
+
+  .rating-save-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
 </style>
 </head>
 <body>
@@ -870,7 +991,7 @@
     </div>
     <div class="menu-nav">
       <a href="{{ url_for('courses.my_reviews') }}" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Reviews</a>
-      <a href="#" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>Liked</a>
+      <a href="{{ url_for('courses.my_saved') }}" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>Saved</a>
       <a href="{{ url_for('courses.my_uploads') }}" class="menu-item"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>Uploads</a>
       <a href="#" class="menu-item menu-item-soon"><span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Schedule Builder<span class="soon-tag">Soon</span></a>
     </div>
@@ -929,20 +1050,40 @@
     <div class="course-header">
       <div class="course-meta">{{ course.department.dept_code }} · {{ course.department.dept_name }}</div>
       <h1 class="course-title">{{ course.course_title }}</h1>
-      <div class="rating-row">
-        {% if avg_rating %}
-          <div class="rating-badge">{{ "%.1f"|format(avg_rating) }}</div>
-          <span class="stars">
-            <span class="stars-empty">★★★★★</span>
-            <span class="stars-filled" style="width:{{ (avg_rating / 5 * 100)|round(1) }}%">★★★★★</span>
-          </span>
-          <span class="rating-label"> From {{ opinion_count }} user{{ 's' if opinion_count != 1 }}</span>
-        {% else %}
-          <div class="rating-badge" style="background:var(--muted);">—</div>
-          <span class="rating-label">No ratings yet</span>
+
+      <div class="rating-save-row">
+        <div class="rating-row">
+          {% if avg_rating %}
+            <div class="rating-badge">{{ "%.1f"|format(avg_rating) }}</div>
+            <span class="stars">
+              <span class="stars-empty">★★★★★</span>
+              <span class="stars-filled" style="width:{{ (avg_rating / 5 * 100)|round(1) }}%">★★★★★</span>
+            </span>
+            <span class="rating-label"> From {{ opinion_count }} user{{ 's' if opinion_count != 1 }}</span>
+          {% else %}
+            <div class="rating-badge" style="background:var(--muted);">—</div>
+            <span class="rating-label">No ratings yet</span>
+          {% endif %}
+        </div>
+
+        {% if current_user.is_authenticated %}
+          <div class="save-wrapper" data-type="course" data-id="{{ course.course_id }}">
+            <button class="save-btn {% if is_course_saved %}saved{% endif %}" onclick="toggleSaveDropdown(this)">
+              <svg class="save-icon-outline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <svg class="save-icon-filled" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span class="save-btn-label">{% if is_course_saved %}Saved{% else %}Save Course{% endif %}</span>
+            </button>
+            <div class="save-dropdown">
+              <span class="save-dropdown-label">Add a note</span>
+              <textarea class="save-note-input" placeholder="(Optional) saved this course because…">{{ saved_course_note }}</textarea>
+              <button class="save-confirm-btn" onclick="confirmSave(this)">Save</button>
+            </div>
+          </div>
         {% endif %}
       </div>
     </div>
+
+    <!-- DESCRIPTIONS -->
 
     <!-- DESCRIPTIONS -->
     <div class="section-card">
@@ -1106,6 +1247,20 @@
               <div style="display:flex; gap:0.5rem; align-items:center; flex-shrink:0;">
                 <a href="{{ url_for('courses.download_material', material_id=mat.material_id) }}" style="font-size:0.78rem; color:var(--muted); text-decoration:none;">↓ Download</a>
                 <a href="{{ url_for('courses.view_material', material_id=mat.material_id) }}" class="material-download-btn">View PDF</a>
+                {% if current_user.is_authenticated %}
+                  <div class="save-wrapper" data-type="material" data-id="{{ mat.material_id }}">
+                    <button class="save-btn {% if mat.material_id in saved_material_ids %}saved{% endif %}" onclick="toggleSaveDropdown(this)">
+                      <svg class="save-icon-outline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                      <svg class="save-icon-filled" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                      <span class="save-btn-label">{% if mat.material_id in saved_material_ids %}Saved{% else %}Save{% endif %}</span>
+                    </button>
+                    <div class="save-dropdown">
+                      <span class="save-dropdown-label">Add a note</span>
+                      <textarea class="save-note-input" placeholder="(Optional) saved this material because…"></textarea>
+                      <button class="save-confirm-btn" onclick="confirmSave(this)">Save</button>
+                    </div>
+                  </div>
+                {% endif %}
               </div>
             </div>
           {% endfor %}
@@ -1257,6 +1412,71 @@
       // malformed back param — leave default
     }
   }
+
+
+  
+// ── Save button ────────────────────────────────────────────────────────────
+  function toggleSaveDropdown(btn) {
+    const wrapper  = btn.closest('.save-wrapper');
+    const dropdown = wrapper.querySelector('.save-dropdown');
+
+    if (btn.classList.contains('saved')) {
+      const type = wrapper.dataset.type;
+      const id   = wrapper.dataset.id;
+      const url  = type === 'course' ? `/course/${id}/save` : `/material/${id}/save`;
+      fetch(url, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({}),
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.action === 'unsaved') {
+          btn.classList.remove('saved');
+          const label = btn.querySelector('.save-btn-label');
+          if (label) label.textContent = btn.closest('[data-type="course"]') ? 'Save Course' : 'Save';
+        }
+      });
+      return;
+    }
+
+    document.querySelectorAll('.save-dropdown.open').forEach(d => {
+      if (d !== dropdown) d.classList.remove('open');
+    });
+    dropdown.classList.toggle('open');
+  }
+
+  function confirmSave(confirmBtn) {
+    const dropdown = confirmBtn.closest('.save-dropdown');
+    const wrapper  = dropdown.closest('.save-wrapper');
+    const saveBtn  = wrapper.querySelector('.save-btn');
+    const note     = dropdown.querySelector('.save-note-input').value;
+    const type     = wrapper.dataset.type;
+    const id       = wrapper.dataset.id;
+    const url      = type === 'course' ? `/course/${id}/save` : `/material/${id}/save`;
+
+    fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ note }),
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.action === 'saved') {
+        saveBtn.classList.add('saved');
+        const label = saveBtn.querySelector('.save-btn-label');
+        if (label) label.textContent = 'Saved';
+        dropdown.classList.remove('open');
+      }
+    });
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.save-wrapper')) {
+      document.querySelectorAll('.save-dropdown.open').forEach(d => d.classList.remove('open'));
+    }
+  });
+
 </script>
 
 </body>

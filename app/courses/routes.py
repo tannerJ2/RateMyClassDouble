@@ -5,7 +5,7 @@ Course routes — search, browse, detail, review submission, likes.
 from datetime import datetime, timezone
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import current_user, login_required
-from app.models import Course, Department, Review, ReviewLike, Material, Semester, Professor
+from app.models import Course, Department, Review, ReviewLike, Material, Semester, Professor, SavedCourse, SavedMaterial
 from app.extensions import db
 from sqlalchemy import func
 
@@ -91,8 +91,17 @@ def search_page():
         .group_by(Department.dept_code)
         .all()
     )
-    return render_template('courses/search.html', departments=departments, dept_counts=dept_counts)
-
+    saved_course_ids = set()
+    if current_user.is_authenticated:
+        saved_course_ids = {
+            sc.course_id
+            for sc in SavedCourse.query.filter_by(user_id=current_user.user_id).all()
+        }
+    return render_template('courses/search.html',
+        departments      = departments,
+        dept_counts      = dept_counts,
+        saved_course_ids = saved_course_ids,
+    )
 
 # ─────────────────────────────────────────────
 # Course detail
@@ -137,6 +146,9 @@ def course_detail(course_id):
 
     user_opinion = user_description = None
     user_likes   = {}
+    is_course_saved    = False
+    saved_course_note  = ''
+    saved_material_ids = set()
 
     if current_user.is_authenticated:
         user_opinion = Review.query.filter_by(
@@ -154,22 +166,39 @@ def course_detail(course_id):
             ).all()
             user_likes = {like.review_id: like.like_type for like in likes}
 
+        sc = SavedCourse.query.filter_by(
+            user_id=current_user.user_id, course_id=course_id
+        ).first()
+        is_course_saved   = sc is not None
+        saved_course_note = sc.note or '' if sc else ''
+
+        if active_materials:
+            mat_ids    = [m.material_id for m in active_materials]
+            saved_mats = SavedMaterial.query.filter(
+                SavedMaterial.user_id    == current_user.user_id,
+                SavedMaterial.material_id.in_(mat_ids)
+            ).all()
+            saved_material_ids = {sm.material_id for sm in saved_mats}
+
     return render_template(
         'courses/course_detail.html',
-        course            = course,
-        professors        = professors,
-        opinions          = top_opinions,
-        descriptions      = top_descriptions,
-        opinion_count     = opinion_count,
-        description_count = description_count,
-        material_count    = material_count,
-        active_materials  = active_materials,
-        avg_difficulty    = avg_difficulty,
-        avg_workload      = avg_workload,
-        avg_rating        = avg_rating,
-        user_opinion      = user_opinion,
-        user_description  = user_description,
-        user_likes        = user_likes,
+        course             = course,
+        professors         = professors,
+        opinions           = top_opinions,
+        descriptions       = top_descriptions,
+        opinion_count      = opinion_count,
+        description_count  = description_count,
+        material_count     = material_count,
+        active_materials   = active_materials,
+        avg_difficulty     = avg_difficulty,
+        avg_workload       = avg_workload,
+        avg_rating         = avg_rating,
+        user_opinion       = user_opinion,
+        user_description   = user_description,
+        user_likes         = user_likes,
+        is_course_saved    = is_course_saved,
+        saved_course_note  = saved_course_note,
+        saved_material_ids = saved_material_ids,
     )
 
 
@@ -250,6 +279,7 @@ def all_descriptions(course_id):
 def all_materials(course_id):
     course = Course.query.get_or_404(course_id)
     sort   = request.args.get('sort', 'recent')
+    pin_id = request.args.get('pin', type=int)
 
     materials = (
         Material.query
@@ -257,20 +287,45 @@ def all_materials(course_id):
         .all()
     )
 
+    saved_material_ids = set()
+
+    if current_user.is_authenticated:
+        mat_ids = [m.material_id for m in materials]
+        if mat_ids:
+            saved = SavedMaterial.query.filter(
+                SavedMaterial.user_id    == current_user.user_id,
+                SavedMaterial.material_id.in_(mat_ids)
+            ).all()
+            saved_material_ids = {sm.material_id for sm in saved}
+
     if sort == 'recent':
         materials = sorted(materials, key=lambda m: m.created_at, reverse=True)
     elif sort == 'yours' and current_user.is_authenticated:
-        mine     = [m for m in materials if m.user_id == current_user.user_id]
-        others   = [m for m in materials if m.user_id != current_user.user_id]
+        mine      = [m for m in materials if m.user_id == current_user.user_id]
+        others    = [m for m in materials if m.user_id != current_user.user_id]
         materials = mine + sorted(others, key=lambda m: m.created_at, reverse=True)
     else:
         materials = sorted(materials, key=lambda m: m.created_at, reverse=True)
 
+    # Saved materials always float to top
+    if saved_material_ids:
+        saved_first = [m for m in materials if m.material_id in saved_material_ids]
+        rest        = [m for m in materials if m.material_id not in saved_material_ids]
+        materials   = saved_first + rest
+
+    # A specific pin_id (from the Saved page) goes absolutely first
+    if pin_id:
+        pinned    = [m for m in materials if m.material_id == pin_id]
+        rest      = [m for m in materials if m.material_id != pin_id]
+        materials = pinned + rest
+
     return render_template(
         'courses/all_materials.html',
-        course    = course,
-        materials = materials,
-        sort      = sort,
+        course             = course,
+        materials          = materials,
+        sort               = sort,
+        saved_material_ids = saved_material_ids,
+        pin_id             = pin_id,
     )
 
 @courses.route('/material/<int:material_id>/view')
@@ -757,6 +812,7 @@ def my_uploads():
     )
     return render_template('courses/my_uploads.html', materials=materials)
 
+
 @courses.route('/my/saved')
 @login_required
 def my_saved():
@@ -768,9 +824,31 @@ def my_saved():
         user_id=current_user.user_id
     ).order_by(SavedMaterial.created_at.desc()).all()
 
+    course_ratings = {}
+    for sc in saved_courses:
+        avg   = db.session.query(func.avg(Review.rating_overall)).filter_by(
+            course_id=sc.course_id, review_type='opinion'
+        ).scalar()
+        count = Review.query.filter_by(
+            course_id=sc.course_id, review_type='opinion'
+        ).count()
+        course_ratings[sc.course_id] = {
+            'avg':   round(float(avg), 1) if avg else None,
+            'count': count,
+        }
+
+    all_saved = sorted(
+        [('course', sc) for sc in saved_courses] +
+        [('material', sm) for sm in saved_materials],
+        key=lambda x: x[1].created_at,
+        reverse=True,
+    )
+
     return render_template('courses/my_saved.html',
-        saved_courses   = saved_courses,
-        saved_materials = saved_materials,
+        all_saved        = all_saved,
+        course_ratings   = course_ratings,
+        total_courses    = len(saved_courses),
+        total_materials  = len(saved_materials),
     )
 
 
@@ -778,6 +856,7 @@ def my_saved():
 @login_required
 def save_course(course_id):
     Course.query.get_or_404(course_id)
+    note     = ((request.json or {}).get('note') or '').strip() or None
     existing = SavedCourse.query.filter_by(
         user_id=current_user.user_id, course_id=course_id
     ).first()
@@ -785,7 +864,11 @@ def save_course(course_id):
         db.session.delete(existing)
         db.session.commit()
         return jsonify({'action': 'unsaved'})
-    db.session.add(SavedCourse(user_id=current_user.user_id, course_id=course_id))
+    db.session.add(SavedCourse(
+        user_id   = current_user.user_id,
+        course_id = course_id,
+        note      = note,
+    ))
     db.session.commit()
     return jsonify({'action': 'saved'})
 
@@ -794,6 +877,7 @@ def save_course(course_id):
 @login_required
 def save_material(material_id):
     Material.query.get_or_404(material_id)
+    note     = ((request.json or {}).get('note') or '').strip() or None
     existing = SavedMaterial.query.filter_by(
         user_id=current_user.user_id, material_id=material_id
     ).first()
@@ -801,6 +885,37 @@ def save_material(material_id):
         db.session.delete(existing)
         db.session.commit()
         return jsonify({'action': 'unsaved'})
-    db.session.add(SavedMaterial(user_id=current_user.user_id, material_id=material_id))
+    db.session.add(SavedMaterial(
+        user_id     = current_user.user_id,
+        material_id = material_id,
+        note        = note,
+    ))
     db.session.commit()
     return jsonify({'action': 'saved'})
+
+# ─────────────────────────────────────────────
+# Update note on a saved course
+# ─────────────────────────────────────────────
+@courses.route('/saved/course/<int:course_id>/note', methods=['POST'])
+@login_required
+def update_saved_course_note(course_id):
+    saved      = SavedCourse.query.filter_by(
+        user_id=current_user.user_id, course_id=course_id
+    ).first_or_404()
+    saved.note = ((request.json or {}).get('note') or '').strip() or None
+    db.session.commit()
+    return jsonify({'ok': True})
+
+
+# ─────────────────────────────────────────────
+# Update note on a saved material
+# ─────────────────────────────────────────────
+@courses.route('/saved/material/<int:material_id>/note', methods=['POST'])
+@login_required
+def update_saved_material_note(material_id):
+    saved      = SavedMaterial.query.filter_by(
+        user_id=current_user.user_id, material_id=material_id
+    ).first_or_404()
+    saved.note = ((request.json or {}).get('note') or '').strip() or None
+    db.session.commit()
+    return jsonify({'ok': True})

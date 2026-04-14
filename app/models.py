@@ -46,12 +46,14 @@ class User(UserMixin, db.Model):
     major  = db.Column(db.String(100), nullable=True)
     minor  = db.Column(db.String(100), nullable=True)
 
-    reviews        = db.relationship('Review',             back_populates='user',                                    lazy='dynamic')
-    review_likes   = db.relationship('ReviewLike',         back_populates='user',                                    lazy='dynamic')
-    materials      = db.relationship('Material',           back_populates='user',                                    lazy='dynamic')
-    flags_reported = db.relationship('Flag',               foreign_keys='Flag.reporter_user_id',     back_populates='reporter',          lazy='dynamic')
-    flags_reviewed = db.relationship('Flag',               foreign_keys='Flag.reviewed_by_admin_id', back_populates='reviewed_by_admin', lazy='dynamic')
-    reset_tokens   = db.relationship('PasswordResetToken', back_populates='user',                                    lazy='dynamic')
+    reviews         = db.relationship('Review',              back_populates='user',    lazy='dynamic')
+    review_likes    = db.relationship('ReviewLike',          back_populates='user',    lazy='dynamic')
+    materials = db.relationship('Material', back_populates='user', lazy='dynamic')
+    flags_reported  = db.relationship('Flag',                foreign_keys='Flag.reporter_user_id',     back_populates='reporter',          lazy='dynamic')
+    flags_reviewed  = db.relationship('Flag',                foreign_keys='Flag.reviewed_by_admin_id', back_populates='reviewed_by_admin', lazy='dynamic')
+    reset_tokens    = db.relationship('PasswordResetToken',  back_populates='user',    lazy='dynamic')
+    saved_courses   = db.relationship('SavedCourse',         back_populates='user',    lazy='dynamic')
+    saved_materials = db.relationship('SavedMaterial',       back_populates='user',    lazy='dynamic')
 
     def get_id(self):
         return str(self.user_id)
@@ -110,7 +112,8 @@ class Course(db.Model):
     department = db.relationship('Department', back_populates='courses')
     professors = db.relationship('Professor',  secondary=course_professor, back_populates='courses', lazy='dynamic')
     reviews    = db.relationship('Review',     back_populates='course',    lazy='dynamic')
-    materials  = db.relationship('Material',   back_populates='course',    lazy='dynamic')
+    materials      = db.relationship('Material',    back_populates='course',    lazy='dynamic')
+    saved_by_users = db.relationship('SavedCourse', back_populates='course',    lazy='dynamic')
 
     def __repr__(self):
         return f'<Course {self.course_number} - {self.course_title}>'
@@ -248,7 +251,8 @@ class Material(db.Model):
     course   = db.relationship('Course',   back_populates='materials')
     user     = db.relationship('User',     back_populates='materials')
     semester = db.relationship('Semester', back_populates='materials')
-    flags    = db.relationship('Flag',     back_populates='material', lazy='dynamic')
+    flags          = db.relationship('Flag',          back_populates='material', lazy='dynamic')
+    saved_by_users = db.relationship('SavedMaterial', back_populates='material', lazy='dynamic')
 
     def __repr__(self):
         return f'<Material {self.material_id} - {self.title}>'
@@ -333,3 +337,49 @@ class PasswordResetToken(db.Model):
         return f'<PasswordResetToken user={self.user_id} expires={self.expires_at}>'
 
 
+# ─────────────────────────────────────────────
+# SavedCourse
+# Bookmarked courses per user, with optional note.
+# ─────────────────────────────────────────────
+class SavedCourse(db.Model):
+    __tablename__ = 'saved_course'
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'course_id', name='uq_saved_course'),
+    )
+
+    id         = db.Column(db.Integer,  primary_key=True, autoincrement=True)
+    user_id    = db.Column(db.Integer,  db.ForeignKey('users.user_id',    ondelete='CASCADE'), nullable=False, index=True)
+    course_id  = db.Column(db.Integer,  db.ForeignKey('course.course_id', ondelete='CASCADE'), nullable=False, index=True)
+    note       = db.Column(db.Text,     nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), nullable=False)
+
+    user   = db.relationship('User',   back_populates='saved_courses')
+    course = db.relationship('Course', back_populates='saved_by_users')
+
+    def __repr__(self):
+        return f'<SavedCourse user={self.user_id} course={self.course_id}>'
+
+
+# ─────────────────────────────────────────────
+# SavedMaterial
+# Bookmarked materials per user, with optional note.
+# ─────────────────────────────────────────────
+class SavedMaterial(db.Model):
+    __tablename__ = 'saved_material'
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'material_id', name='uq_saved_material'),
+    )
+
+    id          = db.Column(db.Integer,  primary_key=True, autoincrement=True)
+    user_id     = db.Column(db.Integer,  db.ForeignKey('users.user_id',        ondelete='CASCADE'), nullable=False, index=True)
+    material_id = db.Column(db.Integer,  db.ForeignKey('material.material_id', ondelete='CASCADE'), nullable=False, index=True)
+    note        = db.Column(db.Text,     nullable=True)
+    created_at  = db.Column(db.DateTime, default=datetime.now(timezone.utc), nullable=False)
+
+    user     = db.relationship('User',     back_populates='saved_materials')
+    material = db.relationship('Material', back_populates='saved_by_users')
+
+    def __repr__(self):
+        return f'<SavedMaterial user={self.user_id} material={self.material_id}>'

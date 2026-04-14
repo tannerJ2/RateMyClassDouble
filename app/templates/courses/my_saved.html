@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saved — RateMyClass</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #f7f4ef;
+    --ink:     #1a1a1a;
+    --accent:  #c0392b;
+    --muted:   #888;
+    --border:  #e0dbd2;
+    --shadow:  0 2px 20px rgba(0,0,0,0.08);
+    --success: #1e8449;
+    --card:    #ffffff;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ───────────────────────────────────── */
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 3rem 1.2rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .logo span {
+    color: var(--accent);
+  }
+
+  .nav-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .nav-btn:hover {
+    background: var(--accent);
+  }
+
+  .nav-link {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-link:hover {
+    color: var(--accent);
+  }
+
+  /* ── NAV TRIGGER ───────────────────────────── */
+  #nav-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+  }
+
+  .trigger-line {
+    height: 2.5px;
+    background: var(--ink);
+    border-radius: 4px;
+    display: block;
+  }
+
+  .trigger-line:nth-child(1) { width: 24px; }
+  .trigger-line:nth-child(2) { width: 16px; }
+  .trigger-line:nth-child(3) { width: 24px; }
+
+  /* ── OVERLAY ───────────────────────────────── */
+  #menu-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.25);
+    z-index: 200;
+  }
+
+  #menu-overlay.active {
+    display: block;
+  }
+
+  /* ── SIDE MENU ─────────────────────────────── */
+  #side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 100vh;
+    background: #fff;
+    border-right: 1px solid var(--border);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 6px 0 32px rgba(0,0,0,0.1);
+  }
+
+  #side-menu.open {
+    transform: translateX(0);
+  }
+
+  .menu-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.3rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    min-height: 68px;
+  }
+
+  .menu-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .menu-logo span {
+    color: var(--accent);
+  }
+
+  #menu-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+  }
+
+  .close-line {
+    height: 2.5px;
+    background: var(--ink);
+    border-radius: 4px;
+    display: block;
+  }
+
+  .close-line:nth-child(1) { width: 24px; }
+  .close-line:nth-child(2) { width: 16px; }
+  .close-line:nth-child(3) { width: 24px; }
+
+  .menu-user {
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .menu-user-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .menu-user-email {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .menu-nav {
+    flex: 1;
+    padding: 0.8rem 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.85rem 1.5rem;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .menu-item:hover {
+    background: var(--bg);
+    color: var(--accent);
+  }
+
+  .menu-item-icon {
+    display: flex;
+    align-items: center;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .menu-item:hover .menu-item-icon {
+    color: var(--accent);
+  }
+
+  .menu-item-active {
+    background: var(--bg);
+    color: var(--accent);
+  }
+
+  .menu-item-active .menu-item-icon {
+    color: var(--accent);
+  }
+
+  .menu-item-soon {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .soon-tag {
+    margin-left: auto;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.15rem 0.5rem;
+    color: var(--muted);
+  }
+
+  .menu-bottom {
+    border-top: 1px solid var(--border);
+    padding: 0.8rem 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu-item-logout {
+    color: var(--accent);
+  }
+
+  .menu-item-logout .menu-item-icon {
+    color: var(--accent);
+  }
+
+  .menu-item-logout:hover {
+    background: #fdf0ee;
+  }
+
+  /* ── PAGE ──────────────────────────────────── */
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2.5rem 3rem 5rem;
+  }
+
+  /* ── PAGE HEADER ───────────────────────────── */
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin-bottom: 0.4rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── FILTER TABS ───────────────────────────── */
+  .filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 0.4rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-tab:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  .filter-tab.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+
+  .tab-count {
+    font-size: 0.72rem;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 0.05rem 0.45rem;
+    font-weight: 600;
+  }
+
+  .filter-tab:not(.active) .tab-count {
+    background: var(--bg);
+    color: var(--muted);
+  }
+
+  /* ── SAVED LIST ────────────────────────────── */
+  .saved-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* ── SAVED ITEM ────────────────────────────── */
+  .saved-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem;
+    transition: opacity 0.25s, transform 0.25s;
+  }
+
+  /* ── SAVED ITEM HEADER ─────────────────────── */
+  .saved-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.9rem;
+  }
+
+  .saved-item-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .saved-type-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+  }
+
+  .badge-course   { background: #eef4ff; color: #2563eb; }
+  .badge-material { background: #eafaf1; color: #1e8449; }
+
+  .material-type-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 20px;
+  }
+
+  .type-notes       { background: #eef4ff; color: #2563eb; }
+  .type-study_guide { background: #eafaf1; color: #1e8449; }
+  .type-exam        { background: #fdf0ee; color: var(--accent); }
+  .type-other       { background: #f5f5f5; color: #555; }
+
+  .saved-date {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* ── COURSE INFO ───────────────────────────── */
+  .saved-course-dept {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.25rem;
+  }
+
+  .saved-course-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.45rem;
+    transition: color 0.2s;
+    line-height: 1.35;
+  }
+
+  .saved-course-title:hover {
+    color: var(--accent);
+  }
+
+  .saved-course-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .stars-small {
+    display: inline-block;
+    position: relative;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+  }
+
+  .stars-empty { color: #ddd; }
+
+  .stars-filled {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: #f39c12;
+  }
+
+  /* ── MATERIAL INFO ─────────────────────────── */
+  .saved-material-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.3rem;
+    line-height: 1.35;
+  }
+
+  .saved-material-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+    flex-wrap: wrap;
+  }
+
+  .saved-material-course-link {
+    font-size: 0.82rem;
+    color: var(--accent);
+    text-decoration: none;
+    transition: opacity 0.2s;
+    display: inline-block;
+  }
+
+  .saved-material-course-link:hover {
+    opacity: 0.75;
+  }
+
+  /* ── MATERIAL ACTIONS ──────────────────────── */
+  .saved-material-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.45rem 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: var(--ink);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .action-btn:hover {
+    border-color: var(--ink);
+    background: var(--bg);
+  }
+
+  .action-btn-primary {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+
+  .action-btn-primary:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* ── NOTE SECTION ──────────────────────────── */
+  .note-section {
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .note-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+  }
+
+  .note-icon {
+    flex-shrink: 0;
+    color: var(--muted);
+    margin-top: 0.1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .note-display-text {
+    flex: 1;
+    font-size: 0.85rem;
+    color: #555;
+    line-height: 1.5;
+    font-style: italic;
+    min-width: 0;
+  }
+
+  .note-empty-text {
+    flex: 1;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .note-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 0.5rem;
+  }
+
+  .note-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: var(--muted);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .note-icon-btn:hover {
+    color: var(--ink);
+    background: var(--bg);
+  }
+
+  .note-icon-btn.danger:hover {
+    color: var(--accent);
+    background: #fdf0ee;
+  }
+
+  .note-edit-area {
+    display: none;
+    margin-top: 0.6rem;
+  }
+
+  .note-edit-textarea {
+    width: 100%;
+    resize: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    height: 70px;
+    outline: none;
+    color: var(--ink);
+    background: var(--bg);
+    transition: border-color 0.2s;
+  }
+
+  .note-edit-textarea:focus {
+    border-color: var(--ink);
+  }
+
+  /* ── EMPTY STATE ───────────────────────────── */
+  .empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--muted);
+  }
+
+  .empty-icon {
+    margin: 0 auto 1.4rem;
+    width: 52px;
+    height: 52px;
+    color: #ccc;
+  }
+
+  .empty-state h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    max-width: 300px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .empty-browse-btn {
+    display: inline-block;
+    background: var(--ink);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 0.65rem 1.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+
+  .empty-browse-btn:hover {
+    background: var(--accent);
+  }
+
+  /* ── FILTER EMPTY MSG ──────────────────────── */
+  .filter-empty {
+    display: none;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  /* ── FLASH MESSAGES ────────────────────────── */
+  .flash-messages {
+    margin-bottom: 1.5rem;
+  }
+
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .alert-success { background: #eafaf1; color: var(--success); border: 1px solid rgba(30,132,73,0.2); }
+  .alert-info    { background: #eef4ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.2); }
+  .alert-danger  { background: #fdf0ee; color: var(--accent); border: 1px solid rgba(192,57,43,0.2); }
+
+  /* ── RESPONSIVE ────────────────────────────── */
+  @media (max-width: 700px) {
+    nav { padding: 1rem 1.5rem; }
+    .page { padding: 1.5rem 1.2rem 4rem; }
+    .saved-item { padding: 1.1rem 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- OVERLAY -->
+<div id="menu-overlay"></div>
+
+<!-- SIDE MENU -->
+<div id="side-menu">
+  <div class="menu-top">
+    <a class="menu-logo" href="{{ url_for('courses.index') }}">Rate<span>My</span>Class</a>
+    <button id="menu-close">
+      <span class="close-line"></span>
+      <span class="close-line"></span>
+      <span class="close-line"></span>
+    </button>
+  </div>
+
+  <div class="menu-user">
+    <div class="menu-user-name">{{ current_user.first_name }} {{ current_user.last_name }}</div>
+    <div class="menu-user-email">{{ current_user.email }}</div>
+  </div>
+
+  <div class="menu-nav">
+    <a href="{{ url_for('courses.my_reviews') }}" class="menu-item">
+      <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+      Reviews
+    </a>
+    <a href="{{ url_for('courses.my_saved') }}" class="menu-item menu-item-active">
+      <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+      Saved
+    </a>
+    <a href="{{ url_for('courses.my_uploads') }}" class="menu-item">
+      <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
+      Uploads
+    </a>
+    <a href="#" class="menu-item menu-item-soon">
+      <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+      Schedule Builder
+      <span class="soon-tag">Soon</span>
+    </a>
+  </div>
+
+  <div class="menu-bottom">
+    <a href="{{ url_for('auth.profile') }}" class="menu-item">
+      <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      Profile
+    </a>
+    <a href="{{ url_for('auth.settings') }}" class="menu-item">
+      <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      Settings
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="menu-item menu-item-logout">
+      <span class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+      Sign Out
+    </a>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <button id="nav-trigger">
+      <span class="trigger-line"></span>
+      <span class="trigger-line"></span>
+      <span class="trigger-line"></span>
+    </button>
+    <a class="logo" href="{{ url_for('courses.index') }}">Rate<span>My</span>Class</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-link">Hi, {{ current_user.first_name }}!</span>
+    <a href="{{ url_for('auth.logout') }}" class="nav-btn">Sign Out</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="page-header">
+    <h1 class="page-title">Saved</h1>
+    <p class="page-subtitle">Your bookmarked courses and materials</p>
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="all" onclick="setFilter('all', this)">
+        All <span class="tab-count" id="count-all">{{ all_saved | length }}</span>
+      </button>
+      <button class="filter-tab" data-filter="course" onclick="setFilter('course', this)">
+        Courses <span class="tab-count" id="count-courses">{{ total_courses }}</span>
+      </button>
+      <button class="filter-tab" data-filter="material" onclick="setFilter('material', this)">
+        Materials <span class="tab-count" id="count-materials">{{ total_materials }}</span>
+      </button>
+    </div>
+  </div>
+
+  {% if all_saved %}
+    <div class="saved-list" id="saved-list">
+
+      {% for item_type, item in all_saved %}
+
+        {% if item_type == 'course' %}
+
+          {# ── COURSE SAVED CARD ── #}
+          <div class="saved-item saved-type-course"
+               data-type="course"
+               id="saved-card-course-{{ item.course_id }}">
+
+            <div class="saved-item-header">
+              <div class="saved-item-header-left">
+                <span class="saved-type-badge badge-course">Course</span>
+              </div>
+              <span class="saved-date">Saved {{ item.created_at.strftime('%b %d, %Y') }}</span>
+            </div>
+
+            <div class="saved-course-dept">
+              {{ item.course.department.dept_code }} · {{ item.course.department.dept_name }}
+            </div>
+            <a href="{{ url_for('courses.course_detail', course_id=item.course_id) }}"
+               class="saved-course-title">
+              {{ item.course.course_title }}
+            </a>
+
+            {% set rating = course_ratings.get(item.course_id) %}
+            <div class="saved-course-rating">
+              {% if rating and rating.avg %}
+                <span class="stars-small">
+                  <span class="stars-empty">★★★★★</span>
+                  <span class="stars-filled" style="width:{{ (rating.avg / 5 * 100)|round(1) }}%">★★★★★</span>
+                </span>
+                <span>{{ rating.avg }} · {{ rating.count }} rating{{ 's' if rating.count != 1 }}</span>
+              {% else %}
+                <span>No ratings yet</span>
+              {% endif %}
+            </div>
+
+            <div class="note-section">
+              <div class="note-row">
+                <span class="note-icon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </span>
+                {% if item.note %}
+                  <span class="note-display-text" id="note-text-course-{{ item.course_id }}">{{ item.note }}</span>
+                {% else %}
+                  <span class="note-empty-text" id="note-text-course-{{ item.course_id }}">No note added</span>
+                {% endif %}
+                <div class="note-actions">
+                  <button class="note-icon-btn"
+                          id="note-edit-btn-course-{{ item.course_id }}"
+                          onclick="toggleNoteEdit('course', {{ item.course_id }})"
+                          title="Edit note">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="note-icon-btn danger"
+                          onclick="unsaveItem('course', {{ item.course_id }}, this)"
+                          title="Remove from saved">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="note-edit-area" id="note-edit-area-course-{{ item.course_id }}">
+                <textarea class="note-edit-textarea"
+                          id="note-textarea-course-{{ item.course_id }}"
+                          placeholder="Why did you save this course?">{{ item.note or '' }}</textarea>
+              </div>
+            </div>
+
+          </div>
+
+        {% else %}
+
+          {# ── MATERIAL SAVED CARD ── #}
+          <div class="saved-item saved-type-material"
+               data-type="material"
+               id="saved-card-material-{{ item.material_id }}">
+
+            <div class="saved-item-header">
+              <div class="saved-item-header-left">
+                <span class="saved-type-badge badge-material">Material</span>
+                <span class="material-type-badge type-{{ item.material.material_type }}">
+                  {% if item.material.material_type == 'notes' %}Notes
+                  {% elif item.material.material_type == 'study_guide' %}Study Guide
+                  {% elif item.material.material_type == 'exam' %}Past Exam
+                  {% else %}Other{% endif %}
+                </span>
+              </div>
+              <span class="saved-date">Saved {{ item.created_at.strftime('%b %d, %Y') }}</span>
+            </div>
+
+            <div class="saved-material-title">{{ item.material.title }}</div>
+            <div class="saved-material-meta">
+              <span>{{ item.material.semester.term }} {{ item.material.semester.year }}</span>
+              <span>·</span>
+              <span>by {{ item.material.user.first_name }} {{ item.material.user.last_name[0] }}.</span>
+            </div>
+            <a href="{{ url_for('courses.course_detail', course_id=item.material.course_id) }}"
+               class="saved-material-course-link">
+              {{ item.material.course.department.dept_code }} {{ item.material.course.course_number }} · {{ item.material.course.course_title }}
+            </a>
+
+            <div class="saved-material-actions">
+              <a href="{{ url_for('courses.course_detail', course_id=item.material.course_id) }}"
+                 class="action-btn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Go to Course
+              </a>
+              <a href="{{ url_for('courses.all_materials', course_id=item.material.course_id) }}?pin={{ item.material_id }}"
+                 class="action-btn action-btn-primary">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                View Other Materials
+              </a>
+            </div>
+
+            <div class="note-section">
+              <div class="note-row">
+                <span class="note-icon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </span>
+                {% if item.note %}
+                  <span class="note-display-text" id="note-text-material-{{ item.material_id }}">{{ item.note }}</span>
+                {% else %}
+                  <span class="note-empty-text" id="note-text-material-{{ item.material_id }}">No note added</span>
+                {% endif %}
+                <div class="note-actions">
+                  <button class="note-icon-btn"
+                          id="note-edit-btn-material-{{ item.material_id }}"
+                          onclick="toggleNoteEdit('material', {{ item.material_id }})"
+                          title="Edit note">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="note-icon-btn danger"
+                          onclick="unsaveItem('material', {{ item.material_id }}, this)"
+                          title="Remove from saved">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="note-edit-area" id="note-edit-area-material-{{ item.material_id }}">
+                <textarea class="note-edit-textarea"
+                          id="note-textarea-material-{{ item.material_id }}"
+                          placeholder="Why did you save this material?">{{ item.note or '' }}</textarea>
+              </div>
+            </div>
+
+          </div>
+
+        {% endif %}
+      {% endfor %}
+
+    </div>
+
+    <div class="filter-empty" id="filter-empty-course">No saved courses yet.</div>
+    <div class="filter-empty" id="filter-empty-material">No saved materials yet.</div>
+
+  {% else %}
+
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3>Nothing saved yet</h3>
+      <p>Save courses and materials you want to revisit. They'll all appear here.</p>
+      <a href="{{ url_for('courses.search_page') }}" class="empty-browse-btn">Browse Courses</a>
+    </div>
+
+  {% endif %}
+
+</div>
+
+<script>
+  // ── Side menu ──────────────────────────────────────────────────────────────
+  const navTrigger  = document.getElementById('nav-trigger');
+  const menuClose   = document.getElementById('menu-close');
+  const sideMenu    = document.getElementById('side-menu');
+  const menuOverlay = document.getElementById('menu-overlay');
+
+  function openMenu()  { sideMenu.classList.add('open');    menuOverlay.classList.add('active'); }
+  function closeMenu() { sideMenu.classList.remove('open'); menuOverlay.classList.remove('active'); }
+
+  navTrigger.addEventListener('click', openMenu);
+  menuClose.addEventListener('click', closeMenu);
+  menuOverlay.addEventListener('click', closeMenu);
+
+  // ── Filter tabs ────────────────────────────────────────────────────────────
+  function setFilter(filter, btn) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.querySelectorAll('.saved-item').forEach(item => {
+      if (filter === 'all') {
+        item.style.display = '';
+      } else {
+        item.style.display = item.dataset.type === filter ? '' : 'none';
+      }
+    });
+
+    const courseEmpty   = document.getElementById('filter-empty-course');
+    const materialEmpty = document.getElementById('filter-empty-material');
+    if (courseEmpty)   courseEmpty.style.display   = 'none';
+    if (materialEmpty) materialEmpty.style.display = 'none';
+
+    if (filter === 'course') {
+      const any = [...document.querySelectorAll('.saved-type-course')].some(i => i.style.display !== 'none');
+      if (!any && courseEmpty) courseEmpty.style.display = 'block';
+    } else if (filter === 'material') {
+      const any = [...document.querySelectorAll('.saved-type-material')].some(i => i.style.display !== 'none');
+      if (!any && materialEmpty) materialEmpty.style.display = 'block';
+    }
+  }
+
+  // ── Note editing ───────────────────────────────────────────────────────────
+  const pencilSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+  const checkSVG  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+  function toggleNoteEdit(type, id) {
+    const editArea = document.getElementById(`note-edit-area-${type}-${id}`);
+    const editBtn  = document.getElementById(`note-edit-btn-${type}-${id}`);
+    const noteText = document.getElementById(`note-text-${type}-${id}`);
+    const textarea = document.getElementById(`note-textarea-${type}-${id}`);
+    const isOpen   = editArea.style.display === 'block';
+
+    if (isOpen) {
+      const note = textarea.value.trim();
+      const url  = type === 'course'
+        ? `/saved/course/${id}/note`
+        : `/saved/material/${id}/note`;
+
+      fetch(url, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ note }),
+      })
+      .then(r => r.json())
+      .then(() => {
+        if (note) {
+          noteText.className   = 'note-display-text';
+          noteText.textContent = note;
+        } else {
+          noteText.className   = 'note-empty-text';
+          noteText.textContent = 'No note added';
+        }
+        editArea.style.display = 'none';
+        editBtn.innerHTML      = pencilSVG;
+      });
+    } else {
+      const currentText = noteText.className === 'note-display-text' ? noteText.textContent : '';
+      textarea.value         = currentText;
+      editArea.style.display = 'block';
+      editBtn.innerHTML      = checkSVG;
+      textarea.focus();
+    }
+  }
+
+  // ── Unsave / remove item ───────────────────────────────────────────────────
+  function unsaveItem(type, id, btn) {
+    const url = type === 'course' ? `/course/${id}/save` : `/material/${id}/save`;
+
+    fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({}),
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.action === 'unsaved') {
+        const card = document.getElementById(`saved-card-${type}-${id}`);
+        card.style.opacity   = '0';
+        card.style.transform = 'translateX(12px)';
+        setTimeout(() => {
+          card.remove();
+          updateCounts();
+        }, 250);
+      }
+    });
+  }
+
+  // ── Update tab counts ──────────────────────────────────────────────────────
+  function updateCounts() {
+    const total     = document.querySelectorAll('.saved-item').length;
+    const courses   = document.querySelectorAll('.saved-type-course').length;
+    const materials = document.querySelectorAll('.saved-type-material').length;
+
+    const el = id => document.getElementById(id);
+    if (el('count-all'))       el('count-all').textContent       = total;
+    if (el('count-courses'))   el('count-courses').textContent   = courses;
+    if (el('count-materials')) el('count-materials').textContent = materials;
+
+    if (total === 0) {
+      const list = document.getElementById('saved-list');
+      if (list) {
+        list.innerHTML = '';
+        list.insertAdjacentHTML('afterend',
+          '<div class="empty-state" style="margin-top:2rem;">'
+          + '<div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>'
+          + '<h3>Nothing saved yet</h3>'
+          + '<p>Save courses and materials you want to revisit.</p>'
+          + '<a href="/courses" class="empty-browse-btn">Browse Courses</a>'
+          + '</div>'
+        );
+        list.remove();
+      }
+    }
+  }
+</script>
+
+</body>
+</html>
