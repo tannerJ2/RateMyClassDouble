@@ -471,30 +471,41 @@
     margin-left: 0.4rem;
   }
 
-  /* ── LIKE BUTTONS ──────────────────────────── */
+/* ── LIKE BUTTONS ──────────────────────────── */
   .like-buttons {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .like-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.4rem;
     background: var(--bg);
     border: 1.5px solid var(--border);
     border-radius: 20px;
-    padding: 0.3rem 0.7rem;
+    padding: 0.3rem 0.75rem;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.75rem;
     cursor: pointer;
     transition: all 0.2s;
     color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .like-btn svg {
+    flex-shrink: 0;
   }
 
   .like-btn:hover {
     border-color: var(--ink);
+  }
+
+  .like-btn:disabled {
+    cursor: default;
+    opacity: 0.85;
   }
 
   .like-btn.active-rh {
@@ -543,6 +554,42 @@
   }
 
   .like-tooltip-wrapper:hover .like-tooltip {
+    display: block;
+  }
+
+/* ── LIKE BUTTON TOOLTIPS (authenticated) ──── */
+  .like-btn-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .like-btn-tip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: #fff;
+    border-radius: 6px;
+    padding: 0.22rem 0.6rem;
+    font-size: 0.71rem;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .like-btn-tip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--ink);
+  }
+
+  .like-btn-wrap:hover .like-btn-tip {
     display: block;
   }
 
@@ -718,30 +765,75 @@
             {% set user_like = user_likes.get(review.review_id) %}
 
             {% if current_user.is_authenticated %}
-              <button class="like-btn {% if user_like == 'really_helpful' %}active-rh{% endif %}"
-                      data-review="{{ review.review_id }}" data-type="really_helpful">
-                ⭐ Really Helpful <span class="lc-rh">{{ counts.really_helpful }}</span>
-              </button>
-              <button class="like-btn {% if user_like == 'helpful' %}active-h{% endif %}"
-                      data-review="{{ review.review_id }}" data-type="helpful">
-                👍 Helpful <span class="lc-h">{{ counts.helpful }}</span>
-              </button>
-              <button class="like-btn {% if user_like == 'not_helpful' %}active-nh{% endif %}"
-                      data-review="{{ review.review_id }}" data-type="not_helpful">
-                👎 Not Helpful <span class="lc-nh">{{ counts.not_helpful }}</span>
-              </button>
+              <div class="like-btn-wrap">
+                <button class="like-btn {% if user_like == 'really_helpful' %}active-rh{% endif %}"
+                        data-review="{{ review.review_id }}" data-type="really_helpful">
+                  <svg width="13" height="13" viewBox="0 0 28 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <g transform="translate(7,0)" opacity="0.4"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></g>
+                    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                    <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                  </svg>
+                  <span class="lc-rh">{{ counts.really_helpful }}</span>
+                </button>
+                <div class="like-btn-tip">Really Helpful</div>
+              </div>
+              <div class="like-btn-wrap">
+                <button class="like-btn {% if user_like == 'helpful' %}active-h{% endif %}"
+                        data-review="{{ review.review_id }}" data-type="helpful">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                    <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                  </svg>
+                  <span class="lc-h">{{ counts.helpful }}</span>
+                </button>
+                <div class="like-btn-tip">Helpful</div>
+              </div>
+              <div class="like-btn-wrap">
+                <button class="like-btn {% if user_like == 'not_helpful' %}active-nh{% endif %}"
+                        data-review="{{ review.review_id }}" data-type="not_helpful">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/>
+                    <path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+                  </svg>
+                  <span class="lc-nh">{{ counts.not_helpful }}</span>
+                </button>
+                <div class="like-btn-tip">Not Helpful</div>
+              </div>
               {% if review.user_id == current_user.user_id %}
                 <a href="{{ url_for('courses.edit_description', course_id=course.course_id) }}" class="edit-link">Edit</a>
               {% endif %}
             {% else %}
-              {% for label, type, icon in [('Really Helpful','really_helpful','⭐'),('Helpful','helpful','👍'),('Not Helpful','not_helpful','👎')] %}
-                <div class="like-tooltip-wrapper">
-                  <button class="like-btn" disabled>{{ icon }} {{ label }} {{ counts[type] }}</button>
-                  <div class="like-tooltip">
-                    <a href="{{ url_for('auth.register') }}">Create an account</a> to like reviews
-                  </div>
-                </div>
-              {% endfor %}
+              <div class="like-tooltip-wrapper">
+                <button class="like-btn" disabled>
+                  <svg width="13" height="13" viewBox="0 0 28 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <g transform="translate(7,0)" opacity="0.4"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></g>
+                    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                    <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                  </svg>
+                  Really Helpful {{ counts.really_helpful }}
+                </button>
+                <div class="like-tooltip"><a href="{{ url_for('auth.register') }}">Create an account</a> to like reviews</div>
+              </div>
+              <div class="like-tooltip-wrapper">
+                <button class="like-btn" disabled>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                    <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                  </svg>
+                  Helpful {{ counts.helpful }}
+                </button>
+                <div class="like-tooltip"><a href="{{ url_for('auth.register') }}">Create an account</a> to like reviews</div>
+              </div>
+              <div class="like-tooltip-wrapper">
+                <button class="like-btn" disabled>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/>
+                    <path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+                  </svg>
+                  Not Helpful {{ counts.not_helpful }}
+                </button>
+                <div class="like-tooltip"><a href="{{ url_for('auth.register') }}">Create an account</a> to like reviews</div>
+              </div>
             {% endif %}
           </div>
         </div>

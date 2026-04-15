@@ -48,7 +48,8 @@ class User(UserMixin, db.Model):
 
     reviews         = db.relationship('Review',              back_populates='user',    lazy='dynamic')
     review_likes    = db.relationship('ReviewLike',          back_populates='user',    lazy='dynamic')
-    materials = db.relationship('Material', back_populates='user', lazy='dynamic')
+    material_likes  = db.relationship('MaterialLike',        back_populates='user',    lazy='dynamic')
+    materials       = db.relationship('Material',            back_populates='user',    lazy='dynamic')
     flags_reported  = db.relationship('Flag',                foreign_keys='Flag.reporter_user_id',     back_populates='reporter',          lazy='dynamic')
     flags_reviewed  = db.relationship('Flag',                foreign_keys='Flag.reviewed_by_admin_id', back_populates='reviewed_by_admin', lazy='dynamic')
     reset_tokens    = db.relationship('PasswordResetToken',  back_populates='user',    lazy='dynamic')
@@ -251,11 +252,56 @@ class Material(db.Model):
     course   = db.relationship('Course',   back_populates='materials')
     user     = db.relationship('User',     back_populates='materials')
     semester = db.relationship('Semester', back_populates='materials')
+    likes          = db.relationship('MaterialLike',   back_populates='material', lazy='dynamic', cascade='all, delete-orphan')
     flags          = db.relationship('Flag',          back_populates='material', lazy='dynamic')
     saved_by_users = db.relationship('SavedMaterial', back_populates='material', lazy='dynamic')
 
+    def get_like_data(self):
+        counts = {'really_helpful': 0, 'helpful': 0, 'not_helpful': 0}
+        score  = 0
+        for like in self.likes:
+            counts[like.like_type] += 1
+            if like.like_type == 'really_helpful':
+                score += 2
+            elif like.like_type == 'helpful':
+                score += 1
+        return score, counts
+
+    def like_score(self):
+        score, _ = self.get_like_data()
+        return score
+
+    def like_counts(self):
+        _, counts = self.get_like_data()
+        return counts
+
     def __repr__(self):
         return f'<Material {self.material_id} - {self.title}>'
+    
+
+# ─────────────────────────────────────────────
+# MaterialLike
+# One like per user per material.
+# really_helpful = 2pts | helpful = 1pt | not_helpful = 0pts
+# ─────────────────────────────────────────────
+class MaterialLike(db.Model):
+    __tablename__ = 'material_like'
+
+    __table_args__ = (
+        db.UniqueConstraint('material_id', 'user_id', name='uq_material_like_user'),
+    )
+
+    like_id     = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    material_id = db.Column(db.Integer, db.ForeignKey('material.material_id', ondelete='CASCADE'), nullable=False, index=True)
+    user_id     = db.Column(db.Integer, db.ForeignKey('users.user_id',       ondelete='CASCADE'), nullable=False, index=True)
+    like_type   = db.Column(db.Enum('really_helpful', 'helpful', 'not_helpful'), nullable=False)
+    created_at  = db.Column(db.DateTime, default=datetime.now(timezone.utc), nullable=False)
+
+    material = db.relationship('Material', back_populates='likes')
+    user     = db.relationship('User',     back_populates='material_likes')
+
+    def __repr__(self):
+        return f'<MaterialLike material={self.material_id} user={self.user_id} [{self.like_type}]>'
 
 
 # ─────────────────────────────────────────────

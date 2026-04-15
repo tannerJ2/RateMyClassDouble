@@ -359,6 +359,7 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem 3rem 4rem;
+    overflow: hidden;
   }
 
   .page-header {
@@ -430,25 +431,24 @@
     background: var(--accent);
   }
 
-  /* ── MATERIAL CARD ─────────────────────────── */
+/* ── MATERIAL CARD ─────────────────────────── */
   .material-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.8rem;
+    border-radius: 16px;
+    padding: 1.5rem 1.8rem;
+    margin-bottom: 1.2rem;
   }
 
   .material-card.mine {
     border-color: var(--accent);
   }
 
-  .material-top {
+  .material-top-row {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
   }
 
   .type-badge {
@@ -465,22 +465,34 @@
   .type-exam        { background: #fdf0ee; color: var(--accent); }
   .type-other       { background: #f5f5f5; color: #555; }
 
-  .material-title {
-    font-size: 1rem;
-    font-weight: 600;
-  }
-
   .material-semester {
     font-size: 0.8rem;
     color: var(--muted);
-    margin-left: auto;
+  }
+
+  .material-title {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
   }
 
   .material-description {
     font-size: 0.92rem;
-    line-height: 1.5;
+    line-height: 1.75;
     color: #333;
-    margin-bottom: 0.6rem;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    line-clamp: 3;
+    overflow: hidden;
   }
 
   .material-footer {
@@ -489,6 +501,8 @@
     align-items: center;
     border-top: 1px solid var(--border);
     padding-top: 0.8rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
   .material-author {
@@ -496,33 +510,111 @@
     color: var(--muted);
   }
 
-  .download-btn {
-    display: inline-flex;
+  .material-footer-right {
+    display: flex;
     align-items: center;
     gap: 0.4rem;
-    background: var(--ink);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 0.45rem 1rem;
+    flex-wrap: wrap;
+  }
+  /* .back-btn and .download-btn replaced by .icon-btn */
+
+
+  /* ── ICON BUTTONS (like, download, view) ───── */
+  .icon-btn-group {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .icon-btn-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 0.28rem 0.65rem;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.8rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background 0.2s;
-  }
-
-  .download-btn:hover {
-    background: var(--accent);
-  }
-  .back-btn {
-    font-size: 0.78rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
     color: var(--muted);
     text-decoration: none;
-    transition: color 0.2s;
+    white-space: nowrap;
   }
 
-  .back-btn:hover { color: var(--accent); }
+  .icon-btn:disabled {
+    cursor: default;
+  }
+
+  .icon-btn:not(:disabled):hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  .icon-btn svg {
+    flex-shrink: 0;
+  }
+
+  /* Active like states */
+  .icon-btn.active-rh {
+    background: #fef9e7;
+    border-color: #f39c12;
+    color: #a57c00;
+  }
+
+  .icon-btn.active-h {
+    background: #eafaf1;
+    border-color: #27ae60;
+    color: #1e8449;
+  }
+
+  .icon-btn.active-nh {
+    background: #fdf0ee;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Tooltip */
+  .icon-btn-tip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: #fff;
+    border-radius: 6px;
+    padding: 0.22rem 0.6rem;
+    font-size: 0.71rem;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .icon-btn-tip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--ink);
+  }
+
+  .icon-btn-wrap:hover .icon-btn-tip {
+    display: block;
+  }
+
+  /* Guest tooltip (sign-in prompt) */
+  .icon-btn-tip a {
+    color: #93c5fd;
+  }
 
   /* ── EMPTY STATE ───────────────────────────── */
   .empty-state {
@@ -756,6 +848,7 @@
     <h1 class="page-title">{{ course.course_title }}</h1>
     <div class="header-row">
       <div class="sort-bar">
+        <a href="?sort=liked"  class="sort-btn {% if sort == 'liked'  %}active{% endif %}">Most Helpful</a>
         <a href="?sort=recent" class="sort-btn {% if sort == 'recent' %}active{% endif %}">Most Recent</a>
         <a href="?sort=type"   class="sort-btn {% if sort == 'type'   %}active{% endif %}">By Type</a>
         {% if current_user.is_authenticated %}
@@ -772,41 +865,161 @@
     {% for mat in materials %}
       <div class="material-card {% if current_user.is_authenticated and mat.user_id == current_user.user_id %}mine{% endif %} {% if pin_id and mat.material_id == pin_id %}pinned-card{% endif %}">
 
-        <div class="material-top">
+        <div class="material-top-row">
           <span class="type-badge type-{{ mat.material_type }}">
             {% if mat.material_type == 'notes' %}Notes
             {% elif mat.material_type == 'study_guide' %}Study Guide
             {% elif mat.material_type == 'exam' %}Past Exam
             {% else %}Other{% endif %}
           </span>
-          <span class="material-title">{{ mat.title }}</span>
           <span class="material-semester">{{ mat.semester.term }} {{ mat.semester.year }}</span>
         </div>
+
+        <p class="material-title">{{ mat.title }}</p>
 
         {% if mat.description %}
           <p class="material-description">{{ mat.description }}</p>
         {% endif %}
 
         <div class="material-footer">
-            <span class="material-author">{{ mat.user.first_name }} {{ mat.user.last_name[0] }}.</span>
-            <div style="display:flex; gap:0.5rem; align-items:center;">
-                <a href="{{ url_for('courses.download_material', material_id=mat.material_id) }}" class="back-btn">↓ Download</a>
-                <a href="{{ url_for('courses.view_material', material_id=mat.material_id) }}" class="download-btn">View PDF</a>
-                {% if current_user.is_authenticated %}
-                  <div class="save-wrapper" data-type="material" data-id="{{ mat.material_id }}">
-                    <button class="save-btn {% if mat.material_id in saved_material_ids %}saved{% endif %}" onclick="toggleSaveDropdown(this)">
-                      <svg class="save-icon-outline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                      <svg class="save-icon-filled" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                      <span class="save-btn-label">{% if mat.material_id in saved_material_ids %}Saved{% else %}Save{% endif %}</span>
-                    </button>
-                    <div class="save-dropdown">
-                      <span class="save-dropdown-label">Add a note</span>
-                      <textarea class="save-note-input" placeholder="(Optional) saved this material because…"></textarea>
-                      <button class="save-confirm-btn" onclick="confirmSave(this)">Save</button>
-                    </div>
-                  </div>
-                {% endif %}
+          <span class="material-author">{{ mat.user.first_name }} {{ mat.user.last_name[0] }}.</span>
+          <div style="display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+
+            {% set counts = mat.like_counts() %}
+            {% set user_like = user_material_likes.get(mat.material_id) %}
+
+            <div class="icon-btn-group">
+
+              {% if current_user.is_authenticated %}
+
+                <!-- Really Helpful -->
+                <div class="icon-btn-wrap">
+                  <button class="icon-btn {% if user_like == 'really_helpful' %}active-rh{% endif %}"
+                          data-material="{{ mat.material_id }}" data-type="really_helpful">
+                    <svg width="16" height="14" viewBox="0 0 28 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <g transform="translate(7,0)" opacity="0.35">
+                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                        <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                      </g>
+                      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                      <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                    </svg>
+                    <span class="lc-rh">{{ counts.really_helpful }}</span>
+                  </button>
+                  <div class="icon-btn-tip">Really Helpful</div>
+                </div>
+
+                <!-- Helpful -->
+                <div class="icon-btn-wrap">
+                  <button class="icon-btn {% if user_like == 'helpful' %}active-h{% endif %}"
+                          data-material="{{ mat.material_id }}" data-type="helpful">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                      <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                    </svg>
+                    <span class="lc-h">{{ counts.helpful }}</span>
+                  </button>
+                  <div class="icon-btn-tip">Helpful</div>
+                </div>
+
+                <!-- Not Helpful -->
+                <div class="icon-btn-wrap">
+                  <button class="icon-btn {% if user_like == 'not_helpful' %}active-nh{% endif %}"
+                          data-material="{{ mat.material_id }}" data-type="not_helpful">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/>
+                      <path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+                    </svg>
+                    <span class="lc-nh">{{ counts.not_helpful }}</span>
+                  </button>
+                  <div class="icon-btn-tip">Not Helpful</div>
+                </div>
+
+              {% else %}
+
+                <!-- Really Helpful (guest) -->
+                <div class="icon-btn-wrap">
+                  <button class="icon-btn" disabled>
+                    <svg width="16" height="14" viewBox="0 0 28 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <g transform="translate(7,0)" opacity="0.35">
+                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                        <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                      </g>
+                      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                      <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                    </svg>
+                    {{ counts.really_helpful }}
+                  </button>
+                  <div class="icon-btn-tip">Really Helpful — <a href="{{ url_for('auth.register') }}">Sign up</a> to rate</div>
+                </div>
+
+                <!-- Helpful (guest) -->
+                <div class="icon-btn-wrap">
+                  <button class="icon-btn" disabled>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+                      <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                    </svg>
+                    {{ counts.helpful }}
+                  </button>
+                  <div class="icon-btn-tip">Helpful — <a href="{{ url_for('auth.register') }}">Sign up</a> to rate</div>
+                </div>
+
+                <!-- Not Helpful (guest) -->
+                <div class="icon-btn-wrap">
+                  <button class="icon-btn" disabled>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/>
+                      <path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+                    </svg>
+                    {{ counts.not_helpful }}
+                  </button>
+                  <div class="icon-btn-tip">Not Helpful — <a href="{{ url_for('auth.register') }}">Sign up</a> to rate</div>
+                </div>
+
+              {% endif %}
+
+              <!-- Download -->
+              <div class="icon-btn-wrap">
+                <a href="{{ url_for('courses.download_material', material_id=mat.material_id) }}" class="icon-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </a>
+                <div class="icon-btn-tip">Download</div>
+              </div>
+
+              <!-- View PDF -->
+              <div class="icon-btn-wrap">
+                <a href="{{ url_for('courses.view_material', material_id=mat.material_id) }}" class="icon-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </a>
+                <div class="icon-btn-tip">View PDF</div>
+              </div>
+
             </div>
+
+            {% if current_user.is_authenticated %}
+              <div class="save-wrapper" data-type="material" data-id="{{ mat.material_id }}">
+                <button class="save-btn {% if mat.material_id in saved_material_ids %}saved{% endif %}" onclick="toggleSaveDropdown(this)">
+                  <svg class="save-icon-outline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                  <svg class="save-icon-filled" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                  <span class="save-btn-label">{% if mat.material_id in saved_material_ids %}Saved{% else %}Save{% endif %}</span>
+                </button>
+                <div class="save-dropdown">
+                  <span class="save-dropdown-label">Add a note</span>
+                  <textarea class="save-note-input" placeholder="(Optional) saved this material because…"></textarea>
+                  <button class="save-confirm-btn" onclick="confirmSave(this)">Save</button>
+                </div>
+              </div>
+            {% endif %}
+
+          </div>
         </div>
 
       </div>
@@ -841,9 +1054,51 @@
   navTrigger.addEventListener('click', openMenu);
   menuClose.addEventListener('click', closeMenu);
   menuOverlay.addEventListener('click', closeMenu);
-  
 
-// ── Save button ────────────────────────────────────────────────────────────
+
+  // ── Like buttons ───────────────────────────────────────────────────────────
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.icon-btn[data-material]');
+    if (!btn) return;
+
+    const materialId = btn.dataset.material;
+    const likeType   = btn.dataset.type;
+    const card       = btn.closest('.material-card');
+
+    fetch(`/material/${materialId}/like`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ like_type: likeType }),
+    })
+    .then(r => r.json())
+    .then(data => {
+      // Clear all active states on this card
+      card.querySelectorAll('.icon-btn[data-material]').forEach(b => {
+        b.classList.remove('active-rh', 'active-h', 'active-nh');
+      });
+
+      // Apply active state if liked or updated (toggle off if removed)
+      if (data.action === 'liked' || data.action === 'updated') {
+        if (likeType === 'really_helpful')      btn.classList.add('active-rh');
+        else if (likeType === 'helpful')        btn.classList.add('active-h');
+        else if (likeType === 'not_helpful')    btn.classList.add('active-nh');
+      }
+
+      // Update counts
+      if (data.counts) {
+        const rhEl = card.querySelector('.lc-rh');
+        const hEl  = card.querySelector('.lc-h');
+        const nhEl = card.querySelector('.lc-nh');
+        if (rhEl) rhEl.textContent = data.counts.really_helpful;
+        if (hEl)  hEl.textContent  = data.counts.helpful;
+        if (nhEl) nhEl.textContent = data.counts.not_helpful;
+      }
+    })
+    .catch(() => {});
+  });
+
+
+  // ── Save button ────────────────────────────────────────────────────────────
   function toggleSaveDropdown(btn) {
     const wrapper  = btn.closest('.save-wrapper');
     const dropdown = wrapper.querySelector('.save-dropdown');
@@ -862,7 +1117,7 @@
         if (data.action === 'unsaved') {
           btn.classList.remove('saved');
           const label = btn.querySelector('.save-btn-label');
-          if (label) label.textContent = btn.closest('[data-type="course"]') ? 'Save Course' : 'Save';
+          if (label) label.textContent = 'Save';
         }
       });
       return;

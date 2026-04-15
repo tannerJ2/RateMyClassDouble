@@ -690,25 +690,27 @@
   }
 
   .material-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.8rem 0.95rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg);
-  transition: border-color 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    transition: border-color 0.2s;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .material-card:hover { border-color: var(--ink); }
 
   .material-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 0.1rem; }
 
-  .material-info { flex: 1; min-width: 0; }
+  .material-info { flex: 1; min-width: 0; overflow: hidden; }
 
-  .material-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.12rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .material-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.12rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2; overflow: hidden; }
 
-  .material-desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.22rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .material-desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.22rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2; overflow: hidden; }
 
   .material-meta { display: flex; align-items: center; gap: 0.45rem; font-size: 0.72rem; color: var(--muted); flex-wrap: wrap; }
 
@@ -718,25 +720,59 @@
   .type-exam        { background: #fdf0ee; color: var(--accent); }
   .type-other       { background: #f5f5f5; color: #555; }
 
-  .material-download-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-shrink: 0;
-  padding: 0.38rem 0.82rem;
-  background: var(--ink);
-  color: #fff;
-  border: none;
-  border-radius: 7px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: background 0.2s;
-  white-space: nowrap;
-}
+  .mat-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
 
-  .material-download-btn:hover { background: var(--accent); }
+  .mat-icon-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  .mat-icon-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .mat-icon-tip {
+    display: none;
+    position: absolute;
+    top: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: #fff;
+    border-radius: 6px;
+    padding: 0.22rem 0.6rem;
+    font-size: 0.71rem;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .mat-icon-tip::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-bottom-color: var(--ink);
+  }
+
+  .mat-icon-wrap:hover .mat-icon-tip {
+    display: block;
+  }
 
   /* ── SIDEBAR ───────────────────────────────── */
   .sidebar {
@@ -1345,7 +1381,6 @@
         <div class="material-list">
           {% for mat in active_materials %}
             <div class="material-card">
-              <div class="material-icon">📄</div>
               <div class="material-info">
                 <div class="material-title">{{ mat.title }}</div>
                 {% if mat.description %}
@@ -1362,9 +1397,26 @@
                   <span>by {{ mat.user.first_name }} {{ mat.user.last_name[0] }}.</span>
                 </div>
               </div>
-              <div style="display:flex; gap:0.5rem; align-items:center; flex-shrink:0;">
-                <a href="{{ url_for('courses.download_material', material_id=mat.material_id) }}" style="font-size:0.78rem; color:var(--muted); text-decoration:none;">↓ Download</a>
-                <a href="{{ url_for('courses.view_material', material_id=mat.material_id) }}" class="material-download-btn">View PDF</a>
+              <div style="display:flex; gap:0.4rem; align-items:center; flex-shrink:0;">
+                <div class="mat-icon-wrap">
+                  <a href="{{ url_for('courses.download_material', material_id=mat.material_id) }}" class="mat-icon-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </a>
+                  <div class="mat-icon-tip">Download</div>
+                </div>
+                <div class="mat-icon-wrap">
+                  <a href="{{ url_for('courses.view_material', material_id=mat.material_id) }}" class="mat-icon-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </a>
+                  <div class="mat-icon-tip">View PDF</div>
+                </div>
                 {% if current_user.is_authenticated %}
                   <div class="save-wrapper" data-type="material" data-id="{{ mat.material_id }}">
                     <button class="save-btn {% if mat.material_id in saved_material_ids %}saved{% endif %}" onclick="toggleSaveDropdown(this)">
@@ -1713,6 +1765,8 @@
       }
     });
   }
+
+
 
 </script>
 

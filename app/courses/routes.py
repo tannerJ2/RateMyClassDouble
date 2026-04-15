@@ -5,9 +5,9 @@ Course routes — search, browse, detail, review submission, likes.
 from datetime import datetime, timezone
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import current_user, login_required
-from app.models import Course, Department, Review, ReviewLike, Material, Semester, Professor, SavedCourse, SavedMaterial
+from app.models import Course, Department, Review, ReviewLike, Material, MaterialLike, Semester, Professor, SavedCourse, SavedMaterial
 from app.extensions import db
-from sqlalchemy import func
+from sqlalchemy import func, case
 
 courses = Blueprint('courses', __name__)
 
@@ -129,13 +129,25 @@ def course_detail(course_id):
     rating_count      = opinion_count + quick_rate_count
     
     description_count = len(descriptions)
-    active_materials  = (
+    like_score = func.coalesce(func.sum(case(
+        (MaterialLike.like_type == 'really_helpful', 2),
+        (MaterialLike.like_type == 'helpful', 1),
+        else_=0
+    )), 0)
+    active_materials = (
         Material.query
-        .filter_by(course_id=course_id, is_removed=False)
-        .order_by(Material.created_at.desc())
+        .outerjoin(Material.likes)
+        .filter(Material.course_id == course_id, Material.is_removed.is_(False))
+        .group_by(Material.material_id)
+        .order_by(like_score.desc(), Material.created_at.desc())
+        .limit(3)
         .all()
     )
-    material_count    = len(active_materials)
+    material_count = (
+        Material.query
+        .filter_by(course_id=course_id, is_removed=False)
+        .count()
+    )
 
     all_ratings = (
         Review.query
@@ -199,6 +211,7 @@ def course_detail(course_id):
             ).all()
             saved_material_ids = {sm.material_id for sm in saved_mats}
 
+
     return render_template(
         'courses/course_detail.html',
         course             = course,
@@ -217,9 +230,9 @@ def course_detail(course_id):
         user_likes         = user_likes,
         is_course_saved    = is_course_saved,
         saved_course_note  = saved_course_note,
-        saved_material_ids = saved_material_ids,
-        user_quick_rating  = user_quick_rating,
-        rating_count       = rating_count
+        saved_material_ids   = saved_material_ids,
+        user_quick_rating    = user_quick_rating,
+        rating_count         = rating_count
     )
 
 
@@ -309,22 +322,58 @@ def all_materials(course_id):
     )
 
     saved_material_ids = set()
+    user_material_likes = {}
 
-    if current_user.is_authenticated:
-        mat_ids = [m.material_id for m in materials]
-        if mat_ids:
-            saved = SavedMaterial.query.filter(
-                SavedMaterial.user_id    == current_user.user_id,
-                SavedMaterial.material_id.in_(mat_ids)
+    mat_ids = [m.material_id for m in materials]
+
+    # Single query for all like counts — avoids N+1 in template
+    raw_counts = db.session.query(
+        MaterialLike.material_id,
+        MaterialLike.like_type,
+        func.count(MaterialLike.like_id)
+    ).filter(MaterialLike.material_id.in_(mat_ids)).group_by(
+        MaterialLike.material_id, MaterialLike.like_type
+    ).all() if mat_ids else []
+
+    counts_map = {}
+    for mid, ltype, cnt in raw_counts:
+        counts_map.setdefault(mid, {'really_helpful': 0, 'helpful': 0, 'not_helpful': 0})[ltype] = cnt
+    for m in materials:
+        counts_map.setdefault(m.material_id, {'really_helpful': 0, 'helpful': 0, 'not_helpful': 0})
+
+    if current_user.is_authenticated and mat_ids:
+        saved = SavedMaterial.query.filter(
+            SavedMaterial.user_id    == current_user.user_id,
+            SavedMaterial.material_id.in_(mat_ids)
+        ).all()
+        saved_material_ids = {sm.material_id for sm in saved}
+
+        user_material_likes = {
+            ml.material_id: ml.like_type
+            for ml in MaterialLike.query.filter(
+                MaterialLike.user_id == current_user.user_id,
+                MaterialLike.material_id.in_(mat_ids)
             ).all()
-            saved_material_ids = {sm.material_id for sm in saved}
+        }
 
-    if sort == 'recent':
-        materials = sorted(materials, key=lambda m: m.created_at, reverse=True)
+    if sort == 'liked':
+        materials = sorted(
+            materials,
+            key=lambda m: (
+                counts_map[m.material_id]['really_helpful'] * 2 + counts_map[m.material_id]['helpful'],
+                m.created_at.timestamp()
+            ),
+            reverse=True
+        )
+    elif sort == 'type':
+        materials = sorted(
+            materials,
+            key=lambda m: (m.material_type, -m.created_at.timestamp(), m.title.lower())
+        )
     elif sort == 'yours' and current_user.is_authenticated:
         mine      = [m for m in materials if m.user_id == current_user.user_id]
         others    = [m for m in materials if m.user_id != current_user.user_id]
-        materials = mine + sorted(others, key=lambda m: m.created_at, reverse=True)
+        materials = sorted(mine, key=lambda m: m.created_at, reverse=True) + sorted(others, key=lambda m: m.created_at, reverse=True)
     else:
         materials = sorted(materials, key=lambda m: m.created_at, reverse=True)
 
@@ -342,11 +391,13 @@ def all_materials(course_id):
 
     return render_template(
         'courses/all_materials.html',
-        course             = course,
-        materials          = materials,
-        sort               = sort,
-        saved_material_ids = saved_material_ids,
-        pin_id             = pin_id,
+        course              = course,
+        materials           = materials,
+        sort                = sort,
+        saved_material_ids  = saved_material_ids,
+        user_material_likes  = user_material_likes,
+        counts_map          = counts_map,
+        pin_id              = pin_id,
     )
 
 @courses.route('/material/<int:material_id>/view')
@@ -655,6 +706,52 @@ def like_review(review_id):
         'score':  review.like_score(),
     })
 
+
+# ─────────────────────────────────────────────
+# Like material — AJAX POST
+# ─────────────────────────────────────────────
+@courses.route('/material/<int:material_id>/like', methods=['POST'])
+@login_required
+def like_material(material_id):
+    if not request.is_json:
+        return jsonify({'error': 'Request must be JSON'}), 400
+
+    material  = db.get_or_404(Material, material_id)
+    like_type = request.json.get('like_type')
+
+    if material.is_removed:
+        return jsonify({'error': 'Material no longer available'}), 404
+
+    if like_type not in ('really_helpful', 'helpful', 'not_helpful'):
+        return jsonify({'error': 'Invalid like type'}), 400
+
+    existing = MaterialLike.query.filter_by(
+        material_id=material_id, user_id=current_user.user_id
+    ).first()
+
+    if existing:
+        if existing.like_type == like_type:
+            db.session.delete(existing)
+            action = 'removed'
+        else:
+            existing.like_type = like_type
+            action = 'updated'
+    else:
+        db.session.add(MaterialLike(
+            material_id = material_id,
+            user_id     = current_user.user_id,
+            like_type   = like_type,
+        ))
+        action = 'added'
+
+    db.session.commit()
+
+    score, counts = material.get_like_data()
+    return jsonify({
+        'action': action,
+        'counts': counts,
+        'score':  score,
+    })
 
 # ─────────────────────────────────────────────
 # Quick rate — AJAX POST
