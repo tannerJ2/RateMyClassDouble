@@ -1040,7 +1040,7 @@
   {% endif %}
 {% endwith %}
 
-<a class="back-link" href="{{ url_for('courses.search_page') }}">← Back to Search</a>
+<a class="back-link" id="back-link" href="{{ url_for('courses.search_page') }}">← Back to Search</a>
 
 <div class="page">
 
@@ -1400,13 +1400,22 @@
       const backUrl    = new URL(backParam, window.location.origin);
       const deptParam  = backUrl.searchParams.get('dept');
       const queryParam = backUrl.searchParams.get('q');
+      const pathname   = backUrl.pathname;
 
       backLink.href = backParam;
 
-      if (deptParam && !queryParam) {
-        backLink.textContent = `← Back to ${deptParam}`;
+      if (pathname === '/my/uploads') {
+        backLink.textContent = '← Back to Uploads';
+      } else if (pathname === '/my/reviews') {
+        backLink.textContent = '← Back to Reviews';
+      } else if (pathname === '/my/saved') {
+        backLink.textContent = '← Back to Saved';
+      } else if (deptParam && !queryParam) {
+        backLink.textContent = '← Back to ' + deptParam;
+      } else if (queryParam && deptParam) {
+        backLink.textContent = '← Back to results for "' + queryParam + '" in ' + deptParam;
       } else if (queryParam) {
-        backLink.textContent = `← Back to results for "${queryParam}"`;
+        backLink.textContent = '← Back to results for "' + queryParam + '"';
       }
     } catch (e) {
       // malformed back param — leave default
