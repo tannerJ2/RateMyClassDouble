@@ -460,18 +460,18 @@
 
   /* ── SECTION CARD ──────────────────────────── */
   .section-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.8rem;
-    margin-bottom: 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.25rem 1.35rem;
+  margin-bottom: 1rem;
   }
 
   .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
   }
 
   .section-title {
@@ -480,23 +480,23 @@
   }
 
   .section-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   }
 
   .submit-btn {
-    background: var(--ink);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 0.45rem 1rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.38rem 0.82rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
   }
 
   .submit-btn:hover {
@@ -504,16 +504,16 @@
   }
 
   .view-all-btn {
-    background: none;
-    border: 1.5px solid var(--border);
-    color: var(--muted);
-    border-radius: 8px;
-    padding: 0.45rem 1rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
+  background: none;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 0.38rem 0.82rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
   }
 
   .view-all-btn:hover {
@@ -539,10 +539,10 @@
   }
 
   .carousel-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.55rem;
   }
 
   .carousel-arrows {
@@ -550,25 +550,43 @@
     gap: 0.5rem;
   }
 
-  .carousel-arrow {
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-  }
 
-  .carousel-arrow:hover {
-    border-color: var(--ink);
-    background: var(--ink);
-    color: #fff;
-  }
+  .carousel-arrow {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+  flex: 0 0 30px;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.carousel-arrow:hover {
+  border-color: var(--ink);
+  background: #f3efe8;
+  transform: translateY(-1px);
+}
+
+.carousel-arrow:active {
+  transform: translateY(0);
+}
+
+.carousel-arrow span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  transform: translateY(-1px);
+}
 
   .carousel-counter {
     font-size: 0.78rem;
@@ -577,10 +595,10 @@
 
   /* ── OPINION PREVIEW (in carousel) ────────── */
   .opinion-top {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.4rem;
   }
 
   .opinion-stars {
@@ -600,36 +618,36 @@
   }
 
   .opinion-text {
-    font-size: 0.9rem;
-    line-height: 1.7;
-    color: #333;
-    margin-bottom: 0.8rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #333;
+  margin-bottom: 0.45rem;
   }
 
   .opinion-ratings {
-    display: flex;
-    gap: 1.2rem;
-    font-size: 0.78rem;
-    color: var(--muted);
-    margin-bottom: 0.5rem;
+  display: flex;
+  gap: 0.9rem;
+  font-size: 0.77rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
   }
 
   .opinion-author {
-    font-size: 0.78rem;
-    color: var(--muted);
+  font-size: 0.76rem;
+  color: var(--muted);
   }
 
   /* ── DESCRIPTION PREVIEW (in carousel) ────── */
   .desc-text {
-    font-size: 0.9rem;
-    line-height: 1.7;
-    color: #333;
-    margin-bottom: 0.8rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #333;
+  margin-bottom: 0.45rem;
   }
 
   .desc-meta {
-    font-size: 0.78rem;
-    color: var(--muted);
+  font-size: 0.76rem;
+  color: var(--muted);
   }
 
   /* ── EMPTY STATE ───────────────────────────── */
@@ -666,20 +684,20 @@
   }
 
   .material-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
   }
 
   .material-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.9rem;
-    padding: 1rem 1.1rem;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg);
-    transition: border-color 0.2s;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  transition: border-color 0.2s;
   }
 
   .material-card:hover { border-color: var(--ink); }
@@ -688,11 +706,11 @@
 
   .material-info { flex: 1; min-width: 0; }
 
-  .material-title { font-size: 0.92rem; font-weight: 600; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .material-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.12rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  .material-desc { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.35rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .material-desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.22rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-  .material-meta { display: flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; color: var(--muted); flex-wrap: wrap; }
+  .material-meta { display: flex; align-items: center; gap: 0.45rem; font-size: 0.72rem; color: var(--muted); flex-wrap: wrap; }
 
   .material-type-badge { padding: 0.15rem 0.55rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3px; }
   .type-notes       { background: #eef4ff; color: #2563eb; }
@@ -701,22 +719,23 @@
   .type-other       { background: #f5f5f5; color: #555; }
 
   .material-download-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    flex-shrink: 0;
-    padding: 0.45rem 0.85rem;
-    background: var(--ink);
-    color: #fff;
-    border: none;
-    border-radius: 7px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background 0.2s;
-    white-space: nowrap;
-  }
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  padding: 0.38rem 0.82rem;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
   .material-download-btn:hover { background: var(--accent); }
 
   /* ── SIDEBAR ───────────────────────────────── */
@@ -800,6 +819,105 @@
     letter-spacing: 1px;
   }
 
+  /* ── QUICK RATE ────────────────────────────── */
+  .quick-rate-btn {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: border-color 0.2s, color 0.2s;
+    margin-top: 1.2rem;
+  }
+
+  .quick-rate-btn:hover { border-color: var(--ink); }
+
+  .quick-rate-btn.rated {
+    border-color: #f39c12;
+    color: #a57c00;
+    background: #fef9e7;
+  }
+
+  .quick-rate-panel {
+    display: none;
+    margin-top: 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+
+  .quick-rate-panel.open { display: block; }
+
+  .qr-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+  }
+
+  .qr-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink);
+    flex-shrink: 0;
+    width: 80px;
+  }
+
+  .qr-stars {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 3px;
+  }
+
+  .qr-stars input[type="radio"] { display: none; }
+
+  .qr-stars label {
+    font-size: 1.3rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+
+  .qr-stars input:checked ~ label,
+  .qr-stars label:hover,
+  .qr-stars label:hover ~ label {
+    color: #f39c12;
+  }
+
+  .qr-submit {
+    width: 100%;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.2s;
+  }
+
+  .qr-submit:hover    { background: var(--accent); }
+  .qr-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .qr-success {
+    font-size: 0.78rem;
+    color: var(--success);
+    text-align: center;
+    margin-top: 0.5rem;
+    display: none;
+  }
+
   /* ── FLASH MESSAGES ────────────────────────── */
   .flash-messages {
     padding: 1rem 3rem 0;
@@ -853,20 +971,20 @@
   }
 
   .save-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: none;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    padding: 0.4rem 0.75rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem;
-    color: var(--muted);
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s, background 0.2s;
-    white-space: nowrap;
-  }
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0.38rem 0.82rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
 
   .save-btn:hover {
     border-color: var(--ink);
@@ -1059,7 +1177,7 @@
               <span class="stars-empty">★★★★★</span>
               <span class="stars-filled" style="width:{{ (avg_rating / 5 * 100)|round(1) }}%">★★★★★</span>
             </span>
-            <span class="rating-label"> From {{ opinion_count }} user{{ 's' if opinion_count != 1 }}</span>
+            <span class="rating-label"> Based on {{ rating_count }} rating{{ 's' if rating_count != 1 }}</span>
           {% else %}
             <div class="rating-badge" style="background:var(--muted);">—</div>
             <span class="rating-label">No ratings yet</span>
@@ -1298,6 +1416,10 @@
           <span class="stat-value">{{ opinion_count }}</span>
         </div>
         <div class="stat-row">
+          <span class="stat-label">Ratings</span>
+          <span class="stat-value">{{ rating_count }}</span>
+        </div>
+        <div class="stat-row">
           <span class="stat-label">Descriptions</span>
           <span class="stat-value">{{ description_count }}</span>
         </div>
@@ -1354,6 +1476,53 @@
           </span>
         </div>
       </div>
+
+      {% if current_user.is_authenticated %}
+        <button class="quick-rate-btn {% if user_quick_rating or user_opinion %}rated{% endif %}"
+                id="quick-rate-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          {% if user_quick_rating or user_opinion %}Update Your Rating{% else %}Quick Rate{% endif %}
+        </button>
+
+        <div class="quick-rate-panel" id="quick-rate-panel">
+          <div class="qr-row">
+            <span class="qr-label">Overall</span>
+            <div class="qr-stars">
+              {% for i in range(5, 0, -1) %}
+                <input type="radio" name="qr_overall" id="qr_o{{ i }}" value="{{ i }}"
+                  {% if user_opinion and user_opinion.rating_overall == i %}checked
+                  {% elif user_quick_rating and user_quick_rating.rating_overall == i %}checked{% endif %}>
+                <label for="qr_o{{ i }}">★</label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="qr-row">
+            <span class="qr-label">Workload</span>
+            <div class="qr-stars">
+              {% for i in range(5, 0, -1) %}
+                <input type="radio" name="qr_workload" id="qr_w{{ i }}" value="{{ i }}"
+                  {% if user_opinion and user_opinion.workload_level == i %}checked
+                  {% elif user_quick_rating and user_quick_rating.workload_level == i %}checked{% endif %}>
+                <label for="qr_w{{ i }}">★</label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="qr-row">
+            <span class="qr-label">Difficulty</span>
+            <div class="qr-stars">
+              {% for i in range(5, 0, -1) %}
+                <input type="radio" name="qr_difficulty" id="qr_d{{ i }}" value="{{ i }}"
+                  {% if user_opinion and user_opinion.difficulty_level == i %}checked
+                  {% elif user_quick_rating and user_quick_rating.difficulty_level == i %}checked{% endif %}>
+                <label for="qr_d{{ i }}">★</label>
+              {% endfor %}
+            </div>
+          </div>
+          <button class="qr-submit" id="qr-submit" disabled>Submit Rating</button>
+          <div class="qr-success" id="qr-success">Rating saved.</div>
+        </div>
+      {% endif %}
+
     </div>
 
   </aside>
@@ -1485,6 +1654,65 @@
       document.querySelectorAll('.save-dropdown.open').forEach(d => d.classList.remove('open'));
     }
   });
+
+
+  // ── Quick rate ─────────────────────────────────────────────────────────────
+  const quickRateBtn   = document.getElementById('quick-rate-btn');
+  const quickRatePanel = document.getElementById('quick-rate-panel');
+  const qrSubmit       = document.getElementById('qr-submit');
+  const qrSuccess      = document.getElementById('qr-success');
+
+  if (quickRateBtn) {
+    if (quickRateBtn.classList.contains('rated')) qrSubmit.disabled = false;
+
+    quickRateBtn.addEventListener('click', () => {
+      quickRatePanel.classList.toggle('open');
+    });
+
+    function checkQrReady() {
+      const o = document.querySelector('input[name="qr_overall"]:checked');
+      const w = document.querySelector('input[name="qr_workload"]:checked');
+      const d = document.querySelector('input[name="qr_difficulty"]:checked');
+      qrSubmit.disabled = !(o && w && d);
+    }
+
+    document.querySelectorAll('input[name^="qr_"]').forEach(r => {
+      r.addEventListener('change', checkQrReady);
+    });
+
+    qrSubmit.addEventListener('click', async () => {
+      const overall    = document.querySelector('input[name="qr_overall"]:checked')?.value;
+      const workload   = document.querySelector('input[name="qr_workload"]:checked')?.value;
+      const difficulty = document.querySelector('input[name="qr_difficulty"]:checked')?.value;
+
+      if (!overall || !workload || !difficulty) return;
+
+      qrSubmit.disabled = true;
+
+      const res = await fetch('/course/{{ course.course_id }}/quick-rate', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          rating_overall:   parseInt(overall),
+          workload_level:   parseInt(workload),
+          difficulty_level: parseInt(difficulty),
+        }),
+      });
+
+      if (res.ok) {
+        qrSuccess.style.display = 'block';
+        quickRateBtn.innerHTML  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Update Your Rating';
+        quickRateBtn.classList.add('rated');
+        setTimeout(() => {
+          qrSuccess.style.display = 'none';
+          quickRatePanel.classList.remove('open');
+          qrSubmit.disabled = false;
+        }, 1500);
+      } else {
+        qrSubmit.disabled = false;
+      }
+    });
+  }
 
 </script>
 

@@ -159,7 +159,7 @@ class Review(db.Model):
     review_id        = db.Column(db.Integer,                                        primary_key=True, autoincrement=True)
     course_id        = db.Column(db.Integer, db.ForeignKey('course.course_id'),     nullable=False, index=True)
     user_id          = db.Column(db.Integer, db.ForeignKey('users.user_id'),        nullable=False, index=True)
-    review_type      = db.Column(db.Enum('opinion', 'description'),                 nullable=False, index=True)
+    review_type      = db.Column(db.Enum('opinion', 'description', 'rating'),                 nullable=False, index=True)
     semester_id      = db.Column(db.Integer, db.ForeignKey('semester.semester_id'), nullable=True,  index=True)
     rating_overall   = db.Column(db.Integer, nullable=True)
     workload_level   = db.Column(db.Integer, nullable=True)

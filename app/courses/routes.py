@@ -68,11 +68,15 @@ def search():
             'dept_name': c.dept_name,
             'avg_rating': round(
                 db.session.query(func.avg(Review.rating_overall))
-                .filter_by(course_id=c.Course.course_id, review_type='opinion')
+                .filter(
+                    Review.course_id == c.Course.course_id,
+                    Review.review_type.in_(['opinion', 'rating'])
+                )
                 .scalar() or 0, 1
             ),
-            'rating_count': Review.query.filter_by(
-                course_id=c.Course.course_id, review_type='opinion'
+            'rating_count': Review.query.filter(
+                Review.course_id == c.Course.course_id,
+                Review.review_type.in_(['opinion', 'rating'])
             ).count(),
         }
         for c in results
@@ -119,6 +123,11 @@ def course_detail(course_id):
     top_descriptions = sorted(descriptions, key=lambda r: r.like_score(), reverse=True)[:3]
 
     opinion_count     = len(opinions)
+    quick_rate_count  = Review.query.filter_by(
+        course_id=course_id, review_type='rating'
+    ).count()
+    rating_count      = opinion_count + quick_rate_count
+    
     description_count = len(descriptions)
     active_materials  = (
         Material.query
@@ -128,27 +137,31 @@ def course_detail(course_id):
     )
     material_count    = len(active_materials)
 
-    avg_difficulty = (
-        db.session.query(func.avg(Review.difficulty_level))
-        .filter_by(course_id=course_id, review_type='opinion')
-        .scalar()
+    all_ratings = (
+        Review.query
+        .filter(
+            Review.course_id == course_id,
+            Review.review_type.in_(['opinion', 'rating'])
+        )
+        .with_entities(Review.rating_overall, Review.workload_level, Review.difficulty_level)
+        .all()
     )
-    avg_workload = (
-        db.session.query(func.avg(Review.workload_level))
-        .filter_by(course_id=course_id, review_type='opinion')
-        .scalar()
-    )
-    avg_rating = (
-        db.session.query(func.avg(Review.rating_overall))
-        .filter_by(course_id=course_id, review_type='opinion')
-        .scalar()
-    )
+
+    if all_ratings:
+        avg_rating     = round(sum(r[0] for r in all_ratings) / len(all_ratings), 2)
+        avg_workload   = round(sum(r[1] for r in all_ratings) / len(all_ratings), 2)
+        avg_difficulty = round(sum(r[2] for r in all_ratings) / len(all_ratings), 2)
+    else:
+        avg_rating     = None
+        avg_workload   = None
+        avg_difficulty = None
 
     user_opinion = user_description = None
     user_likes   = {}
     is_course_saved    = False
     saved_course_note  = ''
     saved_material_ids = set()
+    user_quick_rating  = None
 
     if current_user.is_authenticated:
         user_opinion = Review.query.filter_by(
@@ -165,6 +178,12 @@ def course_detail(course_id):
                 ReviewLike.user_id == current_user.user_id
             ).all()
             user_likes = {like.review_id: like.like_type for like in likes}
+
+        user_quick_rating = Review.query.filter_by(
+            user_id=current_user.user_id,
+            course_id=course_id,
+            review_type='rating'
+        ).first()
 
         sc = SavedCourse.query.filter_by(
             user_id=current_user.user_id, course_id=course_id
@@ -199,6 +218,8 @@ def course_detail(course_id):
         is_course_saved    = is_course_saved,
         saved_course_note  = saved_course_note,
         saved_material_ids = saved_material_ids,
+        user_quick_rating  = user_quick_rating,
+        rating_count       = rating_count
     )
 
 
@@ -394,6 +415,12 @@ def submit_opinion(course_id):
 
     semesters = Semester.query.order_by(Semester.year.desc(), Semester.term).all()
 
+    user_quick_rating = Review.query.filter_by(
+        user_id=current_user.user_id,
+        course_id=course_id,
+        review_type='rating'
+    ).first()
+
     if request.method == 'POST':
         semester_id      = request.form.get('semester_id', type=int)
         rating_overall   = request.form.get('rating_overall', type=int)
@@ -422,6 +449,7 @@ def submit_opinion(course_id):
             return render_template('courses/submit_opinion.html',
                 course            = course,
                 semesters         = semesters,
+                user_quick_rating = user_quick_rating,
                 prev_semester_id  = semester_id,
                 prev_rating       = rating_overall,
                 prev_workload     = workload_level,
@@ -429,7 +457,7 @@ def submit_opinion(course_id):
                 prev_assessment   = assessment_style or '',
                 prev_text         = review_text,
             )
-        
+
         db.session.add(Review(
             course_id        = course_id,
             user_id          = current_user.user_id,
@@ -443,11 +471,18 @@ def submit_opinion(course_id):
         ))
         db.session.commit()
 
+        if user_quick_rating:
+            db.session.delete(user_quick_rating)
+            db.session.commit()
+
         flash('Your opinion has been submitted!', 'success')
         return redirect(url_for('courses.all_opinions', course_id=course_id))
 
-    return render_template('courses/submit_opinion.html', course=course, semesters=semesters)
-
+    return render_template('courses/submit_opinion.html',
+        course            = course,
+        semesters         = semesters,
+        user_quick_rating = user_quick_rating,
+    )
 
 # ─────────────────────────────────────────────
 # Submit description
@@ -619,6 +654,72 @@ def like_review(review_id):
         'counts': review.like_counts(),
         'score':  review.like_score(),
     })
+
+
+# ─────────────────────────────────────────────
+# Quick rate — AJAX POST
+# ─────────────────────────────────────────────
+@courses.route('/course/<int:course_id>/quick-rate', methods=['POST'])
+@login_required
+def quick_rate(course_id):
+    if not request.is_json:
+        return jsonify({'error': 'Request must be JSON'}), 400
+
+    Course.query.get_or_404(course_id)
+
+    rating_overall   = request.json.get('rating_overall')
+    workload_level   = request.json.get('workload_level')
+    difficulty_level = request.json.get('difficulty_level')
+
+    if not all([rating_overall, workload_level, difficulty_level]):
+        return jsonify({'error': 'All three ratings are required'}), 400
+
+    if not all(1 <= v <= 5 for v in [rating_overall, workload_level, difficulty_level]):
+        return jsonify({'error': 'Ratings must be between 1 and 5'}), 400
+
+    # If user has a full opinion, update its ratings directly
+    opinion = Review.query.filter_by(
+        user_id=current_user.user_id,
+        course_id=course_id,
+        review_type='opinion'
+    ).first()
+
+    if opinion:
+        opinion.rating_overall   = rating_overall
+        opinion.workload_level   = workload_level
+        opinion.difficulty_level = difficulty_level
+        opinion.updated_at       = datetime.now(timezone.utc)
+        db.session.commit()
+        return jsonify({'action': 'updated'})
+
+    # Otherwise create or update a quick rating
+    existing = Review.query.filter_by(
+        user_id=current_user.user_id,
+        course_id=course_id,
+        review_type='rating'
+    ).first()
+
+    if existing:
+        existing.rating_overall   = rating_overall
+        existing.workload_level   = workload_level
+        existing.difficulty_level = difficulty_level
+        existing.updated_at       = datetime.now(timezone.utc)
+        action = 'updated'
+    else:
+        db.session.add(Review(
+            user_id          = current_user.user_id,
+            course_id        = course_id,
+            review_type      = 'rating',
+            rating_overall   = rating_overall,
+            workload_level   = workload_level,
+            difficulty_level = difficulty_level,
+            review_text      = '',
+        ))
+        action = 'created'
+
+    db.session.commit()
+    return jsonify({'action': action})
+
 
 
 # ─────────────────────────────────────────────
