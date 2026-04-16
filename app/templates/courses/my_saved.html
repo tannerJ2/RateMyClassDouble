@@ -715,6 +715,102 @@
   .alert-info    { background: #eef4ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.2); }
   .alert-danger  { background: #fdf0ee; color: var(--accent); border: 1px solid rgba(192,57,43,0.2); }
 
+  /* ── CONFIRM MODAL ─────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 400;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 380px;
+    margin: 1.5rem;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  }
+
+  .modal-icon {
+    width: 44px;
+    height: 44px;
+    background: #fdf0ee;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    margin-bottom: 1.1rem;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.45rem;
+  }
+
+  .modal-body {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-body strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: flex-end;
+  }
+
+  .modal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 8px;
+    padding: 0.5rem 1.1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid var(--border);
+    background: none;
+    color: var(--ink);
+  }
+
+  .modal-btn:hover {
+    border-color: var(--ink);
+    background: var(--bg);
+  }
+
+  .modal-btn-danger {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .modal-btn-danger:hover {
+    background: #a93226;
+    border-color: #a93226;
+  }
+
   /* ── RESPONSIVE ────────────────────────────── */
   @media (max-width: 700px) {
     nav { padding: 1rem 1.5rem; }
@@ -727,6 +823,27 @@
 
 <!-- OVERLAY -->
 <div id="menu-overlay"></div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6"/>
+        <path d="M14 11v6"/>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+    </div>
+    <div class="modal-title" id="modal-title">Remove from Saved?</div>
+    <div class="modal-body" id="modal-body">This item will be removed from your saved list.</div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn modal-btn-danger" id="modal-confirm-btn">Remove</button>
+    </div>
+  </div>
+</div>
 
 <!-- SIDE MENU -->
 <div id="side-menu">
@@ -1081,9 +1198,42 @@
     }
   }
 
-  // ── Unsave / remove item ───────────────────────────────────────────────────
-  function unsaveItem(type, id, btn) {
+  // ── Confirm modal ──────────────────────────────────────────────────────────
+  let pendingUnsave = null;
+
+  function unsaveItem(type, id) {
+    const card  = document.getElementById(`saved-card-${type}-${id}`);
+    const isCourse = type === 'course';
+
+    // Build a descriptive label for the modal body
+    let itemName = '';
+    if (isCourse) {
+      const titleEl = card.querySelector('.saved-course-title');
+      itemName = titleEl ? titleEl.textContent.trim() : 'this course';
+    } else {
+      const titleEl = card.querySelector('.saved-material-title');
+      itemName = titleEl ? titleEl.textContent.trim() : 'this material';
+    }
+
+    document.getElementById('modal-title').textContent =
+      isCourse ? 'Remove Course from Saved?' : 'Remove Material from Saved?';
+    document.getElementById('modal-body').innerHTML =
+      '<strong>' + itemName + '</strong> will be removed from your saved list. You can always save it again later.';
+
+    pendingUnsave = { type, id };
+    document.getElementById('confirm-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('confirm-modal').classList.remove('active');
+    pendingUnsave = null;
+  }
+
+  document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+    if (!pendingUnsave) return;
+    const { type, id } = pendingUnsave;
     const url = type === 'course' ? `/course/${id}/save` : `/material/${id}/save`;
+    closeModal();
 
     fetch(url, {
       method:  'POST',
@@ -1102,7 +1252,17 @@
         }, 250);
       }
     });
-  }
+  });
+
+  // Close modal on overlay click
+  document.getElementById('confirm-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
 
   // ── Update tab counts ──────────────────────────────────────────────────────
   function updateCounts() {

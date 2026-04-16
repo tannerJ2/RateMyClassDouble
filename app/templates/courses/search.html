@@ -366,20 +366,42 @@
     letter-spacing: 0.5px;
   }
 
-  .filter-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
   .filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     border-radius: 20px;
-    padding: 0.35rem 0.8rem;
+    padding: 0.35rem 0.9rem;
     font-size: 0.8rem;
+    font-family: 'DM Sans', sans-serif;
     cursor: pointer;
     transition: all 0.2s;
+    color: var(--ink);
+    user-select: none;
   }
-  .filter-tag:hover, .filter-tag.active {
+
+  .filter-tag:hover {
+    border-color: var(--ink);
+  }
+
+  .filter-tag.active {
     background: var(--ink);
     color: #fff;
     border-color: var(--ink);
+  }
+
+  .filter-arrow {
+    display: inline-flex;
+    align-items: center;
+    transition: transform 0.2s;
   }
 
   .results-count {
@@ -522,6 +544,65 @@
     nav { padding: 1rem 1.5rem; }
     .search-page { padding: 1.5rem; }
     #dept-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── COURSE CARD RATINGS ───────────────────── */
+  .card-ratings {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-top: 0.4rem;
+    align-items: center;
+  }
+
+  .card-rating-row {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .card-rating-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .card-rating-empty {
+    font-size: 0.72rem;
+    color: #ccc;
+    letter-spacing: 1px;
+  }
+
+  .card-rating-filled-wrap {
+    position: relative;
+    display: inline-block;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+  }
+
+  .card-rating-filled-wrap .empty-layer {
+    color: #ddd;
+  }
+
+  .card-rating-filled-wrap .fill-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: #f39c12;
+  }
+
+  .card-rating-num {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .no-ratings-text {
+    font-size: 0.75rem;
+    color: #ccc;
+    margin-top: 0.35rem;
   }
 
 
@@ -672,6 +753,101 @@
     flex-shrink: 0;
   }
 
+  /* ── PAGINATION ────────────────────────────── */
+  .pagination {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.2rem;
+    gap: 0.75rem;
+  }
+
+  .pagination.visible {
+    display: flex;
+  }
+
+  .page-info {
+    font-size: 0.82rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .page-info strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .page-arrows {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .page-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .page-arrow:hover:not(:disabled) {
+    border-color: var(--ink);
+    background: var(--bg);
+  }
+
+  .page-arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .page-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 0.4rem;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .page-num:hover {
+    color: var(--ink);
+    background: var(--bg);
+  }
+
+  .page-num.active {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+    font-weight: 500;
+  }
+
+  .page-ellipsis {
+    font-size: 0.82rem;
+    color: var(--muted);
+    padding: 0 0.15rem;
+  }
+
 </style>
 </head>
 <body>
@@ -783,12 +959,32 @@
   </div>
 
   <div class="filter-panel" id="filter-panel">
-    <h4>Filter by</h4>
+    <h4>Sort by</h4>
     <div class="filter-tags">
-      <span class="filter-tag">Top Rated</span>
-      <span class="filter-tag">Easy Workload</span>
-      <span class="filter-tag">Challenging</span>
-      <span class="filter-tag">Online</span>
+      <button class="filter-tag" id="filter-rating" data-field="avg_rating" data-dir="desc">
+        Highest Rated
+        <span class="filter-arrow">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </span>
+      </button>
+      <button class="filter-tag" id="filter-workload" data-field="avg_workload" data-dir="desc">
+        Heavy Workload
+        <span class="filter-arrow">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </span>
+      </button>
+      <button class="filter-tag" id="filter-difficulty" data-field="avg_difficulty" data-dir="desc">
+        Most Difficult
+        <span class="filter-arrow">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </span>
+      </button>
     </div>
   </div>
 
@@ -807,33 +1003,252 @@
 
   <div id="course-list"></div>
 
+  <div class="pagination" id="pagination">
+    <div class="page-info" id="page-info"></div>
+    <div style="display:flex; align-items:center; gap:0.4rem;">
+      <button class="page-arrow" id="page-prev" onclick="goToPage(currentPage - 1)" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div class="page-numbers" id="page-numbers"></div>
+      <button class="page-arrow" id="page-next" onclick="goToPage(currentPage + 1)" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
 </div>
 
 <script>
-  // Side menu
+  // ── Side menu ──────────────────────────────────────────────────────────────
   const navTrigger  = document.getElementById('nav-trigger');
   const menuClose   = document.getElementById('menu-close');
   const sideMenu    = document.getElementById('side-menu');
   const menuOverlay = document.getElementById('menu-overlay');
 
-  // ── Saved state ────────────────────────────────────────────────────────────
   const isAuth         = {{ 'true' if current_user.is_authenticated else 'false' }};
   const savedCourseIds = new Set({{ saved_course_ids | list | tojson }});
 
-  function openMenu() {
-    sideMenu.classList.add('open');
-    menuOverlay.classList.add('active');
-  }
-  function closeMenu() {
-    sideMenu.classList.remove('open');
-    menuOverlay.classList.remove('active');
-  }
+  function openMenu()  { sideMenu.classList.add('open');    menuOverlay.classList.add('active'); }
+  function closeMenu() { sideMenu.classList.remove('open'); menuOverlay.classList.remove('active'); }
 
   navTrigger.addEventListener('click', openMenu);
   menuClose.addEventListener('click', closeMenu);
   menuOverlay.addEventListener('click', closeMenu);
 
-  // Search
+
+  // ── Pagination state ───────────────────────────────────────────────────────
+  const PAGE_SIZE  = 10;
+  let currentPage  = 1;
+  let pagedData    = [];   // the sorted array currently being paged through
+
+
+  // ── Filter state ───────────────────────────────────────────────────────────
+  let activeFilter   = null;
+  let lastCourseData = [];
+
+  const filterLabels = {
+    avg_rating:     { desc: 'Highest Rated',  asc: 'Lowest Rated'   },
+    avg_workload:   { desc: 'Heavy Workload',  asc: 'Light Workload' },
+    avg_difficulty: { desc: 'Most Difficult',  asc: 'Easiest'        },
+  };
+
+  function updateFilterButtons() {
+    document.querySelectorAll('.filter-tag').forEach(btn => {
+      const field    = btn.dataset.field;
+      const isActive = activeFilter && activeFilter.field === field;
+      btn.classList.toggle('active', isActive);
+
+      const dir       = isActive ? activeFilter.dir : 'desc';
+      const labelNode = btn.childNodes[0];
+      labelNode.textContent = filterLabels[field][dir] + ' ';
+
+      const arrow = btn.querySelector('.filter-arrow');
+      arrow.style.transform = (isActive && activeFilter.dir === 'asc')
+        ? 'rotate(180deg)'
+        : 'rotate(0deg)';
+
+      btn.dataset.dir = dir;
+    });
+  }
+
+  function applySortAndRender(courses) {
+    let sorted = [...courses];
+    if (activeFilter && sorted.length) {
+      const { field, dir } = activeFilter;
+      sorted.sort((a, b) => {
+        const av = parseFloat(a[field]) || 0;
+        const bv = parseFloat(b[field]) || 0;
+        return dir === 'desc' ? bv - av : av - bv;
+      });
+    }
+    pagedData   = sorted;
+    currentPage = 1;
+    renderPage();
+  }
+
+  document.querySelectorAll('.filter-tag').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const field = btn.dataset.field;
+      if (activeFilter && activeFilter.field === field) {
+        activeFilter.dir = activeFilter.dir === 'desc' ? 'asc' : 'desc';
+      } else {
+        activeFilter = { field, dir: 'desc' };
+      }
+      updateFilterButtons();
+      if (lastCourseData.length) applySortAndRender(lastCourseData);
+    });
+  });
+
+
+  // ── Card builder ───────────────────────────────────────────────────────────
+  function makeStarRow(label, val) {
+    const pct = (val / 5 * 100).toFixed(1) + '%';
+    return '<div class="card-rating-row">'
+      + '<span class="card-rating-label">' + label + '</span>'
+      + '<span class="card-rating-filled-wrap">'
+      + '<span class="empty-layer">★★★★★</span>'
+      + '<span class="fill-layer" style="width:' + pct + '">★★★★★</span>'
+      + '</span>'
+      + '<span class="card-rating-num">' + val.toFixed(1) + '</span>'
+      + '</div>';
+  }
+
+  function buildReturnUrl() {
+    const params = new URLSearchParams();
+    const query  = resultsSearch.value.trim();
+    const dept   = getSelectedDept();
+    if (query) params.set('q', query);
+    if (dept)  params.set('dept', dept);
+    return '/courses?' + params.toString();
+  }
+
+  function buildCard(c) {
+    const count      = c.rating_count || 0;
+    const returnUrl  = buildReturnUrl();
+
+    const ratingsHtml = count > 0
+      ? '<div class="card-ratings">'
+        + makeStarRow('Overall',    parseFloat(c.avg_rating)     || 0)
+        + makeStarRow('Workload',   parseFloat(c.avg_workload)   || 0)
+        + makeStarRow('Difficulty', parseFloat(c.avg_difficulty) || 0)
+        + '<span class="card-rating-num" style="margin-top:0.1rem;">'
+        + count + ' rating' + (count !== 1 ? 's' : '')
+        + '</span></div>'
+      : '<div class="no-ratings-text">No ratings yet</div>';
+
+    const bkOut  = '<svg class="save-icon-outline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+    const bkFill = '<svg class="save-icon-filled" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+
+    const isSaved  = isAuth && savedCourseIds.has(c.id);
+    const savedCls = isSaved ? ' saved' : '';
+    const savedLbl = isSaved ? 'Saved' : 'Save';
+    const saveHtml = isAuth
+      ? '<div class="save-wrapper course-card-save-area" data-type="course" data-id="' + c.id + '">'
+        + '<button class="save-btn' + savedCls + '" onclick="toggleSaveDropdown(this)">'
+        + bkOut + bkFill
+        + '<span class="save-btn-label">' + savedLbl + '</span></button>'
+        + '<div class="save-dropdown">'
+        + '<span class="save-dropdown-label">Add a note</span>'
+        + '<textarea class="save-note-input" placeholder="(Optional) saved this course because\u2026"></textarea>'
+        + '<button class="save-confirm-btn" onclick="confirmSave(this)">Save</button>'
+        + '</div></div>'
+      : '';
+
+    return '<div class="course-card-wrapper">'
+      + '<a href="/course/' + c.id + '?back=' + encodeURIComponent(returnUrl) + '" style="display:block;">'
+      + '<div class="course-card"><div class="course-info">'
+      + '<div class="course-name">' + c.title + '</div>'
+      + '<div class="course-details">' + c.dept_code + ' ' + c.number + '</div>'
+      + ratingsHtml
+      + '</div></div></a>'
+      + saveHtml + '</div>';
+  }
+
+
+  // ── Pagination renderer ────────────────────────────────────────────────────
+  function renderPage() {
+    const total      = pagedData.length;
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+    const start      = (currentPage - 1) * PAGE_SIZE;
+    const end        = Math.min(start + PAGE_SIZE, total);
+    const slice      = pagedData.slice(start, end);
+
+    const courseList = document.getElementById('course-list');
+    const pagination = document.getElementById('pagination');
+
+    if (total === 0) {
+      courseList.innerHTML = '<p style="color:var(--muted)">No courses found.</p>';
+      pagination.classList.remove('visible');
+      return;
+    }
+
+    courseList.innerHTML = slice.map(buildCard).join('');
+
+    // Scroll course list back to top on page change (not on first load)
+    if (currentPage > 1 || start > 0) {
+      courseList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Page info text
+    document.getElementById('page-info').innerHTML =
+      'Showing <strong>' + (start + 1) + '–' + end + '</strong> of <strong>' + total + '</strong>';
+
+    // Prev / next arrows
+    document.getElementById('page-prev').disabled = currentPage === 1;
+    document.getElementById('page-next').disabled = currentPage === totalPages;
+
+    // Page number buttons (show max 5 pages with ellipsis)
+    const numbersEl   = document.getElementById('page-numbers');
+    numbersEl.innerHTML = '';
+
+    if (totalPages <= 1) {
+      pagination.classList.remove('visible');
+      return;
+    }
+
+    pagination.classList.add('visible');
+
+    function addPageBtn(n) {
+      const btn = document.createElement('button');
+      btn.className   = 'page-num' + (n === currentPage ? ' active' : '');
+      btn.textContent = n;
+      btn.onclick     = () => goToPage(n);
+      numbersEl.appendChild(btn);
+    }
+
+    function addEllipsis() {
+      const span = document.createElement('span');
+      span.className   = 'page-ellipsis';
+      span.textContent = '…';
+      numbersEl.appendChild(span);
+    }
+
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) addPageBtn(i);
+    } else {
+      addPageBtn(1);
+      if (currentPage > 3)               addEllipsis();
+      const rangeStart = Math.max(2, currentPage - 1);
+      const rangeEnd   = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = rangeStart; i <= rangeEnd; i++) addPageBtn(i);
+      if (currentPage < totalPages - 2)  addEllipsis();
+      addPageBtn(totalPages);
+    }
+  }
+
+  function goToPage(n) {
+    const totalPages = Math.ceil(pagedData.length / PAGE_SIZE);
+    if (n < 1 || n > totalPages) return;
+    currentPage = n;
+    renderPage();
+  }
+
+
+  // ── Search ─────────────────────────────────────────────────────────────────
   const resultsSearch = document.getElementById('results-search');
   const filterPanel   = document.getElementById('filter-panel');
   const courseList    = document.getElementById('course-list');
@@ -849,17 +1264,20 @@
   }
 
   function showDeptGrid() {
-    deptGrid.style.display = 'grid';
+    deptGrid.style.display   = 'grid';
     courseList.style.display = 'none';
+    document.getElementById('pagination').classList.remove('visible');
     backBtn.classList.remove('visible');
     resultsCount.textContent = 'Browse by Department';
-    deptTrigger.textContent = 'All Departments';
+    deptTrigger.textContent  = 'All Departments';
     deptOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
     deptOptions.querySelector('.custom-option').classList.add('selected');
+    pagedData   = [];
+    currentPage = 1;
   }
 
   function showCourseList() {
-    deptGrid.style.display = 'none';
+    deptGrid.style.display   = 'none';
     courseList.style.display = 'block';
     backBtn.classList.add('visible');
   }
@@ -873,66 +1291,25 @@
 
     const res     = await fetch(`/search?${params.toString()}`);
     const courses = await res.json();
+    lastCourseData = courses;
 
     if (dept && !query) {
-    const deptName = deptOptions.querySelector(`.custom-option[data-value="${dept}"]`)?.textContent || dept;
-    resultsCount.textContent = `${deptName} — ${courses.length} courses`;
-} else if (query && dept) {
-    const deptName = deptOptions.querySelector(`.custom-option[data-value="${dept}"]`)?.textContent || dept;
-    resultsCount.textContent = `Showing ${courses.length} results for "${query}" in ${deptName}`;
-} else if (query) {
-    resultsCount.textContent = `Showing ${courses.length} results for "${query}"`;
-} else {
-    resultsCount.textContent = 'Showing all courses';
-}
+      const deptName = deptOptions.querySelector(`.custom-option[data-value="${dept}"]`)?.textContent || dept;
+      resultsCount.textContent = `${deptName} — ${courses.length} courses`;
+    } else if (query && dept) {
+      const deptName = deptOptions.querySelector(`.custom-option[data-value="${dept}"]`)?.textContent || dept;
+      resultsCount.textContent = `Showing ${courses.length} results for "${query}" in ${deptName}`;
+    } else if (query) {
+      resultsCount.textContent = `Showing ${courses.length} results for "${query}"`;
+    } else {
+      resultsCount.textContent = 'Showing all courses';
+    }
 
-    // Build the return URL so the back button restores search state
-    const returnParams = new URLSearchParams();
-    if (query) returnParams.set('q', query);
-    if (dept)  returnParams.set('dept', dept);
-    const returnUrl = '/courses?' + returnParams.toString();
-
-    const bkOut  = '<svg class="save-icon-outline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
-    const bkFill = '<svg class="save-icon-filled" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
-
-    courseList.innerHTML = courses.length === 0
-      ? '<p style="color:var(--muted)">No courses found.</p>'
-      : courses.map(c => {
-          const avg        = parseFloat(c.avg_rating) || 0;
-          const count      = c.rating_count || 0;
-          const pct        = count > 0 ? (avg / 5 * 100).toFixed(1) + '%' : '0%';
-          const ratingText = count > 0
-            ? avg.toFixed(1) + ' (' + count + ' rating' + (count !== 1 ? 's' : '') + ')'
-            : 'No ratings yet';
-          const starsHtml  = '<span class="stars">'
-            + '<span class="stars-empty">★★★★★</span>'
-            + '<span class="stars-filled" style="width:' + pct + '">★★★★★</span>'
-            + '</span>';
-          const isSaved   = isAuth && savedCourseIds.has(c.id);
-          const savedCls  = isSaved ? ' saved' : '';
-          const savedLbl  = isSaved ? 'Saved' : 'Save';
-          const saveHtml  = isAuth
-            ? '<div class="save-wrapper course-card-save-area" data-type="course" data-id="' + c.id + '">'
-              + '<button class="save-btn' + savedCls + '" onclick="toggleSaveDropdown(this)">'
-              + bkOut + bkFill
-              + '<span class="save-btn-label">' + savedLbl + '</span></button>'
-              + '<div class="save-dropdown">'
-              + '<span class="save-dropdown-label">Add a note</span>'
-              + '<textarea class="save-note-input" placeholder="(Optional) saved this course because\u2026"></textarea>'
-              + '<button class="save-confirm-btn" onclick="confirmSave(this)">Save</button>'
-              + '</div></div>'
-            : '';
-          return '<div class="course-card-wrapper">'
-            + '<a href="/course/' + c.id + '?back=' + encodeURIComponent(returnUrl) + '" style="display:block;">'
-            + '<div class="course-card"><div class="course-info">'
-            + '<div class="course-name">' + c.title + '</div>'
-            + '<div class="course-details">' + c.dept_code + ' ' + c.number + '</div>'
-            + '<div>' + starsHtml + '<span class="rating-text"> ' + ratingText + '</span></div>'
-            + '</div></div></a>'
-            + saveHtml + '</div>';
-        }).join('');
+    applySortAndRender(courses);
   }
 
+
+  // ── Department grid clicks ─────────────────────────────────────────────────
   deptGrid.addEventListener('click', e => {
     const card = e.target.closest('.dept-card');
     if (!card) return;
@@ -954,11 +1331,8 @@
     if (e.key === 'Enter') {
       const query = resultsSearch.value.trim();
       const dept  = getSelectedDept();
-      if (!query && !dept) {
-        showDeptGrid();
-      } else {
-        doSearch(query, dept);
-      }
+      if (!query && !dept) showDeptGrid();
+      else doSearch(query, dept);
     }
   });
 
@@ -980,33 +1354,25 @@
     opt.classList.add('selected');
     deptOptions.classList.remove('open');
     if (!value) {
-      if (resultsSearch.value.trim()) {
-        doSearch(resultsSearch.value.trim(), '');
-      } else {
-        showDeptGrid();
-      }
+      if (resultsSearch.value.trim()) doSearch(resultsSearch.value.trim(), '');
+      else showDeptGrid();
       return;
     }
     doSearch(resultsSearch.value, value);
   });
 
   document.addEventListener('click', e => {
-    if (!deptSelect.contains(e.target)) {
-      deptOptions.classList.remove('open');
-    }
+    if (!deptSelect.contains(e.target)) deptOptions.classList.remove('open');
   });
-  // ── Restore search state from URL params (e.g. coming back from course detail)
+
+
+  // ── Restore state from URL ─────────────────────────────────────────────────
   (function restoreState() {
     const params     = new URLSearchParams(window.location.search);
     const savedQuery = params.get('q')    || '';
     const savedDept  = params.get('dept') || '';
-
     if (!savedQuery && !savedDept) return;
-
-    if (savedQuery) {
-      resultsSearch.value = savedQuery;
-    }
-
+    if (savedQuery) resultsSearch.value = savedQuery;
     if (savedDept) {
       const matchingOpt = deptOptions.querySelector(`.custom-option[data-value="${savedDept}"]`);
       if (matchingOpt) {
@@ -1015,9 +1381,9 @@
         deptTrigger.textContent = matchingOpt.textContent;
       }
     }
-
     doSearch(savedQuery, savedDept);
   })();
+
 
   // ── Save button ────────────────────────────────────────────────────────────
   function toggleSaveDropdown(btn) {
@@ -1038,7 +1404,7 @@
         if (data.action === 'unsaved') {
           btn.classList.remove('saved');
           const label = btn.querySelector('.save-btn-label');
-          if (label) label.textContent = btn.closest('[data-type="course"]') ? 'Save Course' : 'Save';
+          if (label) label.textContent = 'Save';
         }
       });
       return;

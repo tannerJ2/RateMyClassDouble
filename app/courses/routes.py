@@ -74,6 +74,22 @@ def search():
                 )
                 .scalar() or 0, 1
             ),
+            'avg_workload': round(
+                db.session.query(func.avg(Review.workload_level))
+                .filter(
+                    Review.course_id == c.Course.course_id,
+                    Review.review_type.in_(['opinion', 'rating'])
+                )
+                .scalar() or 0, 1
+            ),
+            'avg_difficulty': round(
+                db.session.query(func.avg(Review.difficulty_level))
+                .filter(
+                    Review.course_id == c.Course.course_id,
+                    Review.review_type.in_(['opinion', 'rating'])
+                )
+                .scalar() or 0, 1
+            ),
             'rating_count': Review.query.filter(
                 Review.course_id == c.Course.course_id,
                 Review.review_type.in_(['opinion', 'rating'])
