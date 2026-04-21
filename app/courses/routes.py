@@ -5,7 +5,7 @@ Course routes — search, browse, detail, review submission, likes.
 from datetime import datetime, timezone
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import current_user, login_required
-from app.models import Course, Department, Review, ReviewLike, Material, MaterialLike, Semester, Professor, SavedCourse, SavedMaterial
+from app.models import Course, Department, Review, ReviewLike, Material, MaterialLike, Semester, Professor, SavedCourse, SavedMaterial, FlagReason
 from app.extensions import db
 from sqlalchemy import func, case
 
@@ -280,12 +280,14 @@ def all_opinions(course_id):
         ).all()
         user_likes = {like.review_id: like.like_type for like in likes}
 
+    flag_reasons = FlagReason.query.all()
     return render_template(
         'courses/all_opinions.html',
-        course     = course,
-        opinions   = opinions,
-        sort       = sort,
-        user_likes = user_likes,
+        course       = course,
+        opinions     = opinions,
+        sort         = sort,
+        user_likes   = user_likes,
+        flag_reasons = flag_reasons,
     )
 
 
@@ -317,12 +319,14 @@ def all_descriptions(course_id):
         ).all()
         user_likes = {like.review_id: like.like_type for like in likes}
 
+    flag_reasons = FlagReason.query.all()
     return render_template(
         'courses/all_descriptions.html',
         course       = course,
         descriptions = descriptions,
         sort         = sort,
         user_likes   = user_likes,
+        flag_reasons = flag_reasons,
     )
 
 @courses.route('/course/<int:course_id>/materials')
@@ -405,15 +409,17 @@ def all_materials(course_id):
         rest      = [m for m in materials if m.material_id != pin_id]
         materials = pinned + rest
 
+    flag_reasons = FlagReason.query.all()
     return render_template(
         'courses/all_materials.html',
-        course              = course,
-        materials           = materials,
-        sort                = sort,
-        saved_material_ids  = saved_material_ids,
+        course               = course,
+        materials            = materials,
+        sort                 = sort,
+        saved_material_ids   = saved_material_ids,
         user_material_likes  = user_material_likes,
-        counts_map          = counts_map,
-        pin_id              = pin_id,
+        counts_map           = counts_map,
+        pin_id               = pin_id,
+        flag_reasons         = flag_reasons,
     )
 
 @courses.route('/material/<int:material_id>/view')

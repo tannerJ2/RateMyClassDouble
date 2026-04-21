@@ -1,0 +1,59 @@
+{% extends 'admin/base.html' %}
+{% set active_page = 'users' %}
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<h1 class="admin-page-title">User Management</h1>
+
+<div class="filter-bar">
+  <a href="{{ url_for('admin.user_list', status='all',       q=search_q) }}" class="filter-btn {% if status_filter == 'all'       %}active{% endif %}">All</a>
+  <a href="{{ url_for('admin.user_list', status='active',    q=search_q) }}" class="filter-btn {% if status_filter == 'active'    %}active{% endif %}">Active</a>
+  <a href="{{ url_for('admin.user_list', status='suspended', q=search_q) }}" class="filter-btn {% if status_filter == 'suspended' %}active{% endif %}">Suspended</a>
+  <a href="{{ url_for('admin.user_list', status='banned',    q=search_q) }}" class="filter-btn {% if status_filter == 'banned'    %}active{% endif %}">Banned</a>
+  <a href="{{ url_for('admin.user_list', status='admin',     q=search_q) }}" class="filter-btn {% if status_filter == 'admin'     %}active{% endif %}">Admins</a>
+
+  <form action="{{ url_for('admin.user_list') }}" method="get" style="margin-left:auto; display:flex; gap:0.4rem;">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <input type="text" name="q" value="{{ search_q }}" placeholder="Search users..." class="search-input">
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  </form>
+</div>
+
+<div class="admin-card">
+  {% if users %}
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>User</th><th>Email</th><th>Role</th><th>Status</th>
+          <th>Joined</th><th>Last Login</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td style="font-weight:500;">{{ user.first_name }} {{ user.last_name }}</td>
+          <td style="color:var(--muted);">{{ user.email }}</td>
+          <td>
+            {% if user.is_admin() %}
+              <span class="badge badge-admin">admin</span>
+            {% else %}
+              <span class="badge" style="background:#f0f0f0; color:var(--muted);">user</span>
+            {% endif %}
+          </td>
+          <td><span class="badge badge-{{ user.status }}">{{ user.status }}</span></td>
+          <td style="color:var(--muted); font-size:0.78rem;">{{ user.created_at.strftime('%b %d, %Y') }}</td>
+          <td style="color:var(--muted); font-size:0.78rem;">
+            {{ user.last_login_at.strftime('%b %d, %Y') if user.last_login_at else 'Never' }}
+          </td>
+          <td>
+            <a href="{{ url_for('admin.user_detail', user_id=user.user_id) }}" class="btn btn-outline btn-sm">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="empty-state">No users found matching your criteria.</div>
+  {% endif %}
+</div>
+{% endblock %}

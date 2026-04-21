@@ -37,7 +37,13 @@ class User(UserMixin, db.Model):
     email         = db.Column(db.String(255),  unique=True, nullable=False)
     password_hash = db.Column(db.String(255),  nullable=False)
     role          = db.Column(db.Enum('user', 'admin'), default='user', nullable=False)
-    is_active     = db.Column(db.Boolean,      default=True, nullable=False)
+    is_active          = db.Column(db.Boolean,      default=True, nullable=False)
+    status             = db.Column(db.Enum('active', 'suspended', 'banned'), default='active', nullable=False)
+    suspended_until    = db.Column(db.DateTime,  nullable=True)
+    suspension_reason  = db.Column(db.Text,      nullable=True)
+    ban_reason         = db.Column(db.Text,      nullable=True)
+    status_changed_at  = db.Column(db.DateTime,  nullable=True)
+    status_changed_by  = db.Column(db.Integer,   db.ForeignKey('users.user_id'), nullable=True)
     created_at    = db.Column(db.DateTime,     default=datetime.now(timezone.utc), nullable=False)
     last_login_at = db.Column(db.DateTime,     nullable=True)
 
@@ -61,6 +67,19 @@ class User(UserMixin, db.Model):
 
     def is_admin(self):
         return self.role == 'admin'
+
+    def is_banned(self):
+        return self.status == 'banned'
+
+    def is_suspended(self):
+        if self.status != 'suspended':
+            return False
+        if self.suspended_until and datetime.now(timezone.utc) >= self.suspended_until:
+            self.status = 'active'
+            self.suspended_until = None
+            self.suspension_reason = None
+            return False
+        return True
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -167,7 +186,9 @@ class Review(db.Model):
     difficulty_level = db.Column(db.Integer, nullable=True)
     assessment_style = db.Column(db.String(255), nullable=True)
     review_text      = db.Column(db.Text,    nullable=False)
-    is_edited        = db.Column(db.Boolean, default=False, nullable=False)
+    is_edited        = db.Column(db.Boolean,  default=False, nullable=False)
+    is_removed       = db.Column(db.Boolean,  default=False, nullable=False)
+    removed_at       = db.Column(db.DateTime, nullable=True)
     created_at       = db.Column(db.DateTime, default=datetime.now(timezone.utc), nullable=False)
     updated_at       = db.Column(db.DateTime, nullable=True)
 
@@ -175,6 +196,7 @@ class Review(db.Model):
     user     = db.relationship('User',       back_populates='reviews')
     semester = db.relationship('Semester',   back_populates='reviews')
     likes    = db.relationship('ReviewLike', back_populates='review', lazy='dynamic', cascade='all, delete-orphan')
+    flags    = db.relationship('Flag',       back_populates='review', lazy='dynamic')
 
     def get_like_data(self):
         '''
@@ -332,10 +354,13 @@ class Flag(db.Model):
     __table_args__ = (
         db.UniqueConstraint('reporter_user_id', 'material_id', name='uq_flag_user_material'),
         db.UniqueConstraint('reporter_ip_hash', 'material_id', name='uq_flag_ip_material'),
+        db.UniqueConstraint('reporter_user_id', 'review_id',   name='uq_flag_user_review'),
+        db.UniqueConstraint('reporter_ip_hash', 'review_id',   name='uq_flag_ip_review'),
     )
 
     flag_id              = db.Column(db.Integer,  primary_key=True, autoincrement=True)
-    material_id          = db.Column(db.Integer,  db.ForeignKey('material.material_id'), nullable=False, index=True)
+    material_id          = db.Column(db.Integer,  db.ForeignKey('material.material_id'), nullable=True, index=True)
+    review_id            = db.Column(db.Integer,  db.ForeignKey('review.review_id'),     nullable=True, index=True)
     reporter_user_id     = db.Column(db.Integer,  db.ForeignKey('users.user_id'),        nullable=True)
     reporter_ip_hash     = db.Column(db.String(64), nullable=True)
     reason_id            = db.Column(db.Integer,  db.ForeignKey('flag_reason.reason_id'), nullable=False, index=True)
@@ -346,9 +371,16 @@ class Flag(db.Model):
     created_at           = db.Column(db.DateTime, default=datetime.now(timezone.utc), nullable=False)
 
     material          = db.relationship('Material',   back_populates='flags')
+    review            = db.relationship('Review',     back_populates='flags')
     reporter          = db.relationship('User', foreign_keys=[reporter_user_id],     back_populates='flags_reported')
     reviewed_by_admin = db.relationship('User', foreign_keys=[reviewed_by_admin_id], back_populates='flags_reviewed')
     reason            = db.relationship('FlagReason', back_populates='flags')
+
+    def content_type(self):
+        return 'review' if self.review_id else 'material'
+
+    def content_item(self):
+        return self.review if self.review_id else self.material
 
     def __repr__(self):
         return f'<Flag {self.flag_id} [{self.status}]>'

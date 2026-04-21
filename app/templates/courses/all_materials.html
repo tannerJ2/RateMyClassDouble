@@ -765,6 +765,162 @@
     background: var(--accent);
   }
 
+  /* ── FLAG BUTTON & MODAL ───────────────────── */
+  .flag-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 0.28rem 0.65rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    cursor: pointer;
+    color: var(--muted);
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+
+  .flag-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .flag-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .flag-modal-overlay.open {
+    display: flex;
+  }
+
+  .flag-modal {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.6rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .flag-modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .flag-modal-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+
+  .flag-reason-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .flag-reason-option {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0.7rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    font-size: 0.85rem;
+    color: var(--ink);
+  }
+
+  .flag-reason-option:hover {
+    border-color: var(--accent);
+    background: #fdf0ee;
+  }
+
+  .flag-reason-option input[type="radio"] {
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .flag-reason-option.selected {
+    border-color: var(--accent);
+    background: #fdf0ee;
+  }
+
+  .flag-details-input {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 0.55rem 0.7rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    resize: none;
+    height: 72px;
+    outline: none;
+    transition: border-color 0.2s;
+    color: var(--ink);
+    width: 100%;
+  }
+
+  .flag-details-input:focus {
+    border-color: var(--accent);
+  }
+
+  .flag-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .flag-cancel-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.45rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    color: var(--muted);
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .flag-cancel-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  .flag-submit-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.45rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .flag-submit-btn:hover { opacity: 0.85; }
+  .flag-submit-btn:disabled { opacity: 0.4; cursor: default; }
+
 </style>
 </head>
 <body>
@@ -1019,6 +1175,15 @@
               </div>
             {% endif %}
 
+            <!-- This should be right-->
+            <!-- Flag button -->
+            <button class="flag-btn" onclick="openFlagModal({{ mat.material_id }})">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+              </svg>
+              Flag
+            </button>
+
           </div>
         </div>
 
@@ -1039,6 +1204,39 @@
     </div>
   {% endif %}
 
+</div>
+
+<!-- Flag Modal -->
+<div class="flag-modal-overlay" id="flag-modal-overlay">
+  <div class="flag-modal">
+    <div class="flag-modal-title">Report Content</div>
+    <form id="flag-form" action="{{ url_for('admin.submit_flag') }}" method="post">
+      <input type="hidden" name="content_type" value="material">
+      <input type="hidden" name="content_id"   id="flag-content-id" value="">
+
+      <div>
+        <span class="flag-modal-label">Reason</span>
+        <div class="flag-reason-options">
+          {% for reason in flag_reasons %}
+            <label class="flag-reason-option">
+              <input type="radio" name="reason_id" value="{{ reason.reason_id }}" required>
+              {{ reason.reason_name }}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div>
+        <span class="flag-modal-label">Additional Details <span style="font-weight:400; text-transform:none;">(optional)</span></span>
+        <textarea class="flag-details-input" name="details" placeholder="Describe the issue..."></textarea>
+      </div>
+
+      <div class="flag-modal-actions">
+        <button type="button" class="flag-cancel-btn" onclick="closeFlagModal()">Cancel</button>
+        <button type="submit" class="flag-submit-btn">Submit Report</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -1158,6 +1356,31 @@
     if (!e.target.closest('.save-wrapper')) {
       document.querySelectorAll('.save-dropdown.open').forEach(d => d.classList.remove('open'));
     }
+  });
+
+  // ── Flag modal ─────────────────────────────────────────────────────────────
+  function openFlagModal(materialId) {
+    document.getElementById('flag-content-id').value = materialId;
+    document.getElementById('flag-modal-overlay').classList.add('open');
+    // Reset form
+    document.getElementById('flag-form').reset();
+    document.querySelectorAll('.flag-reason-option').forEach(el => el.classList.remove('selected'));
+  }
+
+  function closeFlagModal() {
+    document.getElementById('flag-modal-overlay').classList.remove('open');
+  }
+
+  document.getElementById('flag-modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeFlagModal();
+  });
+
+  // Highlight selected reason option
+  document.querySelectorAll('.flag-reason-option input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll('.flag-reason-option').forEach(el => el.classList.remove('selected'));
+      this.closest('.flag-reason-option').classList.add('selected');
+    });
   });
 
 </script>

@@ -82,6 +82,28 @@ def login():
         if not user.is_active:
             flash('Your account has been deactivated.', 'danger')
             return redirect(url_for('auth.login'))
+        
+        # Block banned users from logging in
+        if user.is_banned():
+            flash(
+                'Your account has been permanently banned. '
+                'Reason: ' + (user.ban_reason or 'No reason provided.'),
+                'danger'
+            )
+            return redirect(url_for('auth.login'))
+
+        # Block suspended users from logging in
+        if user.is_suspended():
+            until = (
+                user.suspended_until.strftime('%b %d, %Y at %I:%M %p')
+                if user.suspended_until else 'an unspecified date'
+            )
+            flash(
+                f'Your account is suspended until {until}. '
+                f'Reason: {user.suspension_reason or "No reason provided."}',
+                'danger'
+            )
+            return redirect(url_for('auth.login'))
 
         # Log the user in and update last login time
         login_user(user)

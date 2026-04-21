@@ -1,0 +1,129 @@
+{% extends 'admin/base.html' %}
+{% set active_page = 'dashboard' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="admin-page-title">Dashboard</h1>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Users</div>
+    <div class="stat-number">{{ total_users }}</div>
+  </div>
+  <div class="stat-card success">
+    <div class="stat-label">Active</div>
+    <div class="stat-number">{{ active_users }}</div>
+  </div>
+  <div class="stat-card warning">
+    <div class="stat-label">Suspended</div>
+    <div class="stat-number">{{ suspended_users }}</div>
+  </div>
+  <div class="stat-card accent">
+    <div class="stat-label">Banned</div>
+    <div class="stat-number">{{ banned_users }}</div>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Reviews</div>
+    <div class="stat-number">{{ total_reviews }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Materials</div>
+    <div class="stat-number">{{ total_materials }}</div>
+  </div>
+  <div class="stat-card accent">
+    <div class="stat-label">Pending Flags</div>
+    <div class="stat-number">{{ pending_flags }}</div>
+  </div>
+  <div class="stat-card warning">
+    <div class="stat-label">Removed Content</div>
+    <div class="stat-number">{{ removed_reviews + removed_materials }}</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
+
+  <!-- Recent Flags -->
+  <div class="admin-card">
+    <h2>Recent Pending Flags</h2>
+    {% if recent_flags %}
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Reason</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for flag in recent_flags %}
+          <tr>
+            <td>
+              {% if flag.review_id %}
+                <span class="badge badge-active">Review</span>
+              {% else %}
+                <span class="badge badge-admin">Material</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge reason-{{ flag.reason.reason_name|lower|replace(' ', '-') }}">
+                {{ flag.reason.reason_name }}
+              </span>
+            </td>
+            <td style="color:var(--muted); font-size:0.78rem;">{{ flag.created_at.strftime('%b %d, %Y') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div style="margin-top:0.8rem;">
+        <a href="{{ url_for('admin.moderation') }}" class="btn btn-outline btn-sm">View All Flags →</a>
+      </div>
+    {% else %}
+      <div class="empty-state">No pending flags.</div>
+    {% endif %}
+  </div>
+
+  <!-- Recent Users -->
+  <div class="admin-card">
+    <h2>Recently Registered</h2>
+    {% if recent_users %}
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Status</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in recent_users %}
+          <tr>
+            <td>
+              <a href="{{ url_for('admin.user_detail', user_id=user.user_id) }}" style="text-decoration:none; color:var(--ink); font-weight:500;">
+                {{ user.first_name }} {{ user.last_name }}
+              </a>
+            </td>
+            <td>
+              <span class="badge badge-{{ user.status }}">{{ user.status }}</span>
+              {% if user.is_admin() %}
+                <span class="badge badge-admin">admin</span>
+              {% endif %}
+            </td>
+            <td style="color:var(--muted); font-size:0.78rem;">{{ user.created_at.strftime('%b %d, %Y') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div style="margin-top:0.8rem;">
+        <a href="{{ url_for('admin.user_list') }}" class="btn btn-outline btn-sm">View All Users →</a>
+      </div>
+    {% else %}
+      <div class="empty-state">No users yet.</div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

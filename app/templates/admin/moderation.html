@@ -1,0 +1,120 @@
+{% extends 'admin/base.html' %}
+{% set active_page = 'moderation' %}
+{% block title %}Moderation Queue{% endblock %}
+
+{% block content %}
+<h1 class="admin-page-title">Moderation Queue</h1>
+
+<div class="filter-bar">
+  <span style="font-size:0.78rem; color:var(--muted); font-weight:500; margin-right:0.3rem;">Status:</span>
+  <a href="{{ url_for('admin.moderation', status='pending',   type=type_filter) }}" class="filter-btn {% if status_filter == 'pending'   %}active{% endif %}">Pending</a>
+  <a href="{{ url_for('admin.moderation', status='reviewed',  type=type_filter) }}" class="filter-btn {% if status_filter == 'reviewed'  %}active{% endif %}">Reviewed</a>
+  <a href="{{ url_for('admin.moderation', status='dismissed', type=type_filter) }}" class="filter-btn {% if status_filter == 'dismissed' %}active{% endif %}">Dismissed</a>
+  <a href="{{ url_for('admin.moderation', status='all',       type=type_filter) }}" class="filter-btn {% if status_filter == 'all'       %}active{% endif %}">All</a>
+
+  <span style="font-size:0.78rem; color:var(--muted); font-weight:500; margin-left:1rem; margin-right:0.3rem;">Type:</span>
+  <a href="{{ url_for('admin.moderation', status=status_filter, type='all')      }}" class="filter-btn {% if type_filter == 'all'      %}active{% endif %}">All</a>
+  <a href="{{ url_for('admin.moderation', status=status_filter, type='review')   }}" class="filter-btn {% if type_filter == 'review'   %}active{% endif %}">Reviews</a>
+  <a href="{{ url_for('admin.moderation', status=status_filter, type='material') }}" class="filter-btn {% if type_filter == 'material' %}active{% endif %}">Materials</a>
+</div>
+
+{% if flags %}
+  {% for flag in flags %}
+    <div class="flag-card">
+      <div class="flag-card-header">
+        {% if flag.review_id %}
+          <span class="badge badge-active">Review</span>
+          {% if flag.review and flag.review.review_type %}
+            <span class="badge" style="background:#f0f0f0; color:var(--muted); font-size:0.68rem;">{{ flag.review.review_type }}</span>
+          {% endif %}
+        {% else %}
+          <span class="badge badge-admin">Material</span>
+        {% endif %}
+
+        <span class="badge reason-{{ flag.reason.reason_name|lower|replace(' ', '-') }}">{{ flag.reason.reason_name }}</span>
+        <span class="badge badge-{{ flag.status }}">{{ flag.status }}</span>
+
+        <span style="font-size:0.75rem; color:var(--muted); margin-left:auto;">
+          {{ flag.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+        </span>
+      </div>
+
+      <div class="flag-card-meta">
+        Reported by:
+        {% if flag.reporter %}
+          <strong>{{ flag.reporter.first_name }} {{ flag.reporter.last_name }}</strong> ({{ flag.reporter.email }})
+        {% else %}
+          <em>Anonymous visitor</em>
+        {% endif %}
+        {% if flag.details %} — "{{ flag.details }}"{% endif %}
+      </div>
+
+      <div class="flag-card-content">
+        {% if flag.review_id and flag.review %}
+          <div style="margin-bottom:0.4rem;">
+            <strong>{{ flag.review.review_type|capitalize if flag.review.review_type else 'Review' }}</strong> on
+            <strong>{{ flag.review.course.department.dept_code }} {{ flag.review.course.course_number }}</strong>
+            — {{ flag.review.course.course_title }}
+            <br>
+            <span style="font-size:0.78rem; color:var(--muted);">
+              By {{ flag.review.user.first_name }} {{ flag.review.user.last_name }}
+              {% if flag.review.semester %} · {{ flag.review.semester.term }} {{ flag.review.semester.year }}{% endif %}
+              {% if flag.review.rating_overall %} · Rating: {% for i in range(flag.review.rating_overall) %}★{% endfor %}{% for i in range(5 - flag.review.rating_overall) %}☆{% endfor %}{% endif %}
+            </span>
+          </div>
+          <p>{{ flag.review.review_text }}</p>
+          {% if flag.review.is_removed %}
+            <div style="margin-top:0.5rem;"><span class="badge badge-banned">Content Removed</span></div>
+          {% endif %}
+
+        {% elif flag.material_id and flag.material %}
+          <div style="margin-bottom:0.4rem;">
+            <strong>Material:</strong> {{ flag.material.title }}
+            <br>
+            <span style="font-size:0.78rem; color:var(--muted);">
+              Uploaded by {{ flag.material.user.first_name }} {{ flag.material.user.last_name }}
+              · {{ flag.material.material_type }}
+              · {{ flag.material.course.department.dept_code }} {{ flag.material.course.course_number }}
+            </span>
+          </div>
+          {% if flag.material.description %}<p>{{ flag.material.description }}</p>{% endif %}
+          {% if flag.material.is_removed %}
+            <div style="margin-top:0.5rem;"><span class="badge badge-banned">Content Removed</span></div>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      {% if flag.reviewed_by_admin %}
+        <div class="flag-card-meta">
+          Reviewed by <strong>{{ flag.reviewed_by_admin.first_name }} {{ flag.reviewed_by_admin.last_name }}</strong>
+          on {{ flag.reviewed_at.strftime('%b %d, %Y at %I:%M %p') }}
+        </div>
+      {% endif %}
+
+      {% if flag.status == 'pending' %}
+        <div class="flag-card-actions">
+          <form action="{{ url_for('admin.approve_flag', flag_id=flag.flag_id) }}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-success btn-sm">Approve Content</button>
+          </form>
+          <form action="{{ url_for('admin.remove_flagged', flag_id=flag.flag_id) }}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove this content?');">Remove Content</button>
+          </form>
+        </div>
+      {% elif flag.status == 'reviewed' %}
+        {% set item = flag.review if flag.review_id else flag.material %}
+        {% if item and item.is_removed %}
+          <div class="flag-card-actions">
+            <form action="{{ url_for('admin.restore_flagged', flag_id=flag.flag_id) }}" method="post" style="display:inline;">
+              <button type="submit" class="btn btn-outline btn-sm">Restore Content</button>
+            </form>
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="admin-card">
+    <div class="empty-state">No flags found matching your filters.</div>
+  </div>
+{% endif %}
+{% endblock %}
