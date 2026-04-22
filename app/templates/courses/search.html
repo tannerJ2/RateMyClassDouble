@@ -1424,6 +1424,7 @@
     const matchingOpt = deptOptions.querySelector(`.custom-option[data-value="${code}"]`);
     if (matchingOpt) matchingOpt.classList.add('selected');
     doSearch('', code, 1);
+    syncSearchClearBtn();
   });
 
   backBtn.addEventListener('click', () => {
