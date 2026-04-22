@@ -48,7 +48,10 @@ def register():
             first_name    = first_name,
             last_name     = last_name,
             email         = email,
-            password_hash = hashed_password
+            password_hash = hashed_password,
+            role          = 'user',
+            is_active     = True,
+            status        = 'active',
         )
         db.session.add(new_user)
         db.session.commit()

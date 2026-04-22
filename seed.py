@@ -21,6 +21,20 @@
 #   - If a course has any real professor, TBA Staff is excluded entirely.
 #   - If ALL sections are TBA Staff, the course is listed with TBA Staff once.
 #   - Instructor pronouns and HTML entities are cleaned automatically.
+
+
+
+
+#below is for in the future if i want to makke it so it doesnt delete everything
+#when running the seed file
+
+# Instead of drop_all/create_all
+#       db.create_all()  # only creates tables if they don't exist, never drops
+
+# And for departments, check before inserting
+#       if not Department.query.filter_by(dept_code=code).first():
+#           d = Department(dept_code=code, dept_name=name)
+#           db.session.add(d)
 # =============================================================================
 
 from dotenv import load_dotenv
