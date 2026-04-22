@@ -23,6 +23,10 @@
 #   - Instructor pronouns and HTML entities are cleaned automatically.
 # =============================================================================
 
+from dotenv import load_dotenv
+load_dotenv()
+
+
 import csv
 import html
 import os
@@ -55,8 +59,10 @@ DEPARTMENT_NAMES = {
     'CDS':  'Communication Disorders & Sciences',
     'CED':  'Community Economic Development',
     'CHE':  'Chemistry',
+    'CMD':  'Communication Disorders',
     'CMS':  'Communication Studies',
     'COE':  'Counselor Education',
+    'CTR':  'Cooperative Education',
     'CRM':  'Criminology',
     'CSC':  'Computer Science',
     'DBA':  'Doctor of Business Administration',
@@ -66,6 +72,7 @@ DEPARTMENT_NAMES = {
     'ECO':  'Economics',
     'EDL':  'Educational Leadership',
     'EDU':  'Education',
+    'EGR':  'Engineering',
     'ENG':  'English',
     'ENV':  'Environmental Studies',
     'ESC':  'Earth Science',
@@ -79,6 +86,7 @@ DEPARTMENT_NAMES = {
     'HMS':  'Human Services',
     'HON':  'Honors Program',
     'HSC':  'Health Sciences',
+    'IBD':  'Interdisciplinary Biology',
     'IDS':  'Interdisciplinary Studies',
     'ILS':  'Information & Library Science',
     'INQ':  'Inquiry & Research',
@@ -86,6 +94,7 @@ DEPARTMENT_NAMES = {
     'JRN':  'Journalism',
     'JST':  'Jewish Studies',
     'LAC':  'Latin American & Caribbean Studies',
+    'LAT':  'Latin',
     'LIT':  'Literature',
     'MAR':  'Marine Sciences',
     'MAT':  'Mathematics',
@@ -116,6 +125,7 @@ DEPARTMENT_NAMES = {
     'SPA':  'Spanish',
     'SWK':  'Social Work',
     'T2AE': 'Teacher Education',
+    'T2GA': 'Transfer General Education',
     'THE':  'Tourism & Hospitality Education',
     'THR':  'Theatre',
     'TSL':  'Teaching of Second Languages',
@@ -193,11 +203,11 @@ def load_csv(filepath: str):
 # =============================================================================
 
 def seed():
-    csv_path = os.path.join(os.path.dirname(__file__), 'courses_Fall_2026.csv')
+    csv_path = os.path.join(os.path.dirname(__file__), 'Spring_2026_Courses.csv')
 
     if not os.path.exists(csv_path):
         print(f"\n[ERROR] CSV file not found at:\n  {csv_path}")
-        print("Place courses_Fall_2026.csv in the same folder as seed.py and retry.\n")
+        print("Place Spring_2026_Courses.csv in the same folder as seed.py and retry.\n")
         return
 
     print("=" * 60)
@@ -212,13 +222,13 @@ def seed():
     with app.app_context():
 
         # 1. Drop and recreate all tables
-        print("\n[1/8] Recreating tables...")
+        print("\n[1/6] Recreating tables...")
         db.drop_all()
         db.create_all()
         print("      Done.")
 
         # 2. Semesters
-        print("[2/8] Seeding semesters...")
+        print("[2/6] Seeding semesters...")
         semesters = {}
         for year in range(2026, 2027):
             for term in ['Spring', 'Summer', 'Fall', 'Winter']:
@@ -229,7 +239,7 @@ def seed():
         print(f"      {len(semesters)} semesters created.")
 
         # 3. Departments
-        print("[3/8] Seeding departments...")
+        print("[3/6] Seeding departments...")
         dept_objects = {}
         subjects_in_csv = sorted(set(s for s, _ in courses_meta))
         missing_depts = []
@@ -249,7 +259,7 @@ def seed():
             print(f"      WARNING: No display name found for: {missing_depts}")
 
         # 4. Flag Reasons
-        print("[4/8] Seeding flag reasons...")
+        print("[4/6] Seeding flag reasons...")
         flag_reasons = ['Spam', 'Inappropriate Content', 'Plagiarism', 'Cheating']
         for reason in flag_reasons:
             db.session.add(FlagReason(reason_name=reason))
@@ -257,7 +267,7 @@ def seed():
         print(f"      {len(flag_reasons)} flag reasons created.")
 
         # 5. Professors — now using the proper Professor model
-        print("[5/8] Seeding professors...")
+        print("[5/6] Seeding professors...")
         all_prof_names = set()
         for names in course_profs.values():
             all_prof_names.update(names)
@@ -272,7 +282,7 @@ def seed():
         print(f"      {len(prof_objects)} professors created.")
 
         # 6. Courses + professor links — now using ORM relationships
-        print("[6/8] Seeding courses...")
+        print("[6/6] Seeding courses...")
         course_objects = {}
         link_count = 0
 
@@ -303,55 +313,6 @@ def seed():
         print(f"      {len(course_objects)} courses created.")
         print(f"      {link_count} course–professor links created.")
 
-        # 7. Test accounts
-        print("[7/8] Seeding test accounts...")
-        admin = User(
-            first_name    = 'Admin',
-            last_name     = 'User',
-            email         = 'admin@southernct.edu',
-            password_hash = generate_password_hash('Admin1234!').decode('utf-8'),
-            role          = 'admin',
-            is_active     = True,
-        )
-        db.session.add(admin)
-
-        student = User(
-            first_name    = 'Test',
-            last_name     = 'Student',
-            email         = 'student@southernct.edu',
-            password_hash = generate_password_hash('Student1234!').decode('utf-8'),
-            role          = 'user',
-            is_active     = True,
-        )
-        db.session.add(student)
-        db.session.flush()
-        print("      admin@southernct.edu  / Admin1234!")
-        print("      student@southernct.edu / Student1234!")
-
-        # 8. Sample review
-        print("[8/8] Seeding sample review...")
-        csc_152   = course_objects.get(('CSC', '152'))
-        fall_2025 = semesters.get(('Fall', 2025))
-        if csc_152 and fall_2025:
-            db.session.add(Review(
-                course_id        = csc_152.course_id,
-                user_id          = student.user_id,
-                review_type      = 'opinion',
-                semester_id      = fall_2025.semester_id,
-                rating_overall   = 4,
-                workload_level   = 3,
-                difficulty_level = 3,
-                assessment_style = 'Weekly labs and a final project',
-                review_text      = (
-                    'Great intro course for anyone just starting out with programming. '
-                    'The professor explains things clearly and the assignments are well structured. '
-                    'Expect weekly coding labs and a final project at the end of the semester. '
-                    'Would highly recommend for all CS majors.'
-                ),
-            ))
-            print("      Sample review added to CSC 152 — Fall 2025.")
-        else:
-            print("      WARNING: CSC 152 or Fall 2025 not found — skipping sample review.")
 
         db.session.commit()
 
@@ -365,9 +326,6 @@ def seed():
         print(f"  Semesters       : {len(semesters)}")
         print(f"  Flag Reasons    : {len(flag_reasons)}")
         print()
-        print("  Test Accounts:")
-        print("    Admin   → admin@southernct.edu    / Admin1234!")
-        print("    Student → student@southernct.edu  / Student1234!")
         print("=" * 60)
 
 

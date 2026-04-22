@@ -5,6 +5,8 @@ Think of it as the on/off switch
 
 '''
 
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
 
 from app import create_app
 

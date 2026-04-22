@@ -9,3 +9,6 @@ __pycache__/
 
 # Mac files
 .DS_Store
+
+.env
+ratemyclasskey.json

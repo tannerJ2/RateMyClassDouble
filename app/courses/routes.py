@@ -440,13 +440,8 @@ def serve_material(material_id):
     material = Material.query.get_or_404(material_id)
     if material.is_removed:
         return 'Removed', 404
-
-    upload_dir = current_app.config['MATERIAL_UPLOAD_FOLDER']
-    return send_from_directory(
-        upload_dir,
-        material.file_url,
-        mimetype='application/pdf',
-    )
+    from app.storage import get_file_response
+    return get_file_response(material.file_url, inline=True)
     
 # ─────────────────────────────────────────────
 # Submit choice — pick opinion or description
@@ -931,14 +926,12 @@ def upload_material(course_id):
         # SECURITY 5: replace the original filename with a random UUID on disk.
         # The original name is never written to the filesystem, which prevents
         # path traversal and avoids leaking user-supplied strings to the OS.
-        stored_name = uuid.uuid4().hex + '.pdf'
 
         # SECURITY 6: upload directory lives in instance/ which is outside
         # static/ — the web server (Nginx) must NOT alias this path, so files
         # can only be retrieved through the controlled download route below.
-        upload_dir = current_app.config['MATERIAL_UPLOAD_FOLDER']
-        os.makedirs(upload_dir, exist_ok=True)
-        file.save(os.path.join(upload_dir, stored_name))
+        from app.storage import upload_file
+        stored_name = upload_file(file, original_name)
 
         # ── Persist metadata ──────────────────────────────────────────────────
         material = Material(
@@ -974,31 +967,14 @@ def download_material(material_id):
     from app.models import Material
 
     material = Material.query.get_or_404(material_id)
-
-    # SECURITY 7: soft-deleted files cannot be downloaded by anyone.
     if material.is_removed:
         flash('This material has been removed and is no longer available.', 'danger')
         return redirect(url_for('courses.course_detail', course_id=material.course_id))
-
-    upload_dir  = current_app.config['MATERIAL_UPLOAD_FOLDER']
-
-    # SECURITY 8: construct the download filename from the DB title (not from
-    # the stored UUID), sanitized through secure_filename to strip any special
-    # characters, then force a .pdf extension.
+    from werkzeug.utils import secure_filename
+    from app.storage import get_file_response
     safe_title    = secure_filename(material.title) or 'material'
     download_name = safe_title + '.pdf'
-
-    # SECURITY 9: send_from_directory validates that the resolved path stays
-    # inside upload_dir (raises 404 if someone injects ../ sequences).
-    # Content-Disposition: attachment prevents the browser from rendering the
-    # PDF inline as an active document, reducing XSS-via-PDF risk.
-    return send_from_directory(
-        upload_dir,
-        material.file_url,
-        as_attachment=True,
-        download_name=download_name,
-        mimetype='application/pdf',
-    )
+    return get_file_response(material.file_url, download_name=download_name, inline=False)
 
 @courses.route('/my/reviews')
 @login_required
