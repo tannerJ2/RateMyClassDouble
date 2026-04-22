@@ -287,7 +287,61 @@
     min-width: 200px;
     transition: border-color 0.2s;
   }
+
   .results-search-bar:focus-within { border-color: var(--accent); }
+
+  .search-clear-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    flex-shrink: 0;
+    position: relative;
+    transition: color 0.2s;
+  }
+
+  .search-clear-btn:hover { color: var(--accent); }
+
+  .search-clear-btn.visible { display: flex; }
+
+  .search-clear-btn .clear-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    right: 0;
+    background: var(--ink);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    padding: 0.35rem 0.7rem;
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .search-clear-btn .clear-tooltip::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 8px;
+    border: 5px solid transparent;
+    border-top-color: var(--ink);
+  }
+
+  .search-clear-btn:hover .clear-tooltip {
+    animation: tooltip-delay 0.15s ease forwards;
+    animation-delay: 0.6s;
+  }
+
+  @keyframes tooltip-delay {
+    to { opacity: 1; }
+  }
+
   .results-search-bar input {
     border: none;
     outline: none;
@@ -307,7 +361,7 @@
     font-family: 'DM Sans', sans-serif;
   }
 
-  .custom-select { position: relative; min-width: 180px; }
+  .custom-select { position: relative; min-width: 150px; }
 
   .custom-select-trigger {
     border: 1.5px solid var(--border);
@@ -402,6 +456,36 @@
     display: inline-flex;
     align-items: center;
     transition: transform 0.2s;
+  }
+
+  .filter-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+  }
+
+  .filter-panel-header h4 {
+    margin-bottom: 0;
+  }
+
+  .filter-clear-btn {
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  .filter-clear-btn:hover {
+    color: var(--accent);
+  }
+
+  .filter-clear-btn.hidden {
+    display: none;
   }
 
   .results-count {
@@ -956,10 +1040,20 @@
         {% endfor %}
       </div>
     </div>
+    <button class="search-clear-btn" id="search-clear-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      <span class="clear-tooltip">Clear search</span>
+    </button>
   </div>
 
   <div class="filter-panel" id="filter-panel">
-    <h4>Sort by</h4>
+    <div class="filter-panel-header">
+      <h4>Sort by</h4>
+      <button class="filter-clear-btn" id="filter-clear-btn">Clear</button>
+    </div>
     <div class="filter-tags">
       <button class="filter-tag" id="filter-rating" data-field="avg_rating" data-dir="desc">
         Highest Rated
@@ -1006,13 +1100,13 @@
   <div class="pagination" id="pagination">
     <div class="page-info" id="page-info"></div>
     <div style="display:flex; align-items:center; gap:0.4rem;">
-      <button class="page-arrow" id="page-prev" onclick="goToPage(currentPage - 1)" disabled>
+      <button class="page-arrow" id="page-prev" disabled>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
       <div class="page-numbers" id="page-numbers"></div>
-      <button class="page-arrow" id="page-next" onclick="goToPage(currentPage + 1)" disabled>
+      <button class="page-arrow" id="page-next" disabled>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
         </svg>
@@ -1040,16 +1134,15 @@
   menuOverlay.addEventListener('click', closeMenu);
 
 
-  // ── Pagination state ───────────────────────────────────────────────────────
-  const PAGE_SIZE  = 10;
-  let currentPage  = 1;
-  let pagedData    = [];   // the sorted array currently being paged through
+  // ── State ──────────────────────────────────────────────────────────────────
+  // activeFilter holds the current sort; currentSearch tracks q/dept/page so
+  // any part of the UI (pagination, filter tags, back button) can re-run the
+  // same search with only the changed parameter.
+  let activeFilter  = null;   // { field: 'avg_rating', dir: 'desc' } | null
+  let currentSearch = { q: '', dept: '', page: 1 };
 
 
-  // ── Filter state ───────────────────────────────────────────────────────────
-  let activeFilter   = null;
-  let lastCourseData = [];
-
+  // ── Filter labels ──────────────────────────────────────────────────────────
   const filterLabels = {
     avg_rating:     { desc: 'Highest Rated',  asc: 'Lowest Rated'   },
     avg_workload:   { desc: 'Heavy Workload',  asc: 'Light Workload' },
@@ -1061,33 +1154,23 @@
       const field    = btn.dataset.field;
       const isActive = activeFilter && activeFilter.field === field;
       btn.classList.toggle('active', isActive);
-
-      const dir       = isActive ? activeFilter.dir : 'desc';
-      const labelNode = btn.childNodes[0];
-      labelNode.textContent = filterLabels[field][dir] + ' ';
-
-      const arrow = btn.querySelector('.filter-arrow');
-      arrow.style.transform = (isActive && activeFilter.dir === 'asc')
-        ? 'rotate(180deg)'
-        : 'rotate(0deg)';
-
-      btn.dataset.dir = dir;
+      const dir = isActive ? activeFilter.dir : 'desc';
+      btn.childNodes[0].textContent = filterLabels[field][dir] + ' ';
+      btn.querySelector('.filter-arrow').style.transform =
+        (isActive && dir === 'asc') ? 'rotate(180deg)' : 'rotate(0deg)';
     });
   }
-
-  function applySortAndRender(courses) {
-    let sorted = [...courses];
-    if (activeFilter && sorted.length) {
-      const { field, dir } = activeFilter;
-      sorted.sort((a, b) => {
-        const av = parseFloat(a[field]) || 0;
-        const bv = parseFloat(b[field]) || 0;
-        return dir === 'desc' ? bv - av : av - bv;
-      });
-    }
-    pagedData   = sorted;
-    currentPage = 1;
-    renderPage();
+  function syncClearBtn() {
+    const btn = document.getElementById('filter-clear-btn');
+    if (!btn) return;
+    btn.classList.toggle('hidden', !activeFilter);
+  }
+  function syncSearchClearBtn() {
+    const btn = document.getElementById('search-clear-btn');
+    if (!btn) return;
+    const hasQuery = resultsSearch.value.trim() !== '';
+    const hasDept  = getSelectedDept() !== '';
+    btn.classList.toggle('visible', hasQuery || hasDept);
   }
 
   document.querySelectorAll('.filter-tag').forEach(btn => {
@@ -1099,7 +1182,8 @@
         activeFilter = { field, dir: 'desc' };
       }
       updateFilterButtons();
-      if (lastCourseData.length) applySortAndRender(lastCourseData);
+      syncClearBtn();
+      doSearch(currentSearch.q, currentSearch.dept, 1);
     });
   });
 
@@ -1119,16 +1203,19 @@
 
   function buildReturnUrl() {
     const params = new URLSearchParams();
-    const query  = resultsSearch.value.trim();
-    const dept   = getSelectedDept();
-    if (query) params.set('q', query);
-    if (dept)  params.set('dept', dept);
+    if (currentSearch.q)    params.set('q',    currentSearch.q);
+    if (currentSearch.dept) params.set('dept', currentSearch.dept);
+    if (activeFilter) {
+      params.set('sort', activeFilter.field);
+      params.set('dir',  activeFilter.dir);
+    }
+    if (currentSearch.page > 1) params.set('page', currentSearch.page);
     return '/courses?' + params.toString();
   }
 
   function buildCard(c) {
-    const count      = c.rating_count || 0;
-    const returnUrl  = buildReturnUrl();
+    const count     = c.rating_count || 0;
+    const returnUrl = buildReturnUrl();
 
     const ratingsHtml = count > 0
       ? '<div class="card-ratings">'
@@ -1169,86 +1256,7 @@
   }
 
 
-  // ── Pagination renderer ────────────────────────────────────────────────────
-  function renderPage() {
-    const total      = pagedData.length;
-    const totalPages = Math.ceil(total / PAGE_SIZE);
-    const start      = (currentPage - 1) * PAGE_SIZE;
-    const end        = Math.min(start + PAGE_SIZE, total);
-    const slice      = pagedData.slice(start, end);
-
-    const courseList = document.getElementById('course-list');
-    const pagination = document.getElementById('pagination');
-
-    if (total === 0) {
-      courseList.innerHTML = '<p style="color:var(--muted)">No courses found.</p>';
-      pagination.classList.remove('visible');
-      return;
-    }
-
-    courseList.innerHTML = slice.map(buildCard).join('');
-
-    // Scroll course list back to top on page change (not on first load)
-    if (currentPage > 1 || start > 0) {
-      courseList.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    // Page info text
-    document.getElementById('page-info').innerHTML =
-      'Showing <strong>' + (start + 1) + '–' + end + '</strong> of <strong>' + total + '</strong>';
-
-    // Prev / next arrows
-    document.getElementById('page-prev').disabled = currentPage === 1;
-    document.getElementById('page-next').disabled = currentPage === totalPages;
-
-    // Page number buttons (show max 5 pages with ellipsis)
-    const numbersEl   = document.getElementById('page-numbers');
-    numbersEl.innerHTML = '';
-
-    if (totalPages <= 1) {
-      pagination.classList.remove('visible');
-      return;
-    }
-
-    pagination.classList.add('visible');
-
-    function addPageBtn(n) {
-      const btn = document.createElement('button');
-      btn.className   = 'page-num' + (n === currentPage ? ' active' : '');
-      btn.textContent = n;
-      btn.onclick     = () => goToPage(n);
-      numbersEl.appendChild(btn);
-    }
-
-    function addEllipsis() {
-      const span = document.createElement('span');
-      span.className   = 'page-ellipsis';
-      span.textContent = '…';
-      numbersEl.appendChild(span);
-    }
-
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) addPageBtn(i);
-    } else {
-      addPageBtn(1);
-      if (currentPage > 3)               addEllipsis();
-      const rangeStart = Math.max(2, currentPage - 1);
-      const rangeEnd   = Math.min(totalPages - 1, currentPage + 1);
-      for (let i = rangeStart; i <= rangeEnd; i++) addPageBtn(i);
-      if (currentPage < totalPages - 2)  addEllipsis();
-      addPageBtn(totalPages);
-    }
-  }
-
-  function goToPage(n) {
-    const totalPages = Math.ceil(pagedData.length / PAGE_SIZE);
-    if (n < 1 || n > totalPages) return;
-    currentPage = n;
-    renderPage();
-  }
-
-
-  // ── Search ─────────────────────────────────────────────────────────────────
+  // ── DOM refs ───────────────────────────────────────────────────────────────
   const resultsSearch = document.getElementById('results-search');
   const filterPanel   = document.getElementById('filter-panel');
   const courseList    = document.getElementById('course-list');
@@ -1272,8 +1280,8 @@
     deptTrigger.textContent  = 'All Departments';
     deptOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
     deptOptions.querySelector('.custom-option').classList.add('selected');
-    pagedData   = [];
-    currentPage = 1;
+    currentSearch = { q: '', dept: '', page: 1 };
+    history.replaceState(null, '', '/courses');
   }
 
   function showCourseList() {
@@ -1282,30 +1290,126 @@
     backBtn.classList.add('visible');
   }
 
-  async function doSearch(query, dept = '') {
+
+  // ── Core search ────────────────────────────────────────────────────────────
+  async function doSearch(query, dept, page = 1) {
     showCourseList();
 
-    const params = new URLSearchParams();
-    if (query) params.append('q', query);
-    if (dept)  params.append('dept', dept);
+    currentSearch = { q: query, dept, page };
 
-    const res     = await fetch(`/search?${params.toString()}`);
-    const courses = await res.json();
-    lastCourseData = courses;
+    // Build API params (includes sort/dir/page for the server)
+    const apiParams = new URLSearchParams();
+    if (query) apiParams.set('q',    query);
+    if (dept)  apiParams.set('dept', dept);
+    if (activeFilter) {
+      apiParams.set('sort', activeFilter.field);
+      apiParams.set('dir',  activeFilter.dir);
+    }
+    apiParams.set('page', page);
 
+    // Sync browser URL (omit page=1 to keep URLs clean)
+    const urlParams = new URLSearchParams(apiParams);
+    if (page === 1) urlParams.delete('page');
+    history.replaceState(null, '', '/courses?' + urlParams.toString());
+
+    // Show loading state
+    courseList.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">Loading...</p>';
+    document.getElementById('pagination').classList.remove('visible');
+
+    const res  = await fetch('/search?' + apiParams.toString());
+    const data = await res.json();
+
+    // Results count label
+    const total = data.total;
     if (dept && !query) {
-      const deptName = deptOptions.querySelector(`.custom-option[data-value="${dept}"]`)?.textContent || dept;
-      resultsCount.textContent = `${deptName} — ${courses.length} courses`;
+      const name = deptOptions.querySelector(`.custom-option[data-value="${dept}"]`)?.textContent || dept;
+      resultsCount.textContent = name + ' — ' + total + ' courses';
     } else if (query && dept) {
-      const deptName = deptOptions.querySelector(`.custom-option[data-value="${dept}"]`)?.textContent || dept;
-      resultsCount.textContent = `Showing ${courses.length} results for "${query}" in ${deptName}`;
+      const name = deptOptions.querySelector(`.custom-option[data-value="${dept}"]`)?.textContent || dept;
+      resultsCount.textContent = total + ' results for "' + query + '" in ' + name;
     } else if (query) {
-      resultsCount.textContent = `Showing ${courses.length} results for "${query}"`;
+      resultsCount.textContent = total + ' results for "' + query + '"';
     } else {
       resultsCount.textContent = 'Showing all courses';
     }
 
-    applySortAndRender(courses);
+    renderResults(data);
+  }
+
+
+  // ── Results + pagination renderer ──────────────────────────────────────────
+  function renderResults(data) {
+    const { courses, total, page, per_page, pages } = data;
+    const pagination = document.getElementById('pagination');
+
+    if (total === 0) {
+      courseList.innerHTML = '<p style="color:var(--muted)">No courses found.</p>';
+      pagination.classList.remove('visible');
+      return;
+    }
+
+    courseList.innerHTML = courses.map(buildCard).join('');
+
+    // Scroll back to top when navigating between pages (not on the first load)
+    if (page > 1) {
+      courseList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    if (pages <= 1) {
+      pagination.classList.remove('visible');
+      return;
+    }
+
+    // Page info text
+    const start = (page - 1) * per_page + 1;
+    const end   = Math.min(page * per_page, total);
+    document.getElementById('page-info').innerHTML =
+      'Showing <strong>' + start + '–' + end + '</strong> of <strong>' + total + '</strong>';
+
+    // Prev / next
+    const prevBtn = document.getElementById('page-prev');
+    const nextBtn = document.getElementById('page-next');
+    prevBtn.disabled = page === 1;
+    nextBtn.disabled = page === pages;
+    prevBtn.onclick  = () => goToPage(page - 1);
+    nextBtn.onclick  = () => goToPage(page + 1);
+
+    // Numbered page buttons (max 7 visible with ellipsis)
+    const numbersEl = document.getElementById('page-numbers');
+    numbersEl.innerHTML = '';
+
+    function addPageBtn(n) {
+      const btn       = document.createElement('button');
+      btn.className   = 'page-num' + (n === page ? ' active' : '');
+      btn.textContent = n;
+      btn.onclick     = () => goToPage(n);
+      numbersEl.appendChild(btn);
+    }
+
+    function addEllipsis() {
+      const span       = document.createElement('span');
+      span.className   = 'page-ellipsis';
+      span.textContent = '…';
+      numbersEl.appendChild(span);
+    }
+
+    if (pages <= 7) {
+      for (let i = 1; i <= pages; i++) addPageBtn(i);
+    } else {
+      addPageBtn(1);
+      if (page > 3)             addEllipsis();
+      const rangeStart = Math.max(2, page - 1);
+      const rangeEnd   = Math.min(pages - 1, page + 1);
+      for (let i = rangeStart; i <= rangeEnd; i++) addPageBtn(i);
+      if (page < pages - 2)    addEllipsis();
+      addPageBtn(pages);
+    }
+
+    pagination.classList.add('visible');
+  }
+
+  function goToPage(n) {
+    doSearch(currentSearch.q, currentSearch.dept, n);
   }
 
 
@@ -1319,20 +1423,43 @@
     deptOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
     const matchingOpt = deptOptions.querySelector(`.custom-option[data-value="${code}"]`);
     if (matchingOpt) matchingOpt.classList.add('selected');
-    doSearch('', code);
+    doSearch('', code, 1);
   });
 
   backBtn.addEventListener('click', () => {
     resultsSearch.value = '';
+    activeFilter = null;
+    updateFilterButtons();
+    syncClearBtn();
     showDeptGrid();
   });
+
+  document.getElementById('filter-clear-btn').addEventListener('click', () => {
+    activeFilter = null;
+    updateFilterButtons();
+    syncClearBtn();
+    if (currentSearch.q || currentSearch.dept) {
+      doSearch(currentSearch.q, currentSearch.dept, 1);
+    }
+  });
+
+  document.getElementById('search-clear-btn').addEventListener('click', () => {
+    resultsSearch.value = '';
+    activeFilter = null;
+    updateFilterButtons();
+    syncClearBtn();
+    syncSearchClearBtn();
+    showDeptGrid();
+  });
+
+  resultsSearch.addEventListener('input', () => syncSearchClearBtn());
 
   resultsSearch.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       const query = resultsSearch.value.trim();
       const dept  = getSelectedDept();
       if (!query && !dept) showDeptGrid();
-      else doSearch(query, dept);
+      else doSearch(query, dept, 1);
     }
   });
 
@@ -1353,12 +1480,13 @@
     deptOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
     opt.classList.add('selected');
     deptOptions.classList.remove('open');
+    syncSearchClearBtn();
     if (!value) {
-      if (resultsSearch.value.trim()) doSearch(resultsSearch.value.trim(), '');
+      if (resultsSearch.value.trim()) doSearch(resultsSearch.value.trim(), '', 1);
       else showDeptGrid();
       return;
     }
-    doSearch(resultsSearch.value, value);
+    doSearch(resultsSearch.value.trim(), value, 1);
   });
 
   document.addEventListener('click', e => {
@@ -1366,13 +1494,21 @@
   });
 
 
-  // ── Restore state from URL ─────────────────────────────────────────────────
+  // ── Restore full state from URL on page load ───────────────────────────────
+  // Preserves q, dept, sort, dir, and page so the back button from a course
+  // detail page returns you to exactly where you were.
   (function restoreState() {
-    const params     = new URLSearchParams(window.location.search);
-    const savedQuery = params.get('q')    || '';
-    const savedDept  = params.get('dept') || '';
-    if (!savedQuery && !savedDept) return;
-    if (savedQuery) resultsSearch.value = savedQuery;
+    const params    = new URLSearchParams(window.location.search);
+    const savedQ    = params.get('q')    || '';
+    const savedDept = params.get('dept') || '';
+    const savedSort = params.get('sort') || '';
+    const savedDir  = params.get('dir')  || 'desc';
+    const savedPage = parseInt(params.get('page') || '1', 10);
+
+    if (!savedQ && !savedDept) return;
+
+    if (savedQ) resultsSearch.value = savedQ;
+
     if (savedDept) {
       const matchingOpt = deptOptions.querySelector(`.custom-option[data-value="${savedDept}"]`);
       if (matchingOpt) {
@@ -1381,7 +1517,16 @@
         deptTrigger.textContent = matchingOpt.textContent;
       }
     }
-    doSearch(savedQuery, savedDept);
+
+    const validSorts = ['avg_rating', 'avg_workload', 'avg_difficulty'];
+    if (validSorts.includes(savedSort)) {
+      activeFilter = { field: savedSort, dir: savedDir === 'asc' ? 'asc' : 'desc' };
+      updateFilterButtons();
+      syncClearBtn();
+    }
+
+    doSearch(savedQ, savedDept, savedPage);
+    syncSearchClearBtn()
   })();
 
 

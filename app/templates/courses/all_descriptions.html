@@ -612,8 +612,100 @@
   }
 
   .empty-state .empty-icon {
-    font-size: 2.5rem;
+    display: flex;
+    justify-content: center;
     margin-bottom: 1rem;
+  }
+
+  /* ── PAGINATION ────────────────────────────── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    gap: 0.75rem;
+  }
+
+  .page-info {
+    font-size: 0.82rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .page-info strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .page-arrows {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .page-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--ink);
+    text-decoration: none;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .page-arrow:hover {
+    border-color: var(--ink);
+    background: var(--bg);
+  }
+
+  .page-arrow.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .page-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 0.4rem;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .page-num:hover {
+    color: var(--ink);
+    background: var(--bg);
+  }
+
+  .page-num.active {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+    font-weight: 500;
+  }
+
+  .page-ellipsis {
+    font-size: 0.82rem;
+    color: var(--muted);
+    padding: 0 0.15rem;
   }
 
   .empty-state p {
@@ -996,7 +1088,7 @@
           </div>
         </div>
 
-        <button class="flag-btn" onclick="openFlagModal({{ review.description_id }})">
+        <button class="flag-btn" onclick="openFlagModal({{ review.review_id }})">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
               </svg>
@@ -1006,9 +1098,62 @@
       </div>
     {% endfor %}
 
+    {% if pages > 1 %}
+      <div class="pagination">
+        <span class="page-info">
+          Showing <strong>{{ ((page - 1) * per_page) + 1 }}–{{ [page * per_page, total] | min }}</strong> of <strong>{{ total }}</strong>
+        </span>
+        <div class="page-arrows">
+          {% if page > 1 %}
+            <a href="?sort={{ sort }}&amp;page={{ page - 1 }}" class="page-arrow">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
+          {% else %}
+            <span class="page-arrow disabled">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </span>
+          {% endif %}
+          <div class="page-numbers">
+            {% if pages <= 7 %}
+              {% for n in range(1, pages + 1) %}
+                <a href="?sort={{ sort }}&amp;page={{ n }}" class="page-num {% if n == page %}active{% endif %}">{{ n }}</a>
+              {% endfor %}
+            {% else %}
+              <a href="?sort={{ sort }}&amp;page=1" class="page-num {% if page == 1 %}active{% endif %}">1</a>
+              {% if page > 3 %}<span class="page-ellipsis">…</span>{% endif %}
+              {% set range_start = [2, page - 1] | max %}
+              {% set range_end   = [pages - 1, page + 1] | min %}
+              {% for n in range(range_start, range_end + 1) %}
+                <a href="?sort={{ sort }}&amp;page={{ n }}" class="page-num {% if n == page %}active{% endif %}">{{ n }}</a>
+              {% endfor %}
+              {% if page < pages - 2 %}<span class="page-ellipsis">…</span>{% endif %}
+              <a href="?sort={{ sort }}&amp;page={{ pages }}" class="page-num {% if page == pages %}active{% endif %}">{{ pages }}</a>
+            {% endif %}
+          </div>
+          {% if page < pages %}
+            <a href="?sort={{ sort }}&amp;page={{ page + 1 }}" class="page-arrow">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          {% else %}
+            <span class="page-arrow disabled">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
   {% else %}
     <div class="empty-state">
-      <div class="empty-icon">📋</div>
+      <div class="empty-icon">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <line x1="10" y1="9" x2="8" y2="9"/>
+        </svg>
+      </div>
       {% if current_user.is_authenticated %}
         <p>No descriptions yet for this course.</p>
         <p style="font-size:0.82rem;">We'd love to hear what this course covers!</p>

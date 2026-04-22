@@ -8,6 +8,7 @@ from flask_login import current_user, login_required
 from app.models import Course, Department, Review, ReviewLike, Material, MaterialLike, Semester, Professor, SavedCourse, SavedMaterial, FlagReason
 from app.extensions import db
 from sqlalchemy import func, case
+from sqlalchemy.orm import joinedload
 
 courses = Blueprint('courses', __name__)
 
@@ -27,77 +28,116 @@ def index():
 # ─────────────────────────────────────────────
 @courses.route('/search')
 def search():
-    q    = request.args.get('q', '').strip()
-    dept = request.args.get('dept', '').strip()
+    q        = request.args.get('q', '').strip()
+    dept     = request.args.get('dept', '').strip()
+    sort_by  = request.args.get('sort', '').strip()
+    dir_     = request.args.get('dir', 'desc').strip()
+    page     = request.args.get('page', 1, type=int)
+    per_page = 20
 
-    query = Course.query.join(Department, Course.dept_id == Department.dept_id)
-
-    if dept:
-        query = query.filter(Department.dept_code == dept)
-
-    if q:
-        like = f'%{q}%'
-        concat_code_number = func.concat(
-            Department.dept_code, ' ', Course.course_number
+    # ── Rating aggregate subquery — single JOIN eliminates N+1 queries ────────
+    rating_sq = (
+        db.session.query(
+            Review.course_id,
+            func.avg(Review.rating_overall).label('avg_rating'),
+            func.avg(Review.workload_level).label('avg_workload'),
+            func.avg(Review.difficulty_level).label('avg_difficulty'),
+            func.count(Review.review_id).label('rating_count'),
         )
-        query = query.filter(
-            db.or_(
-                Course.course_title.ilike(like),
-                Course.course_number.ilike(like),
-                Department.dept_code.ilike(like),
-                concat_code_number.ilike(like),   # ← handles "CSC 400"
-            )
-        ).order_by(
-            db.case((Department.dept_code.ilike(q), 0),              else_=1),
-            db.case((concat_code_number.ilike(f'{q}%'), 0),          else_=1),  # ← boost exact prefix matches
-            db.case((Course.course_number.ilike(f'{q}%'), 0),        else_=1),
-            db.case((Course.course_title.ilike(f'{q}%'), 0),         else_=1),
-            Course.course_number
+        .filter(Review.review_type.in_(['opinion', 'rating']))
+        .group_by(Review.course_id)
+        .subquery()
+    )
+
+    # ── Shared filter conditions (reused for count + main query) ──────────────
+    filters = []
+    if dept:
+        filters.append(Department.dept_code == dept)
+    if q:
+        like      = f'%{q}%'
+        concat_cn = func.concat(Department.dept_code, ' ', Course.course_number)
+        filters.append(db.or_(
+            Course.course_title.ilike(like),
+            Course.course_number.ilike(like),
+            Department.dept_code.ilike(like),
+            concat_cn.ilike(like),
+        ))
+
+    # ── Lightweight count (no rating join needed) ─────────────────────────────
+    count_q = (
+        db.session.query(func.count(Course.course_id))
+        .join(Department, Course.dept_id == Department.dept_id)
+    )
+    for f in filters:
+        count_q = count_q.filter(f)
+    total = count_q.scalar() or 0
+
+    # ── Main query with rating aggregates ─────────────────────────────────────
+    query = (
+        db.session.query(
+            Course,
+            Department.dept_code,
+            Department.dept_name,
+            func.coalesce(rating_sq.c.avg_rating,    0).label('avg_rating'),
+            func.coalesce(rating_sq.c.avg_workload,   0).label('avg_workload'),
+            func.coalesce(rating_sq.c.avg_difficulty, 0).label('avg_difficulty'),
+            func.coalesce(rating_sq.c.rating_count,   0).label('rating_count'),
+        )
+        .join(Department, Course.dept_id == Department.dept_id)
+        .outerjoin(rating_sq, Course.course_id == rating_sq.c.course_id)
+    )
+    for f in filters:
+        query = query.filter(f)
+
+    # ── Ordering ──────────────────────────────────────────────────────────────
+    sort_cols = {
+        'avg_rating':     rating_sq.c.avg_rating,
+        'avg_workload':   rating_sq.c.avg_workload,
+        'avg_difficulty': rating_sq.c.avg_difficulty,
+    }
+    if sort_by in sort_cols:
+        col = sort_cols[sort_by]
+        query = query.order_by(
+            col.desc() if dir_ == 'desc' else col.asc(),
+            Department.dept_code,
+            Course.course_number,
+        )
+    elif q:
+        concat_cn = func.concat(Department.dept_code, ' ', Course.course_number)
+        query = query.order_by(
+            db.case((Department.dept_code.ilike(q), 0),         else_=1),
+            db.case((concat_cn.ilike(f'{q}%'), 0),              else_=1),
+            db.case((Course.course_number.ilike(f'{q}%'), 0),   else_=1),
+            db.case((Course.course_title.ilike(f'{q}%'), 0),    else_=1),
+            Course.course_number,
         )
     else:
         query = query.order_by(Department.dept_code, Course.course_number)
 
-    results = query.add_columns(Department.dept_code, Department.dept_name).limit(1500).all()
+    # ── Paginate ──────────────────────────────────────────────────────────────
+    pages   = max(1, -(-total // per_page))
+    results = query.offset((page - 1) * per_page).limit(per_page).all()
 
-    return jsonify([
-        {
-            'id':        c.Course.course_id,
-            'title':     c.Course.course_title,
-            'number':    c.Course.course_number,
-            'dept_code': c.dept_code,
-            'dept_name': c.dept_name,
-            'avg_rating': round(
-                db.session.query(func.avg(Review.rating_overall))
-                .filter(
-                    Review.course_id == c.Course.course_id,
-                    Review.review_type.in_(['opinion', 'rating'])
-                )
-                .scalar() or 0, 1
-            ),
-            'avg_workload': round(
-                db.session.query(func.avg(Review.workload_level))
-                .filter(
-                    Review.course_id == c.Course.course_id,
-                    Review.review_type.in_(['opinion', 'rating'])
-                )
-                .scalar() or 0, 1
-            ),
-            'avg_difficulty': round(
-                db.session.query(func.avg(Review.difficulty_level))
-                .filter(
-                    Review.course_id == c.Course.course_id,
-                    Review.review_type.in_(['opinion', 'rating'])
-                )
-                .scalar() or 0, 1
-            ),
-            'rating_count': Review.query.filter(
-                Review.course_id == c.Course.course_id,
-                Review.review_type.in_(['opinion', 'rating'])
-            ).count(),
-        }
-        for c in results
-    ])
-
+    return jsonify({
+        'courses': [
+            {
+                'id':             r.Course.course_id,
+                'title':          r.Course.course_title,
+                'number':         r.Course.course_number,
+                'dept_code':      r.dept_code,
+                'dept_name':      r.dept_name,
+                'avg_rating':     round(float(r.avg_rating),     1),
+                'avg_workload':   round(float(r.avg_workload),   1),
+                'avg_difficulty': round(float(r.avg_difficulty), 1),
+                'rating_count':   int(r.rating_count),
+            }
+            for r in results
+        ],
+        'total':    total,
+        'page':     page,
+        'per_page': per_page,
+        'pages':    pages,
+    })
 
 # ─────────────────────────────────────────────
 # Search page — department grid + course browser
@@ -257,24 +297,53 @@ def course_detail(course_id):
 # ─────────────────────────────────────────────
 @courses.route('/course/<int:course_id>/opinions')
 def all_opinions(course_id):
-    course = Course.query.get_or_404(course_id)
-    sort   = request.args.get('sort', 'liked')
+    course   = Course.query.get_or_404(course_id)
+    sort     = request.args.get('sort', 'liked')
+    page     = request.args.get('page', 1, type=int)
+    per_page = 15
 
-    opinions = Review.query.filter_by(course_id=course_id, review_type='opinion').all()
+    # ── Like score subquery — eliminates N+1 scoring in Python ───────────────
+    like_sq = (
+        db.session.query(
+            ReviewLike.review_id,
+            func.sum(case(
+                (ReviewLike.like_type == 'really_helpful', 2),
+                (ReviewLike.like_type == 'helpful', 1),
+                else_=0
+            )).label('score')
+        )
+        .group_by(ReviewLike.review_id)
+        .subquery()
+    )
+
+    base = (
+        db.session.query(Review)
+        .filter(Review.course_id == course_id, Review.review_type == 'opinion')
+        .outerjoin(like_sq, Review.review_id == like_sq.c.review_id)
+    )
 
     if sort == 'recent':
-        opinions = sorted(opinions, key=lambda r: r.created_at, reverse=True)
+        base = base.order_by(Review.created_at.desc())
     elif sort == 'yours' and current_user.is_authenticated:
-        mine     = [r for r in opinions if r.user_id == current_user.user_id]
-        others   = [r for r in opinions if r.user_id != current_user.user_id]
-        opinions = mine + sorted(others, key=lambda r: r.like_score(), reverse=True)
+        base = base.order_by(
+            db.case((Review.user_id == current_user.user_id, 0), else_=1),
+            func.coalesce(like_sq.c.score, 0).desc(),
+            Review.created_at.desc(),
+        )
     else:
-        opinions = sorted(opinions, key=lambda r: r.like_score(), reverse=True)
+        base = base.order_by(
+            func.coalesce(like_sq.c.score, 0).desc(),
+            Review.created_at.desc(),
+        )
+
+    total    = Review.query.filter_by(course_id=course_id, review_type='opinion').count()
+    pages    = max(1, -(-total // per_page))
+    opinions = base.offset((page - 1) * per_page).limit(per_page).all()
 
     user_likes = {}
     if current_user.is_authenticated and opinions:
-        ids   = [r.review_id for r in opinions]
-        likes = ReviewLike.query.filter(
+        ids        = [r.review_id for r in opinions]
+        likes      = ReviewLike.query.filter(
             ReviewLike.review_id.in_(ids),
             ReviewLike.user_id == current_user.user_id
         ).all()
@@ -288,6 +357,10 @@ def all_opinions(course_id):
         sort         = sort,
         user_likes   = user_likes,
         flag_reasons = flag_reasons,
+        page         = page,
+        pages        = pages,
+        total        = total,
+        per_page     = per_page,
     )
 
 
@@ -296,24 +369,53 @@ def all_opinions(course_id):
 # ─────────────────────────────────────────────
 @courses.route('/course/<int:course_id>/descriptions')
 def all_descriptions(course_id):
-    course = Course.query.get_or_404(course_id)
-    sort   = request.args.get('sort', 'liked')
+    course   = Course.query.get_or_404(course_id)
+    sort     = request.args.get('sort', 'liked')
+    page     = request.args.get('page', 1, type=int)
+    per_page = 15
 
-    descriptions = Review.query.filter_by(course_id=course_id, review_type='description').all()
+    # ── Like score subquery ───────────────────────────────────────────────────
+    like_sq = (
+        db.session.query(
+            ReviewLike.review_id,
+            func.sum(case(
+                (ReviewLike.like_type == 'really_helpful', 2),
+                (ReviewLike.like_type == 'helpful', 1),
+                else_=0
+            )).label('score')
+        )
+        .group_by(ReviewLike.review_id)
+        .subquery()
+    )
+
+    base = (
+        db.session.query(Review)
+        .filter(Review.course_id == course_id, Review.review_type == 'description')
+        .outerjoin(like_sq, Review.review_id == like_sq.c.review_id)
+    )
 
     if sort == 'recent':
-        descriptions = sorted(descriptions, key=lambda r: r.created_at, reverse=True)
+        base = base.order_by(Review.created_at.desc())
     elif sort == 'yours' and current_user.is_authenticated:
-        mine         = [r for r in descriptions if r.user_id == current_user.user_id]
-        others       = [r for r in descriptions if r.user_id != current_user.user_id]
-        descriptions = mine + sorted(others, key=lambda r: r.like_score(), reverse=True)
+        base = base.order_by(
+            db.case((Review.user_id == current_user.user_id, 0), else_=1),
+            func.coalesce(like_sq.c.score, 0).desc(),
+            Review.created_at.desc(),
+        )
     else:
-        descriptions = sorted(descriptions, key=lambda r: r.like_score(), reverse=True)
+        base = base.order_by(
+            func.coalesce(like_sq.c.score, 0).desc(),
+            Review.created_at.desc(),
+        )
+
+    total        = Review.query.filter_by(course_id=course_id, review_type='description').count()
+    pages        = max(1, -(-total // per_page))
+    descriptions = base.offset((page - 1) * per_page).limit(per_page).all()
 
     user_likes = {}
     if current_user.is_authenticated and descriptions:
-        ids   = [r.review_id for r in descriptions]
-        likes = ReviewLike.query.filter(
+        ids        = [r.review_id for r in descriptions]
+        likes      = ReviewLike.query.filter(
             ReviewLike.review_id.in_(ids),
             ReviewLike.user_id == current_user.user_id
         ).all()
@@ -327,26 +429,90 @@ def all_descriptions(course_id):
         sort         = sort,
         user_likes   = user_likes,
         flag_reasons = flag_reasons,
+        page         = page,
+        pages        = pages,
+        total        = total,
+        per_page     = per_page,
     )
 
 @courses.route('/course/<int:course_id>/materials')
 def all_materials(course_id):
-    course = Course.query.get_or_404(course_id)
-    sort   = request.args.get('sort', 'recent')
-    pin_id = request.args.get('pin', type=int)
+    course   = Course.query.get_or_404(course_id)
+    sort     = request.args.get('sort', 'recent')
+    pin_id   = request.args.get('pin', type=int)
+    page     = request.args.get('page', 1, type=int)
+    per_page = 15
 
-    materials = (
-        Material.query
-        .filter_by(course_id=course_id, is_removed=False)
-        .all()
+    # ── Like score subquery ───────────────────────────────────────────────────
+    like_sq = (
+        db.session.query(
+            MaterialLike.material_id,
+            func.sum(case(
+                (MaterialLike.like_type == 'really_helpful', 2),
+                (MaterialLike.like_type == 'helpful', 1),
+                else_=0
+            )).label('score')
+        )
+        .group_by(MaterialLike.material_id)
+        .subquery()
     )
 
-    saved_material_ids = set()
+    # ── Fetch saved IDs upfront — needed for ORDER BY ─────────────────────────
+    saved_material_ids  = set()
     user_material_likes = {}
+
+    if current_user.is_authenticated:
+        saved_rows = (
+            db.session.query(SavedMaterial.material_id)
+            .join(Material, SavedMaterial.material_id == Material.material_id)
+            .filter(
+                SavedMaterial.user_id == current_user.user_id,
+                Material.course_id   == course_id,
+                Material.is_removed  == False,
+            )
+            .all()
+        )
+        saved_material_ids = {row.material_id for row in saved_rows}
+
+    # ── Base query ────────────────────────────────────────────────────────────
+    base = (
+        Material.query
+        .filter_by(course_id=course_id, is_removed=False)
+        .outerjoin(like_sq, Material.material_id == like_sq.c.material_id)
+    )
+
+    # ── ORDER BY: pin first, saved second, then user-chosen sort ─────────────
+    order_clauses = []
+
+    if pin_id:
+        order_clauses.append(db.case((Material.material_id == pin_id, 0), else_=1))
+
+    if saved_material_ids:
+        order_clauses.append(
+            db.case((Material.material_id.in_(list(saved_material_ids)), 0), else_=1)
+        )
+
+    if sort == 'liked':
+        order_clauses += [func.coalesce(like_sq.c.score, 0).desc(), Material.created_at.desc()]
+    elif sort == 'type':
+        order_clauses += [Material.material_type, Material.created_at.desc()]
+    elif sort == 'yours' and current_user.is_authenticated:
+        order_clauses += [
+            db.case((Material.user_id == current_user.user_id, 0), else_=1),
+            Material.created_at.desc(),
+        ]
+    else:
+        order_clauses.append(Material.created_at.desc())
+
+    base = base.order_by(*order_clauses)
+
+    total     = Material.query.filter_by(course_id=course_id, is_removed=False).count()
+    pages     = max(1, -(-total // per_page))
+    materials = base.offset((page - 1) * per_page).limit(per_page).all()
 
     mat_ids = [m.material_id for m in materials]
 
-    # Single query for all like counts — avoids N+1 in template
+    # ── Single query for all like counts on this page ─────────────────────────
     raw_counts = db.session.query(
         MaterialLike.material_id,
         MaterialLike.like_type,
@@ -362,12 +528,6 @@ def all_materials(course_id):
         counts_map.setdefault(m.material_id, {'really_helpful': 0, 'helpful': 0, 'not_helpful': 0})
 
     if current_user.is_authenticated and mat_ids:
-        saved = SavedMaterial.query.filter(
-            SavedMaterial.user_id    == current_user.user_id,
-            SavedMaterial.material_id.in_(mat_ids)
-        ).all()
-        saved_material_ids = {sm.material_id for sm in saved}
-
         user_material_likes = {
             ml.material_id: ml.like_type
             for ml in MaterialLike.query.filter(
@@ -375,39 +535,6 @@ def all_materials(course_id):
                 MaterialLike.material_id.in_(mat_ids)
             ).all()
         }
-
-    if sort == 'liked':
-        materials = sorted(
-            materials,
-            key=lambda m: (
-                counts_map[m.material_id]['really_helpful'] * 2 + counts_map[m.material_id]['helpful'],
-                m.created_at.timestamp()
-            ),
-            reverse=True
-        )
-    elif sort == 'type':
-        materials = sorted(
-            materials,
-            key=lambda m: (m.material_type, -m.created_at.timestamp(), m.title.lower())
-        )
-    elif sort == 'yours' and current_user.is_authenticated:
-        mine      = [m for m in materials if m.user_id == current_user.user_id]
-        others    = [m for m in materials if m.user_id != current_user.user_id]
-        materials = sorted(mine, key=lambda m: m.created_at, reverse=True) + sorted(others, key=lambda m: m.created_at, reverse=True)
-    else:
-        materials = sorted(materials, key=lambda m: m.created_at, reverse=True)
-
-    # Saved materials always float to top
-    if saved_material_ids:
-        saved_first = [m for m in materials if m.material_id in saved_material_ids]
-        rest        = [m for m in materials if m.material_id not in saved_material_ids]
-        materials   = saved_first + rest
-
-    # A specific pin_id (from the Saved page) goes absolutely first
-    if pin_id:
-        pinned    = [m for m in materials if m.material_id == pin_id]
-        rest      = [m for m in materials if m.material_id != pin_id]
-        materials = pinned + rest
 
     flag_reasons = FlagReason.query.all()
     return render_template(
@@ -420,6 +547,10 @@ def all_materials(course_id):
         counts_map           = counts_map,
         pin_id               = pin_id,
         flag_reasons         = flag_reasons,
+        page                 = page,
+        pages                = pages,
+        total                = total,
+        per_page             = per_page,
     )
 
 @courses.route('/material/<int:material_id>/view')
@@ -982,12 +1113,19 @@ def my_reviews():
     opinions = (
         Review.query
         .filter_by(user_id=current_user.user_id, review_type='opinion')
+        .options(
+            joinedload(Review.course).joinedload(Course.department),
+            joinedload(Review.semester),
+        )
         .order_by(Review.created_at.desc())
         .all()
     )
     descriptions = (
         Review.query
         .filter_by(user_id=current_user.user_id, review_type='description')
+        .options(
+            joinedload(Review.course).joinedload(Course.department),
+        )
         .order_by(Review.created_at.desc())
         .all()
     )
@@ -1003,34 +1141,63 @@ def my_uploads():
     materials = (
         Material.query
         .filter_by(user_id=current_user.user_id, is_removed=False)
+        .options(
+            joinedload(Material.course).joinedload(Course.department),
+            joinedload(Material.semester),
+        )
         .order_by(Material.created_at.desc())
         .all()
     )
     return render_template('courses/my_uploads.html', materials=materials)
 
-
 @courses.route('/my/saved')
 @login_required
 def my_saved():
-    saved_courses = SavedCourse.query.filter_by(
-        user_id=current_user.user_id
-    ).order_by(SavedCourse.created_at.desc()).all()
+    saved_courses = (
+        SavedCourse.query
+        .filter_by(user_id=current_user.user_id)
+        .options(
+            joinedload(SavedCourse.course).joinedload(Course.department),
+        )
+        .order_by(SavedCourse.created_at.desc())
+        .all()
+    )
 
-    saved_materials = SavedMaterial.query.filter_by(
-        user_id=current_user.user_id
-    ).order_by(SavedMaterial.created_at.desc()).all()
+    saved_materials = (
+        SavedMaterial.query
+        .filter_by(user_id=current_user.user_id)
+        .options(
+            joinedload(SavedMaterial.material).joinedload(Material.course).joinedload(Course.department),
+            joinedload(SavedMaterial.material).joinedload(Material.semester),
+            joinedload(SavedMaterial.material).joinedload(Material.user),
+        )
+        .order_by(SavedMaterial.created_at.desc())
+        .all()
+    )
 
+    # ── Single GROUP BY query replaces the per-course loop ────────────────────
+    course_ids = [sc.course_id for sc in saved_courses]
     course_ratings = {}
-    for sc in saved_courses:
-        avg   = db.session.query(func.avg(Review.rating_overall)).filter_by(
-            course_id=sc.course_id, review_type='opinion'
-        ).scalar()
-        count = Review.query.filter_by(
-            course_id=sc.course_id, review_type='opinion'
-        ).count()
-        course_ratings[sc.course_id] = {
-            'avg':   round(float(avg), 1) if avg else None,
-            'count': count,
+    if course_ids:
+        rating_rows = (
+            db.session.query(
+                Review.course_id,
+                func.avg(Review.rating_overall).label('avg'),
+                func.count(Review.review_id).label('count'),
+            )
+            .filter(
+                Review.course_id.in_(course_ids),
+                Review.review_type == 'opinion',
+            )
+            .group_by(Review.course_id)
+            .all()
+        )
+        course_ratings = {
+            row.course_id: {
+                'avg':   round(float(row.avg), 1),
+                'count': row.count,
+            }
+            for row in rating_rows
         }
 
     all_saved = sorted(
@@ -1041,10 +1208,10 @@ def my_saved():
     )
 
     return render_template('courses/my_saved.html',
-        all_saved        = all_saved,
-        course_ratings   = course_ratings,
-        total_courses    = len(saved_courses),
-        total_materials  = len(saved_materials),
+        all_saved       = all_saved,
+        course_ratings  = course_ratings,
+        total_courses   = len(saved_courses),
+        total_materials = len(saved_materials),
     )
 
 
