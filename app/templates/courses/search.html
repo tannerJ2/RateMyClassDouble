@@ -306,7 +306,7 @@
 
   .search-clear-btn:hover { color: var(--accent); }
 
-  .search-clear-btn.visible { display: flex; }
+  .search-clear-btn { display: flex; }
 
   .search-clear-btn .clear-tooltip {
     position: absolute;
@@ -1165,13 +1165,6 @@
     if (!btn) return;
     btn.classList.toggle('hidden', !activeFilter);
   }
-  function syncSearchClearBtn() {
-    const btn = document.getElementById('search-clear-btn');
-    if (!btn) return;
-    const hasQuery = resultsSearch.value.trim() !== '';
-    const hasDept  = getSelectedDept() !== '';
-    btn.classList.toggle('visible', hasQuery || hasDept);
-  }
 
   document.querySelectorAll('.filter-tag').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1424,7 +1417,6 @@
     const matchingOpt = deptOptions.querySelector(`.custom-option[data-value="${code}"]`);
     if (matchingOpt) matchingOpt.classList.add('selected');
     doSearch('', code, 1);
-    syncSearchClearBtn();
   });
 
   backBtn.addEventListener('click', () => {
@@ -1449,11 +1441,9 @@
     activeFilter = null;
     updateFilterButtons();
     syncClearBtn();
-    syncSearchClearBtn();
     showDeptGrid();
   });
 
-  resultsSearch.addEventListener('input', () => syncSearchClearBtn());
 
   resultsSearch.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
@@ -1481,7 +1471,6 @@
     deptOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
     opt.classList.add('selected');
     deptOptions.classList.remove('open');
-    syncSearchClearBtn();
     if (!value) {
       if (resultsSearch.value.trim()) doSearch(resultsSearch.value.trim(), '', 1);
       else showDeptGrid();
@@ -1527,7 +1516,6 @@
     }
 
     doSearch(savedQ, savedDept, savedPage);
-    syncSearchClearBtn()
   })();
 
 
