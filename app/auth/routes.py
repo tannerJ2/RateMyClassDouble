@@ -165,7 +165,11 @@ def forgot_password():
                     <p>If you did not request this, ignore this email.</p>
                     '''
             )
-            mail.send(msg)
+            try:
+                mail.send(msg)
+                print("EMAIL SENT SUCCESSFULLY")
+            except Exception as e:
+                print(f"EMAIL FAILED: {e}")
 
         flash('If that email exists you will receive a reset link shortly.', 'info')
         return redirect(url_for('auth.login'))
