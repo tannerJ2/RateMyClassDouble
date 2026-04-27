@@ -5,7 +5,9 @@ contains all the actual login, register, logout route functions
 '''
 
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+import token
+
+from flask import Blueprint, current_app, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app.extensions import db, bcrypt
 from app.models import User, PasswordResetToken
@@ -153,7 +155,8 @@ def forgot_password():
             db.session.commit()
 
             # TODO: Send email via SendGrid with reset link
-            reset_link = url_for('auth.reset_password', token=token, _external=True)
+            from flask import current_app
+            reset_link = f"{current_app.config['BASE_URL']}/reset-password/{token}"
 
             msg = Message(
                 subject='RateMyClass — Password Reset',

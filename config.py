@@ -31,3 +31,4 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = 'RateMyClassPswReset@gmail.com'
     MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'false').lower() == 'true'
+    BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
