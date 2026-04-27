@@ -9,6 +9,7 @@ from app.models import Course, Department, Review, ReviewLike, Material, Materia
 from app.extensions import db
 from sqlalchemy import func, case
 from sqlalchemy.orm import joinedload
+from datetime import datetime, timedelta, timezone
 
 courses = Blueprint('courses', __name__)
 
@@ -974,7 +975,7 @@ def quick_rate(course_id):
 @courses.route('/course/<int:course_id>/upload', methods=['GET', 'POST'])
 @login_required
 def upload_material(course_id):
-    import os, uuid
+    import os, uuid, hashlib
     from flask import current_app
     from werkzeug.utils import secure_filename
     from app.models import Material, Semester
@@ -1053,6 +1054,48 @@ def upload_material(course_id):
                 prev_semester_id = semester_id,
             )
 
+        # Rate limit: max 5 uploads per hour per user
+        one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
+        recent_uploads = Material.query.filter(
+            Material.user_id == current_user.user_id,
+            Material.course_id == course_id,
+            Material.created_at >= one_hour_ago
+        ).count()
+
+        if recent_uploads >= 5:
+            flash('You can only upload 5 materials per hour. Please try again later.', 'danger')
+            return render_template('courses/upload_material.html',
+                course           = course,
+                semesters        = semesters,
+                prev_title       = title,
+                prev_description = description or '',
+                prev_type        = material_type,
+                prev_semester_id = semester_id,
+            )
+        
+        file.seek(0)
+        file_hash = hashlib.sha256(file.read()).hexdigest()
+        file.seek(0)
+
+        duplicate = Material.query.filter_by(
+            file_hash  = file_hash,
+            is_removed = False
+        ).first()
+
+        if duplicate:
+            flash('This file has already been uploaded to the platform.', 'danger')
+            return render_template('courses/upload_material.html',
+                course           = course,
+                semesters        = semesters,
+                prev_title       = title,
+                prev_description = description or '',
+                prev_type        = material_type,
+                prev_semester_id = semester_id,
+            )
+
+
+        # ── Save file securely ────────────────────────────────────────────────
+
         # ── Save file securely ────────────────────────────────────────────────
         # SECURITY 5: replace the original filename with a random UUID on disk.
         # The original name is never written to the filesystem, which prevents
@@ -1073,6 +1116,7 @@ def upload_material(course_id):
             description   = description,
             file_url      = stored_name,   # UUID filename only — not a public URL
             material_type = material_type,
+            file_hash     = file_hash,
         )
         db.session.add(material)
         db.session.commit()

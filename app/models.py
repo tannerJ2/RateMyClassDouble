@@ -270,6 +270,8 @@ class Material(db.Model):
     is_removed    = db.Column(db.Boolean,     default=False, nullable=False)
     removed_at    = db.Column(db.DateTime,    nullable=True)
     created_at    = db.Column(db.DateTime,    default=datetime.now(timezone.utc), nullable=False)
+    file_url      = db.Column(db.String(500),  nullable=False)
+    file_hash     = db.Column(db.String(64),   nullable=True,  index=True)
 
     course   = db.relationship('Course',   back_populates='materials')
     user     = db.relationship('User',     back_populates='materials')

@@ -581,7 +581,10 @@
       e.preventDefault();
       semesterTrigger.style.borderColor = 'var(--accent)';
       semesterTrigger.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
     }
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Uploading...';
   });
 </script>
 
