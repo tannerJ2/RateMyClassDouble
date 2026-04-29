@@ -1264,7 +1264,7 @@
               <div class="carousel-slide {% if loop.first %}active{% endif %}">
                 <p class="desc-text">{{ review.review_text }}</p>
                 <span class="desc-meta">
-                  {{ review.user.first_name }} {{ review.user.last_name[0] }}. · {{ review.created_at.strftime('%b %d, %Y') }}{% if review.is_edited %} · <em>edited</em>{% endif %}
+                  {{ review.created_at.strftime('%b %d, %Y') }}{% if review.is_edited %} · <em>edited</em>{% endif %}
                 </span>
               </div>
             {% endfor %}
@@ -1326,7 +1326,6 @@
                   <span>Workload: {{ review.workload_level }}/5</span>
                   <span>Difficulty: {{ review.difficulty_level }}/5</span>
                 </div>
-                <span class="opinion-author">{{ review.user.first_name }} {{ review.user.last_name[0] }}.</span>
               </div>
             {% endfor %}
           </div>
@@ -1394,7 +1393,6 @@
                     {% else %}Other{% endif %}
                   </span>
                   <span>{{ mat.semester.term }} {{ mat.semester.year }}</span>
-                  <span>by {{ mat.user.first_name }} {{ mat.user.last_name[0] }}.</span>
                 </div>
               </div>
               <div style="display:flex; gap:0.4rem; align-items:center; flex-shrink:0;">
