@@ -96,7 +96,7 @@ DEPARTMENT_NAMES = {
     'GER':  'German',
     'HCM':  'Healthcare Management',
     'HIS':  'History',
-    'HLS':  'Homeland Security',
+    'HLS':  'Healthcare Studies',
     'HMS':  'Human Services',
     'HON':  'Honors Program',
     'HSC':  'Health Sciences',

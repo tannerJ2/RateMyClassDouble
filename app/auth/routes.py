@@ -10,7 +10,7 @@ import token
 from flask import Blueprint, current_app, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app.extensions import db, bcrypt
-from app.models import User, PasswordResetToken
+from app.models import User, PasswordResetToken, Review, Course
 from datetime import datetime, timedelta, timezone
 from flask_mail import Message
 from app.extensions import mail
@@ -118,7 +118,12 @@ def login():
         flash(f'Welcome back, {user.first_name}!', 'success')
         return redirect(url_for('courses.index'))
 
-    return render_template('auth/login.html')
+    stats = {
+        'review_count': Review.query.count(),
+        'student_count': User.query.count(),
+        'course_count':  Course.query.count(),
+    }
+    return render_template('auth/login.html', stats=stats)
 
 
 # ─────────────────────────────────────────────
@@ -143,42 +148,48 @@ def forgot_password():
 
         # Always show success message even if email not found (security)
         if user:
-            token     = secrets.token_urlsafe(32)
-            expires_at = datetime.now(timezone.utc) + timedelta(minutes=30)
+            two_minutes_ago = datetime.now(timezone.utc) - timedelta(minutes=2)
+            recent_token = PasswordResetToken.query.filter(
+                PasswordResetToken.user_id == user.user_id,
+                PasswordResetToken.created_at >= two_minutes_ago,
+                PasswordResetToken.used_at == None
+            ).first()
 
-            reset_token = PasswordResetToken(
-                user_id    = user.user_id,
-                token      = token,
-                expires_at = expires_at
-            )
-            db.session.add(reset_token)
-            db.session.commit()
+            if not recent_token:
+                token     = secrets.token_urlsafe(32)
+                expires_at = datetime.now(timezone.utc) + timedelta(minutes=30)
 
-            # TODO: Send email via SendGrid with reset link
-            from flask import current_app
-            reset_link = f"{current_app.config['BASE_URL']}/reset-password/{token}"
+                reset_token = PasswordResetToken(
+                    user_id    = user.user_id,
+                    token      = token,
+                    expires_at = expires_at
+                )
+                db.session.add(reset_token)
+                db.session.commit()
 
-            msg = Message(
-                subject='RateMyClass — Password Reset',
-                recipients=[user.email],
-                html=f'''
-                    <p>Hi {user.first_name},</p>
-                    <p>Click the link below to reset your password. This link expires in 30 minutes.</p>
-                    <p><a href="{reset_link}">{reset_link}</a></p>
-                    <p>If you did not request this, ignore this email.</p>
-                    '''
-            )
-            try:
-                mail.send(msg)
-                print("EMAIL SENT SUCCESSFULLY")
-            except Exception as e:
-                print(f"EMAIL FAILED: {e}")
+                from flask import current_app
+                reset_link = f"{current_app.config['BASE_URL']}/reset-password/{token}"
+
+                msg = Message(
+                    subject='RateMyClass — Password Reset',
+                    recipients=[user.email],
+                    html=f'''
+                        <p>Hi {user.first_name},</p>
+                        <p>Click the link below to reset your password. This link expires in 30 minutes.</p>
+                        <p><a href="{reset_link}">{reset_link}</a></p>
+                        <p>If you did not request this, ignore this email.</p>
+                        '''
+                )
+                try:
+                    mail.send(msg)
+                    print("EMAIL SENT SUCCESSFULLY")
+                except Exception as e:
+                    print(f"EMAIL FAILED: {e}")
 
         flash('If that email exists you will receive a reset link shortly.', 'info')
         return redirect(url_for('auth.login'))
 
     return render_template('auth/forgot_password.html')
-
 
 # ─────────────────────────────────────────────
 # Reset Password
